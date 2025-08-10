@@ -16,19 +16,23 @@ class JiraIngestor {
     });
     
     try {
-      const issues = await this.fetchIssues(squad, dateRange);
+      const workstreams = await this.fetchWorkstreams(squad, dateRange);
       const epics = await this.fetchEpics(squad, dateRange);
+      const issues = await this.fetchIssues(squad, dateRange);
       
       // Process and enrich data
-      const processedIssues = await this.processIssues(issues, squad);
+      const processedWorkstreams = await this.processWorkstreams(workstreams, squad);
       const processedEpics = await this.processEpics(epics, squad);
+      const processedIssues = await this.processIssues(issues, squad);
       
       return {
-        issues: processedIssues,
+        workstreams: processedWorkstreams,
         epics: processedEpics,
+        issues: processedIssues,
         summary: {
-          totalIssues: processedIssues.length,
+          totalWorkstreams: processedWorkstreams.length,
           totalEpics: processedEpics.length,
+          totalIssues: processedIssues.length,
           issuesByStatus: this.groupByStatus(processedIssues),
           issuesByType: this.groupByType(processedIssues),
           riskIssues: processedIssues.filter(issue => issue.riskFactors.length > 0).length
@@ -40,9 +44,71 @@ class JiraIngestor {
     }
   }
 
+  async fetchWorkstreams(squad, dateRange) {
+    logger.logSquad('debug', 'Fetching Jira workstreams', squad.name);
+    
+    const jql = this.buildWorkstreamJQL(squad, dateRange);
+    
+    try {
+      const response = await axios.get(`${this.baseUrl}/rest/api/${this.apiVersion}/search`, {
+        headers: {
+          'Authorization': `Basic ${this.auth}`,
+          'Content-Type': 'application/json'
+        },
+        params: {
+          jql: jql,
+          maxResults: 100,
+          fields: 'summary,status,duedate,customfield_10001,customfield_10002,customfield_10015,customfield_10016,updated,created,labels,components,priority,description',
+          expand: 'changelog'
+        }
+      });
+
+      logger.logSquad('info', 'Jira workstreams fetched successfully', squad.name, { 
+        totalWorkstreams: response.data.total,
+        returnedWorkstreams: response.data.issues.length 
+      });
+
+      return response.data.issues;
+    } catch (error) {
+      logger.logSquad('error', 'Failed to fetch Jira workstreams', squad.name, { error: error.message });
+      throw error;
+    }
+  }
+
+  async fetchEpics(squad, dateRange) {
+    logger.logSquad('debug', 'Fetching Jira epics', squad.name);
+    
+    const jql = this.buildEpicJQL(squad, dateRange);
+    
+    try {
+      const response = await axios.get(`${this.baseUrl}/rest/api/${this.apiVersion}/search`, {
+        headers: {
+          'Authorization': `Basic ${this.auth}`,
+          'Content-Type': 'application/json'
+        },
+        params: {
+          jql: jql,
+          maxResults: 500,
+          fields: 'summary,status,duedate,customfield_10001,customfield_10002,customfield_10014,customfield_10015,customfield_10016,updated,created,labels,components,priority,description',
+          expand: 'changelog'
+        }
+      });
+
+      logger.logSquad('info', 'Jira epics fetched successfully', squad.name, { 
+        totalEpics: response.data.total,
+        returnedEpics: response.data.issues.length 
+      });
+
+      return response.data.issues;
+    } catch (error) {
+      logger.logSquad('error', 'Failed to fetch Jira epics', squad.name, { error: error.message });
+      throw error;
+    }
+  }
+
   async fetchIssues(squad, dateRange) {
     logger.logSquad('debug', 'Fetching Jira issues', squad.name, { 
-      projectKeys: squad.jiraProjectKeys,
+      projectKey: squad.jiraConfig.projectKey,
       dateRange: `${dateRange.startDate.format()} to ${dateRange.endDate.format()}`
     });
 
@@ -57,7 +123,7 @@ class JiraIngestor {
         params: {
           jql: jql,
           maxResults: 1000,
-          fields: 'summary,issuetype,status,assignee,duedate,storypoints,customfield_10001,customfield_10002,customfield_10014,updated,created,labels,components,priority,description',
+          fields: 'summary,issuetype,status,assignee,duedate,customfield_10001,customfield_10002,customfield_10003,customfield_10014,customfield_10015,customfield_10016,updated,created,labels,components,priority,description',
           expand: 'changelog'
         }
       });
@@ -78,83 +144,60 @@ class JiraIngestor {
     }
   }
 
-  async fetchEpics(squad, dateRange) {
-    logger.logSquad('debug', 'Fetching Jira epics', squad.name);
-    
-    const jql = this.buildEpicJQL(squad, dateRange);
-    
-    try {
-      const response = await axios.get(`${this.baseUrl}/rest/api/${this.apiVersion}/search`, {
-        headers: {
-          'Authorization': `Basic ${this.auth}`,
-          'Content-Type': 'application/json'
-        },
-        params: {
-          jql: jql,
-          maxResults: 500,
-          fields: 'summary,status,duedate,customfield_10001,customfield_10002,updated,created,labels,components,priority,description',
-          expand: 'changelog'
-        }
-      });
-
-      logger.logSquad('info', 'Jira epics fetched successfully', squad.name, { 
-        totalEpics: response.data.total,
-        returnedEpics: response.data.issues.length 
-      });
-
-      return response.data.issues;
-    } catch (error) {
-      logger.logSquad('error', 'Failed to fetch Jira epics', squad.name, { error: error.message });
-      throw error;
-    }
-  }
-
-  buildIssueJQL(squad, dateRange) {
-    const projectFilter = squad.jiraProjectKeys.map(key => `project = ${key}`).join(' OR ');
+  buildWorkstreamJQL(squad, dateRange) {
+    const projectFilter = `project = ${squad.jiraConfig.projectKey}`;
     const dateFilter = `updated >= "${dateRange.startDate.format('YYYY-MM-DD')}" AND updated <= "${dateRange.endDate.format('YYYY-MM-DD')}"`;
-    const issueTypes = 'issuetype IN (Story, Task, Bug, Sub-task)';
+    const issueTypes = 'issuetype = Workstream';
+    const teamFilter = `"Team" = "${squad.name}"`;
     const excludeLabel = 'labels != "no-digest"';
     
-    return `(${projectFilter}) AND ${dateFilter} AND ${issueTypes} AND ${excludeLabel} ORDER BY updated DESC`;
+    return `${projectFilter} AND ${dateFilter} AND ${issueTypes} AND ${teamFilter} AND ${excludeLabel} ORDER BY updated DESC`;
   }
 
   buildEpicJQL(squad, dateRange) {
-    const projectFilter = squad.jiraProjectKeys.map(key => `project = ${key}`).join(' OR ');
+    const projectFilter = `project = ${squad.jiraConfig.projectKey}`;
     const dateFilter = `updated >= "${dateRange.startDate.format('YYYY-MM-DD')}" AND updated <= "${dateRange.endDate.format('YYYY-MM-DD')}"`;
     const issueTypes = 'issuetype = Epic';
+    const teamFilter = `"Team" = "${squad.name}"`;
     const excludeLabel = 'labels != "no-digest"';
     
-    return `(${projectFilter}) AND ${dateFilter} AND ${issueTypes} AND ${excludeLabel} ORDER BY updated DESC`;
+    return `${projectFilter} AND ${dateFilter} AND ${issueTypes} AND ${teamFilter} AND ${excludeLabel} ORDER BY updated DESC`;
   }
 
-  async processIssues(issues, squad) {
-    return issues.map(issue => {
-      const storyPoints = this.extractStoryPoints(issue);
-      const targetQuarter = this.extractCustomField(issue, 'customfield_10001'); // PLACEHOLDER: Target Quarter field
-      const confidence = this.extractCustomField(issue, 'customfield_10002'); // PLACEHOLDER: Confidence field
-      const epicKey = this.extractCustomField(issue, 'customfield_10014'); // PLACEHOLDER: Epic Link field
+  buildIssueJQL(squad, dateRange) {
+    const projectFilter = `project = ${squad.jiraConfig.projectKey}`;
+    const dateFilter = `updated >= "${dateRange.startDate.format('YYYY-MM-DD')}" AND updated <= "${dateRange.endDate.format('YYYY-MM-DD')}"`;
+    const issueTypes = 'issuetype IN (Story, Task, Bug, Sub-task)';
+    const teamFilter = `"Team" = "${squad.name}"`;
+    const excludeLabel = 'labels != "no-digest"';
+    
+    return `${projectFilter} AND ${dateFilter} AND ${issueTypes} AND ${teamFilter} AND ${excludeLabel} ORDER BY updated DESC`;
+  }
+
+  async processWorkstreams(workstreams, squad) {
+    return workstreams.map(workstream => {
+      const targetQuarter = this.extractCustomField(workstream, 'customfield_10001');
+      const confidence = this.extractCustomField(workstream, 'customfield_10002');
+      const team = this.extractCustomField(workstream, 'customfield_10015');
       
-      const riskFactors = this.assessRiskFactors(issue, squad);
+      const riskFactors = this.assessRiskFactors(workstream, squad);
       
       return {
-        key: issue.key,
-        title: issue.fields.summary,
-        type: issue.fields.issuetype.name,
-        status: issue.fields.status.name,
-        storyPoints: storyPoints,
+        key: workstream.key,
+        title: workstream.fields.summary,
+        type: workstream.fields.issuetype.name,
+        status: workstream.fields.status.name,
         targetQuarter: targetQuarter,
-        dueDate: issue.fields.duedate,
-        assignee: issue.fields.assignee?.emailAddress,
-        epicKey: epicKey,
-        linkedPRs: [], // Will be populated by cross-linking
-        lastUpdated: issue.fields.updated,
-        created: issue.fields.created,
-        labels: issue.fields.labels || [],
-        components: issue.fields.components?.map(c => c.name) || [],
-        priority: issue.fields.priority?.name,
+        dueDate: workstream.fields.duedate,
+        lastUpdated: workstream.fields.updated,
+        created: workstream.fields.created,
+        labels: workstream.fields.labels || [],
+        components: workstream.fields.components?.map(c => c.name) || [],
+        priority: workstream.fields.priority?.name,
         confidence: confidence,
+        team: team,
         riskFactors: riskFactors,
-        changelog: this.processChangelog(issue.changelog?.histories || [])
+        changelog: this.processChangelog(workstream.changelog?.histories || [])
       };
     });
   }
@@ -163,6 +206,8 @@ class JiraIngestor {
     return epics.map(epic => {
       const targetQuarter = this.extractCustomField(epic, 'customfield_10001');
       const confidence = this.extractCustomField(epic, 'customfield_10002');
+      const team = this.extractCustomField(epic, 'customfield_10015');
+      const workstream = this.extractCustomField(epic, 'customfield_10016');
       
       const riskFactors = this.assessRiskFactors(epic, squad);
       
@@ -178,15 +223,52 @@ class JiraIngestor {
         components: epic.fields.components?.map(c => c.name) || [],
         priority: epic.fields.priority?.name,
         confidence: confidence,
+        team: team,
+        workstream: workstream,
         riskFactors: riskFactors,
         changelog: this.processChangelog(epic.changelog?.histories || [])
       };
     });
   }
 
+  async processIssues(issues, squad) {
+    return issues.map(issue => {
+      const storyPoints = this.extractStoryPoints(issue);
+      const targetQuarter = this.extractCustomField(issue, 'customfield_10001');
+      const confidence = this.extractCustomField(issue, 'customfield_10002');
+      const epicKey = this.extractCustomField(issue, 'customfield_10014');
+      const team = this.extractCustomField(issue, 'customfield_10015');
+      const workstream = this.extractCustomField(issue, 'customfield_10016');
+      
+      const riskFactors = this.assessRiskFactors(issue, squad);
+      
+      return {
+        key: issue.key,
+        title: issue.fields.summary,
+        type: issue.fields.issuetype.name,
+        status: issue.fields.status.name,
+        storyPoints: storyPoints,
+        targetQuarter: targetQuarter,
+        dueDate: issue.fields.duedate,
+        assignee: issue.fields.assignee?.emailAddress,
+        epicKey: epicKey,
+        team: team,
+        workstream: workstream,
+        linkedPRs: [], // Will be populated by cross-linking
+        lastUpdated: issue.fields.updated,
+        created: issue.fields.created,
+        labels: issue.fields.labels || [],
+        components: issue.fields.components?.map(c => c.name) || [],
+        priority: issue.fields.priority?.name,
+        confidence: confidence,
+        riskFactors: riskFactors,
+        changelog: this.processChangelog(issue.changelog?.histories || [])
+      };
+    });
+  }
+
   extractStoryPoints(issue) {
-    // PLACEHOLDER: Story points field mapping
-    // This needs to be configured based on your Jira setup
+    // Use the configured story points field
     const storyPointsField = 'customfield_10003'; // PLACEHOLDER: Replace with actual field ID
     
     const total = issue.fields[storyPointsField] || 0;
@@ -196,8 +278,6 @@ class JiraIngestor {
   }
 
   calculateDoneStoryPoints(issue) {
-    // PLACEHOLDER: Calculate done story points based on status
-    // This logic needs to be customized based on your workflow
     const doneStatuses = ['Done', 'Closed', 'Resolved'];
     
     if (doneStatuses.includes(issue.fields.status.name)) {

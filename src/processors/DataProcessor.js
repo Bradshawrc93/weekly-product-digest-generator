@@ -7,13 +7,13 @@ class DataProcessor {
   }
 
   async processSquadData(data) {
-    const { squad, issues, prs, decisions, dateRange } = data;
+    const { squad, workstreams, epics, issues, prs, decisions, dateRange } = data;
     
     logger.logSquad('info', 'Processing squad data', squad.name);
     
     try {
       // Cross-link data
-      const crossLinkedData = await this.crossLinkData(issues, prs, decisions);
+      const crossLinkedData = await this.crossLinkData(workstreams, epics, issues, prs, decisions);
       
       // Generate insights
       const insights = await this.generateInsights(crossLinkedData, squad, dateRange);
@@ -28,8 +28,11 @@ class DataProcessor {
     }
   }
 
-  async crossLinkData(issues, prs, decisions) {
+  async crossLinkData(workstreams, epics, issues, prs, decisions) {
     logger.debug('Cross-linking data');
+    
+    // Build hierarchy: Workstream -> Epic -> Issue
+    const hierarchy = this.buildHierarchy(workstreams, epics, issues);
     
     // Link PRs to Jira issues
     const linkedIssues = this.linkPRsToIssues(issues, prs);
@@ -37,16 +40,97 @@ class DataProcessor {
     // Link Slack decisions to relevant issues/PRs
     const linkedDecisions = this.linkDecisionsToIssues(decisions, linkedIssues);
     
-    // Build epic hierarchies
-    const epicHierarchies = this.buildEpicHierarchies(linkedIssues);
-    
     return {
+      workstreams: workstreams,
+      epics: epics,
       issues: linkedIssues,
       prs: prs,
       decisions: linkedDecisions,
-      epics: epicHierarchies,
+      hierarchy: hierarchy,
       links: this.generateLinkSummary(linkedIssues, linkedDecisions)
     };
+  }
+
+  buildHierarchy(workstreams, epics, issues) {
+    const hierarchy = {
+      workstreams: {},
+      epics: {},
+      issues: {}
+    };
+    
+    // Build workstream level
+    workstreams.forEach(workstream => {
+      hierarchy.workstreams[workstream.key] = {
+        ...workstream,
+        epics: [],
+        totalIssues: 0,
+        totalPoints: 0,
+        completedPoints: 0,
+        riskFactors: []
+      };
+    });
+    
+    // Build epic level and link to workstreams
+    epics.forEach(epic => {
+      const workstreamKey = epic.workstream;
+      const workstream = hierarchy.workstreams[workstreamKey];
+      
+      if (workstream) {
+        workstream.epics.push(epic.key);
+      }
+      
+      hierarchy.epics[epic.key] = {
+        ...epic,
+        issues: [],
+        totalPoints: 0,
+        completedPoints: 0,
+        riskFactors: []
+      };
+    });
+    
+    // Build issue level and link to epics
+    issues.forEach(issue => {
+      const epicKey = issue.epicKey;
+      const epic = hierarchy.epics[epicKey];
+      
+      if (epic) {
+        epic.issues.push(issue.key);
+        epic.totalPoints += issue.storyPoints.total;
+        epic.completedPoints += issue.storyPoints.done;
+        epic.riskFactors.push(...issue.riskFactors);
+      }
+      
+      // Also link to workstream
+      const workstreamKey = issue.workstream;
+      const workstream = hierarchy.workstreams[workstreamKey];
+      
+      if (workstream) {
+        workstream.totalIssues++;
+        workstream.totalPoints += issue.storyPoints.total;
+        workstream.completedPoints += issue.storyPoints.done;
+        workstream.riskFactors.push(...issue.riskFactors);
+      }
+      
+      hierarchy.issues[issue.key] = issue;
+    });
+    
+    // Calculate completion rates and clean up risk factors
+    Object.values(hierarchy.workstreams).forEach(workstream => {
+      workstream.completionRate = workstream.totalPoints > 0 ? workstream.completedPoints / workstream.totalPoints : 0;
+      workstream.riskFactors = [...new Set(workstream.riskFactors)];
+    });
+    
+    Object.values(hierarchy.epics).forEach(epic => {
+      epic.completionRate = epic.totalPoints > 0 ? epic.completedPoints / epic.totalPoints : 0;
+      epic.riskFactors = [...new Set(epic.riskFactors)];
+      epic.issueCount = epic.issues.length;
+      epic.completedIssues = epic.issues.filter(issueKey => {
+        const issue = hierarchy.issues[issueKey];
+        return issue && ['Done', 'Closed', 'Resolved'].includes(issue.status);
+      }).length;
+    });
+    
+    return hierarchy;
   }
 
   linkPRsToIssues(issues, prs) {
@@ -94,42 +178,6 @@ class DataProcessor {
     return [...new Set(matches)];
   }
 
-  buildEpicHierarchies(issues) {
-    const epics = {};
-    
-    // Group issues by epic
-    issues.forEach(issue => {
-      if (issue.epicKey) {
-        if (!epics[issue.epicKey]) {
-          epics[issue.epicKey] = {
-            key: issue.epicKey,
-            issues: [],
-            totalPoints: 0,
-            completedPoints: 0,
-            riskFactors: []
-          };
-        }
-        
-        epics[issue.epicKey].issues.push(issue);
-        epics[issue.epicKey].totalPoints += issue.storyPoints.total;
-        epics[issue.epicKey].completedPoints += issue.storyPoints.done;
-        epics[issue.epicKey].riskFactors.push(...issue.riskFactors);
-      }
-    });
-    
-    // Calculate epic-level metrics
-    Object.values(epics).forEach(epic => {
-      epic.riskFactors = [...new Set(epic.riskFactors)];
-      epic.completionRate = epic.totalPoints > 0 ? epic.completedPoints / epic.totalPoints : 0;
-      epic.issueCount = epic.issues.length;
-      epic.completedIssues = epic.issues.filter(issue => 
-        ['Done', 'Closed', 'Resolved'].includes(issue.status)
-      ).length;
-    });
-    
-    return epics;
-  }
-
   generateLinkSummary(issues, decisions) {
     return {
       totalIssues: issues.length,
@@ -144,15 +192,17 @@ class DataProcessor {
     logger.debug('Generating insights', { squad: squad.name });
     
     const velocity = this.calculateVelocity(data.issues, dateRange);
-    const risks = this.identifyRisks(data.issues, data.epics);
-    const quarterSnapshot = this.generateQuarterSnapshot(data.issues, data.epics);
+    const risks = this.identifyRisks(data.issues, data.hierarchy);
+    const quarterSnapshot = this.generateQuarterSnapshot(data.issues, data.hierarchy);
     const decisions = this.processDecisions(data.decisions);
+    const workstreamInsights = this.generateWorkstreamInsights(data.hierarchy);
     
     return {
       velocity,
       risks,
       quarterSnapshot,
       decisions,
+      workstreamInsights,
       summary: this.generateSummary(data, velocity, risks)
     };
   }
@@ -187,21 +237,32 @@ class DataProcessor {
     };
   }
 
-  identifyRisks(issues, epics) {
-    const highRiskEpics = Object.values(epics)
+  identifyRisks(issues, hierarchy) {
+    const highRiskWorkstreams = Object.values(hierarchy.workstreams)
+      .filter(workstream => workstream.riskFactors.length > 0)
+      .map(workstream => workstream.key);
+    
+    const highRiskEpics = Object.values(hierarchy.epics)
       .filter(epic => epic.riskFactors.length > 0)
       .map(epic => epic.key);
     
     const riskFactors = {};
-    Object.values(epics).forEach(epic => {
+    Object.values(hierarchy.workstreams).forEach(workstream => {
+      if (workstream.riskFactors.length > 0) {
+        riskFactors[workstream.key] = workstream.riskFactors;
+      }
+    });
+    
+    Object.values(hierarchy.epics).forEach(epic => {
       if (epic.riskFactors.length > 0) {
         riskFactors[epic.key] = epic.riskFactors;
       }
     });
     
-    const riskScore = this.calculateRiskScore(issues, epics);
+    const riskScore = this.calculateRiskScore(issues, hierarchy);
     
     return {
+      highRiskWorkstreams,
       highRiskEpics,
       riskFactors,
       riskScore,
@@ -210,7 +271,7 @@ class DataProcessor {
     };
   }
 
-  calculateRiskScore(issues, epics) {
+  calculateRiskScore(issues, hierarchy) {
     const totalIssues = issues.length;
     const riskIssues = issues.filter(issue => issue.riskFactors.length > 0).length;
     
@@ -219,12 +280,20 @@ class DataProcessor {
     // Base score from percentage of issues with risks
     let score = riskIssues / totalIssues;
     
+    // Add weight for high-risk workstreams
+    const highRiskWorkstreams = Object.values(hierarchy.workstreams).filter(workstream => workstream.riskFactors.length > 0).length;
+    const totalWorkstreams = Object.keys(hierarchy.workstreams).length;
+    
+    if (totalWorkstreams > 0) {
+      score += (highRiskWorkstreams / totalWorkstreams) * 0.3;
+    }
+    
     // Add weight for high-risk epics
-    const highRiskEpics = Object.values(epics).filter(epic => epic.riskFactors.length > 0).length;
-    const totalEpics = Object.keys(epics).length;
+    const highRiskEpics = Object.values(hierarchy.epics).filter(epic => epic.riskFactors.length > 0).length;
+    const totalEpics = Object.keys(hierarchy.epics).length;
     
     if (totalEpics > 0) {
-      score += (highRiskEpics / totalEpics) * 0.3;
+      score += (highRiskEpics / totalEpics) * 0.2;
     }
     
     return Math.min(score, 1.0);
@@ -242,15 +311,16 @@ class DataProcessor {
     return breakdown;
   }
 
-  generateQuarterSnapshot(issues, epics) {
+  generateQuarterSnapshot(issues, hierarchy) {
     const quarters = {};
     
     // Group by target quarter
-    [...issues, ...Object.values(epics)].forEach(item => {
+    [...issues, ...Object.values(hierarchy.epics), ...Object.values(hierarchy.workstreams)].forEach(item => {
       const quarter = item.targetQuarter || 'Unassigned';
       
       if (!quarters[quarter]) {
         quarters[quarter] = {
+          workstreamCount: 0,
           epicCount: 0,
           totalPoints: 0,
           completedPoints: 0,
@@ -262,7 +332,12 @@ class DataProcessor {
       if (item.key && item.key.includes('-')) {
         // This is an issue
         quarters[quarter].issues.push(item);
-      } else {
+      } else if (item.epics) {
+        // This is a workstream
+        quarters[quarter].workstreamCount++;
+        quarters[quarter].totalPoints += item.totalPoints || 0;
+        quarters[quarter].completedPoints += item.completedPoints || 0;
+      } else if (item.issues) {
         // This is an epic
         quarters[quarter].epicCount++;
         quarters[quarter].totalPoints += item.totalPoints || 0;
@@ -276,6 +351,25 @@ class DataProcessor {
     });
     
     return quarters;
+  }
+
+  generateWorkstreamInsights(hierarchy) {
+    const insights = {};
+    
+    Object.values(hierarchy.workstreams).forEach(workstream => {
+      insights[workstream.key] = {
+        name: workstream.title,
+        completionRate: workstream.completionRate,
+        totalIssues: workstream.totalIssues,
+        totalPoints: workstream.totalPoints,
+        completedPoints: workstream.completedPoints,
+        riskFactors: workstream.riskFactors,
+        epicCount: workstream.epics.length,
+        status: workstream.status
+      };
+    });
+    
+    return insights;
   }
 
   processDecisions(decisions) {
@@ -304,6 +398,8 @@ class DataProcessor {
       totalIssues: data.issues.length,
       totalPRs: data.links.totalPRs,
       totalDecisions: data.decisions.length,
+      totalWorkstreams: Object.keys(data.hierarchy.workstreams).length,
+      totalEpics: Object.keys(data.hierarchy.epics).length,
       velocity: velocity.velocity,
       riskScore: risks.riskScore,
       completionRate: velocity.completedPoints / (velocity.plannedPoints || 1)
@@ -316,6 +412,8 @@ class DataProcessor {
     const allIssues = [];
     const allPRs = [];
     const allDecisions = [];
+    const allWorkstreams = [];
+    const allEpics = [];
     const crossSquadDependencies = [];
     
     // Aggregate data from all squads
@@ -323,6 +421,8 @@ class DataProcessor {
       allIssues.push(...result.issues);
       allPRs.push(...result.prs);
       allDecisions.push(...result.decisions);
+      allWorkstreams.push(...result.workstreams);
+      allEpics.push(...result.epics);
     });
     
     // Identify cross-squad dependencies
@@ -336,6 +436,8 @@ class DataProcessor {
       totalIssues: allIssues.length,
       totalPRs: allPRs.length,
       totalDecisions: allDecisions.length,
+      totalWorkstreams: allWorkstreams.length,
+      totalEpics: allEpics.length,
       crossSquadDependencies: dependencies,
       companyMetrics,
       squadSummaries: squadResults.map(result => ({
@@ -343,6 +445,8 @@ class DataProcessor {
         issues: result.issues.length,
         prs: result.prs.length,
         decisions: result.decisions.length,
+        workstreams: result.workstreams.length,
+        epics: result.epics.length,
         velocity: result.insights?.velocity?.velocity || 0,
         riskScore: result.insights?.risks?.riskScore || 0
       }))
@@ -380,7 +484,9 @@ class DataProcessor {
       averageRiskScore: avgRiskScore,
       totalIssues: squadResults.reduce((sum, result) => sum + result.issues.length, 0),
       totalPRs: squadResults.reduce((sum, result) => sum + result.prs.length, 0),
-      totalDecisions: squadResults.reduce((sum, result) => sum + result.decisions.length, 0)
+      totalDecisions: squadResults.reduce((sum, result) => sum + result.decisions.length, 0),
+      totalWorkstreams: squadResults.reduce((sum, result) => sum + result.workstreams.length, 0),
+      totalEpics: squadResults.reduce((sum, result) => sum + result.epics.length, 0)
     };
   }
 }

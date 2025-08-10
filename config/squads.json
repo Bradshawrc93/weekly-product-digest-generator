@@ -19,7 +19,27 @@
           "role": "Senior Engineer"
         }
       ],
-      "jiraProjectKeys": ["PLAT"],
+      "jiraConfig": {
+        "projectKey": "PLAT",
+        "projectName": "Platform",
+        "workstreams": [
+          {
+            "name": "API Infrastructure",
+            "key": "API-INFRA",
+            "description": "Core API platform and infrastructure"
+          },
+          {
+            "name": "Developer Experience",
+            "key": "DEV-EXP",
+            "description": "Developer tools and experience"
+          },
+          {
+            "name": "Platform Services",
+            "key": "PLAT-SERV",
+            "description": "Shared platform services"
+          }
+        ]
+      },
       "slackChannel": "#platform-squad",
       "notionRoadmapUrl": "https://notion.so/your-platform-roadmap",
       "githubRepos": ["platform-api", "platform-ui", "platform-infra"],
@@ -44,7 +64,27 @@
           "role": "iOS Engineer"
         }
       ],
-      "jiraProjectKeys": ["MOB"],
+      "jiraConfig": {
+        "projectKey": "MOB",
+        "projectName": "Mobile",
+        "workstreams": [
+          {
+            "name": "iOS App",
+            "key": "IOS-APP",
+            "description": "iOS mobile application"
+          },
+          {
+            "name": "Android App",
+            "key": "ANDROID-APP",
+            "description": "Android mobile application"
+          },
+          {
+            "name": "Mobile Infrastructure",
+            "key": "MOB-INFRA",
+            "description": "Shared mobile infrastructure"
+          }
+        ]
+      },
       "slackChannel": "#mobile-squad",
       "notionRoadmapUrl": "https://notion.so/your-mobile-roadmap",
       "githubRepos": ["mobile-ios", "mobile-android"],
@@ -69,7 +109,27 @@
           "role": "Data Engineer"
         }
       ],
-      "jiraProjectKeys": ["DATA"],
+      "jiraConfig": {
+        "projectKey": "DATA",
+        "projectName": "Data",
+        "workstreams": [
+          {
+            "name": "Data Pipeline",
+            "key": "DATA-PIPE",
+            "description": "ETL and data processing pipelines"
+          },
+          {
+            "name": "Analytics",
+            "key": "ANALYTICS",
+            "description": "Business intelligence and analytics"
+          },
+          {
+            "name": "Data Infrastructure",
+            "key": "DATA-INFRA",
+            "description": "Data storage and infrastructure"
+          }
+        ]
+      },
       "slackChannel": "#data-squad",
       "notionRoadmapUrl": "https://notion.so/your-data-roadmap",
       "githubRepos": ["data-pipeline", "analytics-dashboard"],
@@ -93,7 +153,17 @@
     "jiraCustomFields": {
       "targetQuarter": "customfield_10001",
       "confidence": "customfield_10002",
-      "epicLink": "customfield_10014"
+      "epicLink": "customfield_10014",
+      "team": "customfield_10015",
+      "workstream": "customfield_10016",
+      "storyPoints": "customfield_10003"
+    },
+    "jiraHierarchy": {
+      "workstreamIssueType": "Workstream",
+      "epicIssueType": "Epic",
+      "storyIssueType": "Story",
+      "taskIssueType": "Task",
+      "bugIssueType": "Bug"
     },
     "riskThresholds": {
       "noMovementDays": 14,

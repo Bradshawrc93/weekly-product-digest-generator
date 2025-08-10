@@ -38,19 +38,36 @@ This checklist contains all the information you need to gather to configure and 
   - Give it a label like "Weekly Digest Generator"
   - Copy the generated token
 
+**Jira Project Hierarchy:**
+- [ ] **Project Key** (e.g., `PLAT`, `MOB`, `DATA`)
+- [ ] **Project Name** (e.g., `Platform`, `Mobile`, `Data`)
+- [ ] **Workstreams** for each squad:
+  - Workstream names and keys
+  - Workstream descriptions
+  - Example: `API Infrastructure` (key: `API-INFRA`)
+
+**Custom Fields (Required):**
+- [ ] **Team Field ID** (e.g., `customfield_10015`)
+  - This field should contain the squad name
+  - Used to filter issues by squad
+
+- [ ] **Workstream Field ID** (e.g., `customfield_10016`)
+  - This field links epics to workstreams
+  - Used to build the hierarchy
+
+- [ ] **Story Points Field ID** (e.g., `customfield_10003`)
+  - Used for velocity calculations
+
 **Custom Fields (Optional but Recommended):**
-- [ ] **Story Points Field ID**
-  - Go to Jira → Settings → Issues → Custom fields
-  - Find your story points field and copy the ID (e.g., `customfield_10003`)
+- [ ] **Target Quarter Field ID** (e.g., `customfield_10001`)
+- [ ] **Confidence Field ID** (e.g., `customfield_10002`)
+- [ ] **Epic Link Field ID** (e.g., `customfield_10014`)
 
-- [ ] **Target Quarter Field ID**
-  - Find your target quarter field and copy the ID (e.g., `customfield_10001`)
-
-- [ ] **Confidence Field ID**
-  - Find your confidence field and copy the ID (e.g., `customfield_10002`)
-
-- [ ] **Epic Link Field ID**
-  - Usually `customfield_10014` but verify in your instance
+**How to find field IDs:**
+1. Go to any issue in Jira
+2. Open browser developer tools (F12)
+3. Look for `customfield_` in the page source
+4. Or use Jira's REST API: `/rest/api/3/field`
 
 ### 3. Notion Configuration
 **Where to find:** https://www.notion.so/my-integrations
@@ -121,7 +138,14 @@ This checklist contains all the information you need to gather to configure and 
   - Email Address
   - Role (e.g., "Tech Lead", "Senior Engineer")
 
-- [ ] **Jira Project Keys** (e.g., `["PLAT", "INFRA"]`)
+- [ ] **Jira Configuration:**
+  - Project Key (e.g., `PLAT`)
+  - Project Name (e.g., `Platform`)
+  - Workstreams:
+    - Name (e.g., `API Infrastructure`)
+    - Key (e.g., `API-INFRA`)
+    - Description (e.g., `Core API platform and infrastructure`)
+
 - [ ] **Slack Channel** (e.g., `#platform-squad`)
 - [ ] **Notion Roadmap URL** (optional)
 - [ ] **GitHub Repositories** (e.g., `["platform-api", "platform-ui"]`)
@@ -139,8 +163,22 @@ This checklist contains all the information you need to gather to configure and 
   - End Day (e.g., `"sunday"`)
   - End Time (e.g., `"23:59"`)
 
+**Jira Custom Field Mappings:**
+- [ ] **Team Field ID** (e.g., `customfield_10015`)
+- [ ] **Workstream Field ID** (e.g., `customfield_10016`)
+- [ ] **Story Points Field ID** (e.g., `customfield_10003`)
+- [ ] **Target Quarter Field ID** (e.g., `customfield_10001`)
+- [ ] **Confidence Field ID** (e.g., `customfield_10002`)
+- [ ] **Epic Link Field ID** (e.g., `customfield_10014`)
+
+**Jira Hierarchy Configuration:**
+- [ ] **Workstream Issue Type** (e.g., `Workstream`)
+- [ ] **Epic Issue Type** (e.g., `Epic`)
+- [ ] **Story Issue Type** (e.g., `Story`)
+- [ ] **Task Issue Type** (e.g., `Task`)
+- [ ] **Bug Issue Type** (e.g., `Bug`)
+
 **Optional:**
-- [ ] **Jira Custom Field Mappings**
 - [ ] **Risk Thresholds**
 - [ ] **AI Settings**
 - [ ] **Notification Settings**
@@ -192,6 +230,8 @@ NODE_ENV=production
 **File to edit:** `config/squads.json` (in globalSettings.jiraCustomFields)
 
 **Required Field IDs:**
+- [ ] **Team Field ID** (e.g., `customfield_10015`) - **CRITICAL**
+- [ ] **Workstream Field ID** (e.g., `customfield_10016`) - **CRITICAL**
 - [ ] **Story Points Field ID** (e.g., `customfield_10003`)
 - [ ] **Target Quarter Field ID** (e.g., `customfield_10001`)
 - [ ] **Confidence Field ID** (e.g., `customfield_10002`)
@@ -246,6 +286,7 @@ NODE_ENV=production
 - [ ] **Jira Permissions**
   - Verify API token has access to all squad projects
   - Check issue visibility permissions
+  - Verify Team field is accessible and populated
 
 - [ ] **GitHub Permissions**
   - Verify token has access to all squad repositories
@@ -283,15 +324,21 @@ NODE_ENV=production
 - [ ] **Notion API connectivity**
 - [ ] **OpenAI API connectivity**
 
+**Jira Hierarchy Testing:**
+- [ ] **Verify Team field filtering works**
+- [ ] **Verify Workstream field linking works**
+- [ ] **Test hierarchy building (Workstream → Epic → Issue)**
+- [ ] **Verify custom field mappings**
+
 ## 📋 Final Checklist
 
 ### Before First Run:
 - [ ] All API keys and tokens configured
-- [ ] Squad configuration completed
+- [ ] Squad configuration completed with workstreams
 - [ ] Environment variables set
 - [ ] Notion database created with correct properties
 - [ ] Slack bot installed and configured
-- [ ] Jira custom fields identified
+- [ ] Jira custom fields identified (especially Team and Workstream fields)
 - [ ] GitHub repositories accessible
 - [ ] Test run completed successfully
 - [ ] Monitoring and alerting configured
@@ -314,6 +361,8 @@ NODE_ENV=production
 3. **Missing Data** - Check field mappings and project access
 4. **AI Generation Failures** - Verify OpenAI API key and quota
 5. **Notion Publishing Errors** - Check database permissions and structure
+6. **Jira Hierarchy Issues** - Verify Team and Workstream field mappings
+7. **Empty Results** - Check Team field values match squad names exactly
 
 ### Support Resources:
 - [ ] Check logs in `logs/` directory
