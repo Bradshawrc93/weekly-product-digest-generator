@@ -1,0 +1,75 @@
+{
+  "name": "weekly-product-digest-generator",
+  "version": "1.0.0",
+  "description": "A comprehensive tool for generating weekly product operations digests by aggregating data from Jira, Git/PRs, and Slack",
+  "main": "src/index.js",
+  "bin": {
+    "digest": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "digest": "node src/cli.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "build": "npm run lint && npm test",
+    "setup": "node scripts/setup.js",
+    "validate-config": "node scripts/validate-config.js"
+  },
+  "keywords": [
+    "product",
+    "operations",
+    "digest",
+    "jira",
+    "slack",
+    "github",
+    "notion",
+    "automation",
+    "ai",
+    "summarization"
+  ],
+  "author": "Product Ops Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.17.1",
+    "@notionhq/client": "^2.2.14",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "node-cron": "^3.0.3",
+    "commander": "^11.1.0",
+    "openai": "^4.20.1",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "joi": "^17.11.0",
+    "node-cache": "^5.1.2",
+    "rate-limiter-flexible": "^4.0.1",
+    "circuit-breaker-js": "^0.0.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "nodemon": "^3.0.2",
+    "supertest": "^6.3.3",
+    "nock": "^13.3.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/weekly-product-digest-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/weekly-product-digest-generator/issues"
+  },
+  "homepage": "https://github.com/your-org/weekly-product-digest-generator#readme"
+}

@@ -1,0 +1,114 @@
+{
+  "squads": [
+    {
+      "name": "Platform Squad",
+      "description": "Core platform infrastructure and APIs",
+      "members": [
+        {
+          "fullName": "John Doe",
+          "slackHandle": "@johndoe",
+          "githubUsername": "johndoe",
+          "email": "john.doe@company.com",
+          "role": "Tech Lead"
+        },
+        {
+          "fullName": "Jane Smith",
+          "slackHandle": "@janesmith",
+          "githubUsername": "janesmith",
+          "email": "jane.smith@company.com",
+          "role": "Senior Engineer"
+        }
+      ],
+      "jiraProjectKeys": ["PLAT"],
+      "slackChannel": "#platform-squad",
+      "notionRoadmapUrl": "https://notion.so/your-platform-roadmap",
+      "githubRepos": ["platform-api", "platform-ui", "platform-infra"],
+      "tags": ["platform", "infrastructure", "api"]
+    },
+    {
+      "name": "Mobile Squad",
+      "description": "iOS and Android mobile applications",
+      "members": [
+        {
+          "fullName": "Alex Johnson",
+          "slackHandle": "@alexj",
+          "githubUsername": "alexj",
+          "email": "alex.johnson@company.com",
+          "role": "Mobile Lead"
+        },
+        {
+          "fullName": "Sarah Wilson",
+          "slackHandle": "@sarahw",
+          "githubUsername": "sarahw",
+          "email": "sarah.wilson@company.com",
+          "role": "iOS Engineer"
+        }
+      ],
+      "jiraProjectKeys": ["MOB"],
+      "slackChannel": "#mobile-squad",
+      "notionRoadmapUrl": "https://notion.so/your-mobile-roadmap",
+      "githubRepos": ["mobile-ios", "mobile-android"],
+      "tags": ["mobile", "ios", "android"]
+    },
+    {
+      "name": "Data Squad",
+      "description": "Data engineering and analytics",
+      "members": [
+        {
+          "fullName": "Mike Chen",
+          "slackHandle": "@mikec",
+          "githubUsername": "mikec",
+          "email": "mike.chen@company.com",
+          "role": "Data Lead"
+        },
+        {
+          "fullName": "Lisa Brown",
+          "slackHandle": "@lisab",
+          "githubUsername": "lisab",
+          "email": "lisa.brown@company.com",
+          "role": "Data Engineer"
+        }
+      ],
+      "jiraProjectKeys": ["DATA"],
+      "slackChannel": "#data-squad",
+      "notionRoadmapUrl": "https://notion.so/your-data-roadmap",
+      "githubRepos": ["data-pipeline", "analytics-dashboard"],
+      "tags": ["data", "analytics", "pipeline"]
+    }
+  ],
+  "globalSettings": {
+    "sharedSlackChannels": [
+      "#product",
+      "#engineering",
+      "#releases",
+      "#architecture"
+    ],
+    "outputNotionDatabaseId": "your-notion-database-id-here",
+    "runWindow": {
+      "startDay": "monday",
+      "startTime": "00:00",
+      "endDay": "sunday",
+      "endTime": "23:59"
+    },
+    "jiraCustomFields": {
+      "targetQuarter": "customfield_10001",
+      "confidence": "customfield_10002",
+      "epicLink": "customfield_10014"
+    },
+    "riskThresholds": {
+      "noMovementDays": 14,
+      "overdueDays": 7,
+      "confidenceDropThreshold": 0.3
+    },
+    "aiSettings": {
+      "model": "gpt-4",
+      "maxTokens": 2000,
+      "temperature": 0.3
+    },
+    "notifications": {
+      "slackChannel": "#product",
+      "mentionSquadLeads": true,
+      "includeExecutiveSummary": true
+    }
+  }
+}
