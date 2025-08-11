@@ -1,22 +1,49 @@
 {
   "squads": [
     {
-      "name": "Platform Squad",
-      "description": "Core platform infrastructure and APIs",
+      "name": "Customer-Facing (Empower/SmarterAccess UI)",
+      "description": "Customer-facing UI development for Empower and SmarterAccess",
       "members": [
         {
           "fullName": "John Doe",
-          "slackHandle": "@johndoe",
+          "slackHandle": "@johnd",
           "githubUsername": "johndoe",
           "email": "john.doe@company.com",
-          "role": "Tech Lead"
-        },
+          "role": "UI Lead"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "Empower UI",
+            "key": "EMPOWER-UI",
+            "description": "Empower user interface development"
+          },
+          {
+            "name": "SmarterAccess UI",
+            "key": "SMARTER-UI",
+            "description": "SmarterAccess user interface development"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-customer-facing-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["ui", "customer-facing", "empower", "smarteraccess"]
+    },
+    {
+      "name": "Human in the loop (HITL)",
+      "description": "Human in the loop processes and workflows",
+      "members": [
         {
           "fullName": "Jane Smith",
-          "slackHandle": "@janesmith",
+          "slackHandle": "@janes",
           "githubUsername": "janesmith",
           "email": "jane.smith@company.com",
-          "role": "Senior Engineer"
+          "role": "HITL Lead"
         }
       ],
       "jiraConfig": {
@@ -24,44 +51,28 @@
         "projectName": "Product Operations",
         "workstreams": [
           {
-            "name": "API Infrastructure",
-            "key": "API-INFRA",
-            "description": "Core API platform and infrastructure"
-          },
-          {
-            "name": "Developer Experience",
-            "key": "DEV-EXP",
-            "description": "Developer tools and experience"
-          },
-          {
-            "name": "Platform Services",
-            "key": "PLAT-SERV",
-            "description": "Shared platform services"
+            "name": "HITL Processes",
+            "key": "HITL-PROC",
+            "description": "Human in the loop process optimization"
           }
         ]
       },
-      "slackChannel": "#platform-squad",
-      "notionRoadmapUrl": "https://notion.so/your-platform-roadmap",
-      "githubRepos": ["platform-api", "platform-ui", "platform-infra"],
-      "tags": ["platform", "infrastructure", "api"]
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-hitl-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["hitl", "human-in-loop", "processes"]
     },
     {
-      "name": "Mobile Squad",
-      "description": "iOS and Android mobile applications",
+      "name": "Developer Efficiency",
+      "description": "Developer productivity and efficiency tools",
       "members": [
         {
-          "fullName": "Alex Johnson",
-          "slackHandle": "@alexj",
-          "githubUsername": "alexj",
-          "email": "alex.johnson@company.com",
-          "role": "Mobile Lead"
-        },
-        {
-          "fullName": "Sarah Wilson",
-          "slackHandle": "@sarahw",
-          "githubUsername": "sarahw",
-          "email": "sarah.wilson@company.com",
-          "role": "iOS Engineer"
+          "fullName": "Mike Johnson",
+          "slackHandle": "@mikej",
+          "githubUsername": "mikejohnson",
+          "email": "mike.johnson@company.com",
+          "role": "Dev Efficiency Lead"
         }
       ],
       "jiraConfig": {
@@ -69,44 +80,28 @@
         "projectName": "Product Operations",
         "workstreams": [
           {
-            "name": "iOS App",
-            "key": "IOS-APP",
-            "description": "iOS mobile application"
-          },
-          {
-            "name": "Android App",
-            "key": "ANDROID-APP",
-            "description": "Android mobile application"
-          },
-          {
-            "name": "Mobile Infrastructure",
-            "key": "MOB-INFRA",
-            "description": "Shared mobile infrastructure"
+            "name": "Developer Tools",
+            "key": "DEV-TOOLS",
+            "description": "Developer productivity tools and automation"
           }
         ]
       },
-      "slackChannel": "#mobile-squad",
-      "notionRoadmapUrl": "https://notion.so/your-mobile-roadmap",
-      "githubRepos": ["mobile-ios", "mobile-android"],
-      "tags": ["mobile", "ios", "android"]
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-dev-efficiency-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["developer", "efficiency", "tools", "automation"]
     },
     {
-      "name": "Data Squad",
-      "description": "Data engineering and analytics",
+      "name": "Data Collection / Data Lakehouse",
+      "description": "Data collection and lakehouse infrastructure",
       "members": [
         {
-          "fullName": "Mike Chen",
-          "slackHandle": "@mikec",
-          "githubUsername": "mikec",
-          "email": "mike.chen@company.com",
+          "fullName": "Alice Brown",
+          "slackHandle": "@aliceb",
+          "githubUsername": "alicebrown",
+          "email": "alice.brown@company.com",
           "role": "Data Lead"
-        },
-        {
-          "fullName": "Lisa Brown",
-          "slackHandle": "@lisab",
-          "githubUsername": "lisab",
-          "email": "lisa.brown@company.com",
-          "role": "Data Engineer"
         }
       ],
       "jiraConfig": {
@@ -114,26 +109,167 @@
         "projectName": "Product Operations",
         "workstreams": [
           {
-            "name": "Data Pipeline",
-            "key": "DATA-PIPE",
-            "description": "ETL and data processing pipelines"
+            "name": "Data Collection",
+            "key": "DATA-COLLECT",
+            "description": "Data collection pipelines and processes"
           },
           {
-            "name": "Analytics",
-            "key": "ANALYTICS",
-            "description": "Business intelligence and analytics"
-          },
-          {
-            "name": "Data Infrastructure",
-            "key": "DATA-INFRA",
-            "description": "Data storage and infrastructure"
+            "name": "Data Lakehouse",
+            "key": "DATA-LAKE",
+            "description": "Data lakehouse infrastructure and management"
           }
         ]
       },
-      "slackChannel": "#data-squad",
+      "slackChannel": "#product",
       "notionRoadmapUrl": "https://notion.so/your-data-roadmap",
-      "githubRepos": ["data-pipeline", "analytics-dashboard"],
-      "tags": ["data", "analytics", "pipeline"]
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["data", "collection", "lakehouse", "infrastructure"]
+    },
+    {
+      "name": "ThoughtHub Platform",
+      "description": "ThoughtHub platform development and maintenance",
+      "members": [
+        {
+          "fullName": "Bob Wilson",
+          "slackHandle": "@bobw",
+          "githubUsername": "bobwilson",
+          "email": "bob.wilson@company.com",
+          "role": "Platform Lead"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "ThoughtHub Core",
+            "key": "THOUGHTHUB-CORE",
+            "description": "Core ThoughtHub platform functionality"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-thoughthub-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["thoughthub", "platform", "core"]
+    },
+    {
+      "name": "Core RCM",
+      "description": "Core Revenue Cycle Management functionality",
+      "members": [
+        {
+          "fullName": "Carol Davis",
+          "slackHandle": "@carold",
+          "githubUsername": "caroldavis",
+          "email": "carol.davis@company.com",
+          "role": "RCM Lead"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "Core RCM",
+            "key": "CORE-RCM",
+            "description": "Core revenue cycle management features"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-rcm-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["rcm", "revenue", "cycle", "management"]
+    },
+    {
+      "name": "Voice",
+      "description": "Voice technology and speech processing",
+      "members": [
+        {
+          "fullName": "David Lee",
+          "slackHandle": "@davidl",
+          "githubUsername": "davidlee",
+          "email": "david.lee@company.com",
+          "role": "Voice Lead"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "Voice Technology",
+            "key": "VOICE-TECH",
+            "description": "Voice recognition and processing technology"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-voice-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["voice", "speech", "recognition", "processing"]
+    },
+    {
+      "name": "Medical Coding",
+      "description": "Medical coding automation and processes",
+      "members": [
+        {
+          "fullName": "Eva Garcia",
+          "slackHandle": "@evag",
+          "githubUsername": "evagarcia",
+          "email": "eva.garcia@company.com",
+          "role": "Medical Coding Lead"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "Medical Coding",
+            "key": "MED-CODING",
+            "description": "Medical coding automation and accuracy"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-medical-coding-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["medical", "coding", "automation", "healthcare"]
+    },
+    {
+      "name": "Deep Research",
+      "description": "Deep research and advanced analytics",
+      "members": [
+        {
+          "fullName": "Frank Miller",
+          "slackHandle": "@frankm",
+          "githubUsername": "frankmiller",
+          "email": "frank.miller@company.com",
+          "role": "Research Lead"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "Deep Research",
+            "key": "DEEP-RESEARCH",
+            "description": "Advanced research and analytics"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-research-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["research", "analytics", "deep-learning", "ai"]
     }
   ],
   "globalSettings": {
@@ -151,12 +287,11 @@
       "endTime": "23:59"
     },
     "jiraCustomFields": {
-      "targetQuarter": "customfield_10001",
-      "confidence": "customfield_10002",
+      "targetQuarter": "customfield_10368",
+      "confidence": "customfield_10401",
       "epicLink": "customfield_10014",
-      "team": "customfield_10015",
-      "workstream": "customfield_10016",
-      "storyPoints": "customfield_10003"
+      "team": "customfield_10001",
+      "storyPoints": "customfield_10030"
     },
     "jiraHierarchy": {
       "workstreamIssueType": "Workstream",

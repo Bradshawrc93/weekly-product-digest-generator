@@ -18,9 +18,9 @@ const envSchema = Joi.object({
   NOTION_API_KEY: Joi.string().pattern(/^secret_/).required(),
   NOTION_DATABASE_ID: Joi.string().min(1).required(),
   
-  // GitHub Configuration
-  GITHUB_TOKEN: Joi.string().min(1).required(),
-  GITHUB_ORG: Joi.string().min(1).required(),
+  // GitHub Configuration - Disabled for now
+  // GITHUB_TOKEN: Joi.string().min(1).optional(),
+  // GITHUB_ORG: Joi.string().min(1).optional(),
   
   // AI Configuration
   OPENAI_API_KEY: Joi.string().min(1).required(),
@@ -51,10 +51,19 @@ const squadSchema = Joi.object({
   name: Joi.string().min(1).required(),
   description: Joi.string().optional(),
   members: Joi.array().items(squadMemberSchema).min(1).required(),
-  jiraProjectKeys: Joi.array().items(Joi.string()).min(1).required(),
+  jiraConfig: Joi.object({
+    projectKey: Joi.string().min(1).required(),
+    projectName: Joi.string().min(1).required(),
+    workstreams: Joi.array().items(Joi.object({
+      name: Joi.string().min(1).required(),
+      key: Joi.string().min(1).required(),
+      description: Joi.string().optional()
+    })).min(1).required()
+  }).required(),
   slackChannel: Joi.string().pattern(/^#/).optional(),
   notionRoadmapUrl: Joi.string().uri().optional(),
-  githubRepos: Joi.array().items(Joi.string()).min(1).required(),
+  githubRepos: Joi.array().items(Joi.string()).optional(),
+  bitbucketRepos: Joi.array().items(Joi.string()).optional(),
   tags: Joi.array().items(Joi.string()).optional(),
 });
 
@@ -71,6 +80,15 @@ const globalSettingsSchema = Joi.object({
     targetQuarter: Joi.string().optional(),
     confidence: Joi.string().optional(),
     epicLink: Joi.string().optional(),
+    team: Joi.string().optional(),
+    storyPoints: Joi.string().optional(),
+  }).optional(),
+  jiraHierarchy: Joi.object({
+    workstreamIssueType: Joi.string().optional(),
+    epicIssueType: Joi.string().optional(),
+    storyIssueType: Joi.string().optional(),
+    taskIssueType: Joi.string().optional(),
+    bugIssueType: Joi.string().optional(),
   }).optional(),
   riskThresholds: Joi.object({
     noMovementDays: Joi.number().integer().min(1).default(14),

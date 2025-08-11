@@ -1,23 +1,25 @@
 const { logger } = require('../utils/logger');
 const { loadSquadConfig, getSquadByName, getAllSquads, getGlobalSettings, validateApiConnections } = require('../utils/config');
 const { JiraIngestor } = require('../ingestors/jira');
-const { GitHubIngestor } = require('../ingestors/github');
+// const { BitbucketIngestor } = require('../ingestors/bitbucket');
 const { SlackIngestor } = require('../ingestors/slack');
 const { DataProcessor } = require('../processors/DataProcessor');
 const { AIGenerator } = require('../generators/AIGenerator');
 const { NotionPublisher } = require('../publishers/notion');
+const { TeamSummaryGenerator } = require('../utils/teamSummaryGenerator');
 const { SlackNotifier } = require('../publishers/slack');
 const moment = require('moment');
 
 class DigestGenerator {
   constructor() {
     this.jiraIngestor = new JiraIngestor();
-    this.githubIngestor = new GitHubIngestor();
+    // this.bitbucketIngestor = new BitbucketIngestor();
     this.slackIngestor = new SlackIngestor();
     this.dataProcessor = new DataProcessor();
     this.aiGenerator = new AIGenerator();
     this.notionPublisher = new NotionPublisher();
     this.slackNotifier = new SlackNotifier();
+    this.teamSummaryGenerator = new TeamSummaryGenerator();
   }
 
   async initialize() {
@@ -173,8 +175,11 @@ class DigestGenerator {
     try {
       // Collect data from all sources
       const jiraData = await this.jiraIngestor.collectData(squad, dateRange);
-      const githubData = await this.githubIngestor.collectData(squad, dateRange);
+      // const bitbucketData = await this.bitbucketIngestor.collectData(squad, dateRange);
       const slackData = await this.slackIngestor.collectData(squad, dateRange);
+      
+      // Generate team summary
+      const teamSummaries = this.teamSummaryGenerator.generateTeamSummary(jiraData.issues, dateRange);
       
       // Process and cross-link data
       const processedData = await this.dataProcessor.processSquadData({
@@ -182,7 +187,7 @@ class DigestGenerator {
         workstreams: jiraData.workstreams,
         epics: jiraData.epics,
         issues: jiraData.issues,
-        prs: githubData.prs,
+        prs: [], // bitbucketData.prs, // Disabled for now
         decisions: slackData.decisions,
         dateRange
       });
@@ -199,9 +204,10 @@ class DigestGenerator {
         workstreams: jiraData.workstreams,
         epics: jiraData.epics,
         issues: jiraData.issues,
-        prs: githubData.prs,
+        prs: [], // bitbucketData.prs, // Disabled for now
         decisions: slackData.decisions,
         insights: processedData.insights,
+        teamSummaries: teamSummaries,
         digest
       };
       

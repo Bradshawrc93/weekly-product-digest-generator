@@ -9,6 +9,7 @@ This tool automates the creation of weekly product digests by:
 - Processing and cross-linking information
 - Generating AI-powered summaries
 - Publishing to Notion with structured outputs
+- **NEW**: Team-based activity analysis and change tracking
 
 ## Features
 
@@ -18,6 +19,9 @@ This tool automates the creation of weekly product digests by:
 - **Automated publishing** to Notion databases
 - **Risk detection** and velocity tracking
 - **Squad-specific insights** with executive roll-ups
+- **🆕 Team Summary Analysis** - Comprehensive team activity breakdown by changes, updates, and new items
+- **🆕 Incremental Sync** - Efficient data collection with change tracking
+- **🆕 9 Configured Teams** - Support for Customer-Facing, HITL, Developer Efficiency, Data Collection, ThoughtHub Platform, Core RCM, Voice, Medical Coding, and Deep Research teams
 
 ## Quick Start
 
@@ -47,9 +51,9 @@ JIRA_API_TOKEN=your-api-token
 NOTION_API_KEY=secret-your-notion-api-key
 NOTION_DATABASE_ID=your-database-id
 
-# Git Configuration
-GITHUB_TOKEN=your-github-token
-GITHUB_ORG=your-organization
+# Git Configuration (Currently disabled)
+# GITHUB_TOKEN=your-github-token
+# GITHUB_ORG=your-organization
 
 # AI Configuration (OpenAI)
 OPENAI_API_KEY=your-openai-api-key
@@ -63,26 +67,49 @@ Configure your squads in `config/squads.json`:
 {
   "squads": [
     {
-      "name": "Platform Squad",
+      "name": "Voice",
+      "description": "Voice technology and speech processing",
       "members": [
         {
-          "fullName": "John Doe",
-          "slackHandle": "@johndoe"
+          "fullName": "David Lee",
+          "slackHandle": "@davidl",
+          "githubUsername": "davidlee",
+          "email": "david.lee@company.com",
+          "role": "Voice Lead"
         }
       ],
-      "jiraProjectKeys": ["PLAT"],
-      "slackChannel": "#platform-squad",
-      "notionRoadmapUrl": "https://notion.so/your-roadmap"
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "Voice Technology",
+            "key": "VOICE-TECH",
+            "description": "Voice recognition and processing technology"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-voice-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["voice", "speech", "recognition", "processing"]
     }
   ],
   "globalSettings": {
-    "sharedSlackChannels": ["#product", "#engineering"],
+    "sharedSlackChannels": ["#product"],
     "outputNotionDatabaseId": "your-database-id",
     "runWindow": {
       "startDay": "monday",
       "startTime": "00:00",
       "endDay": "sunday", 
       "endTime": "23:59"
+    },
+    "jiraCustomFields": {
+      "epicLink": "customfield_10014",
+      "targetQuarter": "customfield_10368",
+      "team": "customfield_10001",
+      "storyPoints": "customfield_10030"
     }
   }
 }
@@ -94,16 +121,39 @@ Configure your squads in `config/squads.json`:
 
 1. **Data Ingestion** - Collect data from Jira, Git, and Slack
 2. **Processing** - Cross-link and analyze data
-3. **Summarization** - Generate AI-powered insights
-4. **Output** - Create Notion pages and send notifications
+3. **Team Analysis** - Generate team-specific summaries and change tracking
+4. **Summarization** - Generate AI-powered insights
+5. **Output** - Create Notion pages and send notifications
 
 ### Key Components
 
-- `src/ingestors/` - Data collection modules
+- `src/ingestors/` - Data collection modules (Jira, Slack, Git)
 - `src/processors/` - Data processing and analysis
 - `src/generators/` - AI summarization and output generation
 - `src/publishers/` - Notion publishing and notifications
 - `src/utils/` - Shared utilities and helpers
+- `src/core/` - Core orchestration and team summary generation
+
+## Recent Updates
+
+### ✅ **Team Summary Feature** (Latest)
+- **Comprehensive team analysis** with change tracking
+- **9 configured teams** with proper UUID mapping
+- **Activity level assessment** (No/Low/Moderate/High/Very High)
+- **Change type categorization** (Status, Assignee, Priority, etc.)
+- **Human-readable reports** in markdown format
+- **Structured JSON output** for programmatic access
+
+### ✅ **Jira Integration Fixes**
+- **Fixed labels filter** - Now properly handles undefined/null labels
+- **Optimized JQL queries** - Faster and more reliable data retrieval
+- **Team field structure** - Proper handling of Jira's team object format
+- **Incremental sync** - Only fetch data updated since last run
+
+### ✅ **Configuration Updates**
+- **Updated squad structure** - New `jiraConfig` format with workstreams
+- **Team UUID mapping** - Proper mapping between squad names and Jira UUIDs
+- **Custom field configuration** - Support for team, story points, target quarter fields
 
 ## Usage
 
@@ -121,7 +171,20 @@ npm run digest
 npm run digest -- --start-date 2024-01-01 --end-date 2024-01-07
 
 # Generate digest for specific squad
-npm run digest -- --squad "Platform Squad"
+npm run digest -- --squad "Voice"
+```
+
+### Team Summary Testing
+
+```bash
+# Test team summary with real Jira data
+node scripts/test-real-team-summary.js
+
+# Test specific team
+node scripts/test-voice-team.js
+
+# Test JQL generation
+node scripts/debug-jql-generation.js
 ```
 
 ### Slack Commands
@@ -142,6 +205,33 @@ Each squad gets a structured Notion page with:
 - **Decisions** - Key decisions from Slack discussions
 - **Roadmap Snapshot** - Open epics by target quarter
 - **Changelog** - Detailed activity log
+- **🆕 Team Summary** - Team activity breakdown and insights
+
+### Team Summary Report
+
+```markdown
+# Team Summary Report
+**Date Range**: 2025-08-04 to 2025-08-11
+
+## Voice
+
+### Overview
+- **Total Issues**: 3
+- **Issues with Changes**: 3
+- **New Items**: 3
+- **Total Changes**: 8
+
+### Key Insights
+- Low activity level - minimal changes detected
+- 3 new items created
+- 1 items currently in progress
+- 1 items completed
+
+### Change Breakdown
+- **Status Changes**: 2
+- **Priority Changes**: 1
+- **Other Changes**: 5
+```
 
 ### Executive Roll-Up
 
@@ -153,7 +243,7 @@ A summary page linking to all squad pages with cross-squad highlights and depend
 
 - Node.js 18+
 - npm or yarn
-- Access to Jira, Slack, GitHub, and Notion APIs
+- Access to Jira, Slack, and Notion APIs
 
 ### Setup
 
@@ -169,6 +259,19 @@ npm run lint
 
 # Build for production
 npm run build
+```
+
+### Testing
+
+```bash
+# Test team summary functionality
+node scripts/test-team-summary.js
+
+# Test with real Jira data
+node scripts/test-real-team-summary.js
+
+# Test specific components
+node scripts/test-voice-team.js
 ```
 
 ### Contributing
@@ -193,6 +296,20 @@ npm run build
 1. **API Rate Limits** - The tool includes rate limiting and retry logic
 2. **Missing Data** - Check API permissions and configuration
 3. **Notion Publishing Errors** - Verify database permissions and structure
+4. **JQL Errors** - Verify field names and team UUIDs
+
+### Debug Commands
+
+```bash
+# Test JQL generation
+node scripts/debug-jql-generation.js
+
+# Test without filters
+node scripts/test-without-labels.js
+
+# Test specific team
+node scripts/test-voice-team.js
+```
 
 ### Logs
 
@@ -215,4 +332,4 @@ For issues and questions:
 
 ---
 
-**Note**: This is a living document that will be updated as the tool evolves. For the most current information about how the tool operates, see `OPERATIONS.md`.
+**Note**: This is a living document that will be updated as the tool evolves. For the most current information about how the tool operates, see `OPERATIONS.md` and `TEAM_SUMMARY.md`.

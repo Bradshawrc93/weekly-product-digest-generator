@@ -1,4 +1,6 @@
 const { logger } = require('../utils/logger');
+const { StateManager } = require('../utils/stateManager');
+const { ChangeAnalyzer } = require('../utils/changeAnalyzer');
 const axios = require('axios');
 const moment = require('moment');
 
@@ -7,6 +9,8 @@ class JiraIngestor {
     this.baseUrl = process.env.JIRA_BASE_URL;
     this.auth = Buffer.from(`${process.env.JIRA_EMAIL}:${process.env.JIRA_API_TOKEN}`).toString('base64');
     this.apiVersion = '3';
+    this.stateManager = new StateManager();
+    this.changeAnalyzer = new ChangeAnalyzer();
   }
 
   async collectData(squad, dateRange) {
@@ -16,26 +20,53 @@ class JiraIngestor {
     });
     
     try {
-      const workstreams = await this.fetchWorkstreams(squad, dateRange);
-      const epics = await this.fetchEpics(squad, dateRange);
-      const issues = await this.fetchIssues(squad, dateRange);
+      // Get last run timestamp for incremental sync
+      const lastRunTimestamp = await this.stateManager.getLastRunTimestamp();
+      const incrementalStartDate = lastRunTimestamp || dateRange.startDate;
+      
+      logger.logSquad('info', 'Using incremental sync', squad.name, {
+        lastRunTimestamp: lastRunTimestamp?.toISOString(),
+        incrementalStartDate: incrementalStartDate.format(),
+        fullDateRange: `${dateRange.startDate.format()} to ${dateRange.endDate.format()}`
+      });
+
+      // Fetch data with incremental date range
+      const workstreams = await this.fetchWorkstreams(squad, { startDate: incrementalStartDate, endDate: dateRange.endDate });
+      const epics = await this.fetchEpics(squad, { startDate: incrementalStartDate, endDate: dateRange.endDate });
+      const issues = await this.fetchIssues(squad, { startDate: incrementalStartDate, endDate: dateRange.endDate });
+      
+      // Analyze changes for the full date range
+      const issuesWithChanges = this.changeAnalyzer.filterIssuesByChanges(issues, dateRange, 'LOW');
+      const changeStats = this.changeAnalyzer.getChangeStatistics(issues, dateRange);
+      
+      logger.logSquad('info', 'Change analysis completed', squad.name, {
+        totalIssues: issues.length,
+        issuesWithChanges: issuesWithChanges.length,
+        changeStats: changeStats
+      });
       
       // Process and enrich data
       const processedWorkstreams = await this.processWorkstreams(workstreams, squad);
       const processedEpics = await this.processEpics(epics, squad);
-      const processedIssues = await this.processIssues(issues, squad);
+      const processedIssues = await this.processIssues(issuesWithChanges, squad);
+      
+      // Save current timestamp for next run
+      await this.stateManager.saveLastRunTimestamp(dateRange.endDate);
       
       return {
         workstreams: processedWorkstreams,
         epics: processedEpics,
         issues: processedIssues,
+        changeStats: changeStats,
         summary: {
           totalWorkstreams: processedWorkstreams.length,
           totalEpics: processedEpics.length,
           totalIssues: processedIssues.length,
           issuesByStatus: this.groupByStatus(processedIssues),
           issuesByType: this.groupByType(processedIssues),
-          riskIssues: processedIssues.filter(issue => issue.riskFactors.length > 0).length
+          riskIssues: processedIssues.filter(issue => issue.riskFactors.length > 0).length,
+          issuesWithChanges: issuesWithChanges.length,
+          totalChanges: changeStats.totalChanges
         }
       };
     } catch (error) {
@@ -58,7 +89,7 @@ class JiraIngestor {
         params: {
           jql: jql,
           maxResults: 100,
-          fields: 'summary,status,duedate,customfield_10001,customfield_10002,customfield_10015,customfield_10016,updated,created,labels,components,priority,description',
+          fields: 'summary,status,assignee,priority,description,updated,created,customfield_10001,customfield_10014,customfield_10030,customfield_10368',
           expand: 'changelog'
         }
       });
@@ -89,7 +120,7 @@ class JiraIngestor {
         params: {
           jql: jql,
           maxResults: 500,
-          fields: 'summary,status,duedate,customfield_10001,customfield_10002,customfield_10014,customfield_10015,customfield_10016,updated,created,labels,components,priority,description',
+          fields: 'summary,status,assignee,priority,description,updated,created,customfield_10001,customfield_10014,customfield_10030,customfield_10368',
           expand: 'changelog'
         }
       });
@@ -123,7 +154,7 @@ class JiraIngestor {
         params: {
           jql: jql,
           maxResults: 1000,
-          fields: 'summary,issuetype,status,assignee,duedate,customfield_10001,customfield_10002,customfield_10003,customfield_10014,customfield_10015,customfield_10016,updated,created,labels,components,priority,description',
+          fields: 'summary,issuetype,status,assignee,priority,description,updated,created,customfield_10001,customfield_10014,customfield_10030,customfield_10368',
           expand: 'changelog'
         }
       });
@@ -148,8 +179,10 @@ class JiraIngestor {
     const projectFilter = `project = ${squad.jiraConfig.projectKey}`;
     const dateFilter = `updated >= "${dateRange.startDate.format('YYYY-MM-DD')}" AND updated <= "${dateRange.endDate.format('YYYY-MM-DD')}"`;
     const issueTypes = 'issuetype = Workstream';
-    const teamFilter = `"Team" = "${squad.name}"`;
-    const excludeLabel = 'labels != "no-digest"';
+    // Use the correct team field structure for your Jira instance
+    const teamFilter = this.getTeamFilter(squad.name);
+    // Fix the labels filter to handle undefined/null labels
+    const excludeLabel = '(labels IS EMPTY OR labels != "no-digest")';
     
     return `${projectFilter} AND ${dateFilter} AND ${issueTypes} AND ${teamFilter} AND ${excludeLabel} ORDER BY updated DESC`;
   }
@@ -158,8 +191,9 @@ class JiraIngestor {
     const projectFilter = `project = ${squad.jiraConfig.projectKey}`;
     const dateFilter = `updated >= "${dateRange.startDate.format('YYYY-MM-DD')}" AND updated <= "${dateRange.endDate.format('YYYY-MM-DD')}"`;
     const issueTypes = 'issuetype = Epic';
-    const teamFilter = `"Team" = "${squad.name}"`;
-    const excludeLabel = 'labels != "no-digest"';
+    const teamFilter = this.getTeamFilter(squad.name);
+    // Fix the labels filter to handle undefined/null labels
+    const excludeLabel = '(labels IS EMPTY OR labels != "no-digest")';
     
     return `${projectFilter} AND ${dateFilter} AND ${issueTypes} AND ${teamFilter} AND ${excludeLabel} ORDER BY updated DESC`;
   }
@@ -168,17 +202,17 @@ class JiraIngestor {
     const projectFilter = `project = ${squad.jiraConfig.projectKey}`;
     const dateFilter = `updated >= "${dateRange.startDate.format('YYYY-MM-DD')}" AND updated <= "${dateRange.endDate.format('YYYY-MM-DD')}"`;
     const issueTypes = 'issuetype IN (Story, Task, Bug, Sub-task)';
-    const teamFilter = `"Team" = "${squad.name}"`;
-    const excludeLabel = 'labels != "no-digest"';
+    const teamFilter = this.getTeamFilter(squad.name);
+    // Fix the labels filter to handle undefined/null labels
+    const excludeLabel = '(labels IS EMPTY OR labels != "no-digest")';
     
     return `${projectFilter} AND ${dateFilter} AND ${issueTypes} AND ${teamFilter} AND ${excludeLabel} ORDER BY updated DESC`;
   }
 
   async processWorkstreams(workstreams, squad) {
     return workstreams.map(workstream => {
-      const targetQuarter = this.extractCustomField(workstream, 'customfield_10001');
-      const confidence = this.extractCustomField(workstream, 'customfield_10002');
-      const team = this.extractCustomField(workstream, 'customfield_10015');
+      const targetQuarter = this.extractCustomField(workstream, 'customfield_10368');
+      const team = this.extractCustomField(workstream, 'customfield_10001');
       
       const riskFactors = this.assessRiskFactors(workstream, squad);
       
@@ -191,10 +225,8 @@ class JiraIngestor {
         dueDate: workstream.fields.duedate,
         lastUpdated: workstream.fields.updated,
         created: workstream.fields.created,
-        labels: workstream.fields.labels || [],
-        components: workstream.fields.components?.map(c => c.name) || [],
+
         priority: workstream.fields.priority?.name,
-        confidence: confidence,
         team: team,
         riskFactors: riskFactors,
         changelog: this.processChangelog(workstream.changelog?.histories || [])
@@ -204,10 +236,8 @@ class JiraIngestor {
 
   async processEpics(epics, squad) {
     return epics.map(epic => {
-      const targetQuarter = this.extractCustomField(epic, 'customfield_10001');
-      const confidence = this.extractCustomField(epic, 'customfield_10002');
-      const team = this.extractCustomField(epic, 'customfield_10015');
-      const workstream = this.extractCustomField(epic, 'customfield_10016');
+      const targetQuarter = this.extractCustomField(epic, 'customfield_10368');
+      const team = this.extractCustomField(epic, 'customfield_10001');
       
       const riskFactors = this.assessRiskFactors(epic, squad);
       
@@ -219,12 +249,9 @@ class JiraIngestor {
         dueDate: epic.fields.duedate,
         lastUpdated: epic.fields.updated,
         created: epic.fields.created,
-        labels: epic.fields.labels || [],
-        components: epic.fields.components?.map(c => c.name) || [],
+
         priority: epic.fields.priority?.name,
-        confidence: confidence,
         team: team,
-        workstream: workstream,
         riskFactors: riskFactors,
         changelog: this.processChangelog(epic.changelog?.histories || [])
       };
@@ -234,13 +261,17 @@ class JiraIngestor {
   async processIssues(issues, squad) {
     return issues.map(issue => {
       const storyPoints = this.extractStoryPoints(issue);
-      const targetQuarter = this.extractCustomField(issue, 'customfield_10001');
-      const confidence = this.extractCustomField(issue, 'customfield_10002');
+      const targetQuarter = this.extractCustomField(issue, 'customfield_10368');
       const epicKey = this.extractCustomField(issue, 'customfield_10014');
-      const team = this.extractCustomField(issue, 'customfield_10015');
-      const workstream = this.extractCustomField(issue, 'customfield_10016');
+      const team = this.extractCustomField(issue, 'customfield_10001');
       
       const riskFactors = this.assessRiskFactors(issue, squad);
+      
+      // Analyze changes for this issue
+      const changeSummary = this.changeAnalyzer.getChangeSummary(issue, { 
+        startDate: moment().subtract(8, 'days'), 
+        endDate: moment() 
+      });
       
       return {
         key: issue.key,
@@ -250,26 +281,52 @@ class JiraIngestor {
         storyPoints: storyPoints,
         targetQuarter: targetQuarter,
         dueDate: issue.fields.duedate,
-        assignee: issue.fields.assignee?.emailAddress,
+        assignee: issue.fields.assignee?.displayName || issue.fields.assignee?.emailAddress,
         epicKey: epicKey,
         team: team,
-        workstream: workstream,
         linkedPRs: [], // Will be populated by cross-linking
         lastUpdated: issue.fields.updated,
         created: issue.fields.created,
-        labels: issue.fields.labels || [],
-        components: issue.fields.components?.map(c => c.name) || [],
         priority: issue.fields.priority?.name,
-        confidence: confidence,
         riskFactors: riskFactors,
-        changelog: this.processChangelog(issue.changelog?.histories || [])
+        changelog: this.processChangelog(issue.changelog?.histories || []),
+        changeSummary: changeSummary,
+        hasChanges: changeSummary !== null,
+        changeDescription: changeSummary ? this.changeAnalyzer.generateChangeDescription(changeSummary.changes) : null
       };
     });
   }
 
+  /**
+   * Get the correct team filter for a squad name
+   */
+  getTeamFilter(squadName) {
+    // Map squad names to their UUID values in Jira
+    const teamMappings = {
+      'Customer-Facing (Empower/SmarterAccess UI)': 'eab6f557-2ee3-458c-9511-54c135cd4752-88',
+      'Human in the loop (HITL)': 'eab6f557-2ee3-458c-9511-54c135cd4752-86',
+      'Developer Efficiency': 'eab6f557-2ee3-458c-9511-54c135cd4752-87',
+      'Data Collection / Data Lakehouse': 'eab6f557-2ee3-458c-9511-54c135cd4752-85',
+      'ThoughtHub Platform': 'eab6f557-2ee3-458c-9511-54c135cd4752-84',
+      'Core RCM': 'eab6f557-2ee3-458c-9511-54c135cd4752-83',
+      'Voice': 'eab6f557-2ee3-458c-9511-54c135cd4752-82',
+      'Medical Coding': 'eab6f557-2ee3-458c-9511-54c135cd4752-80',
+      'Deep Research': 'eab6f557-2ee3-458c-9511-54c135cd4752-81'
+    };
+    
+    const teamUuid = teamMappings[squadName];
+    if (!teamUuid) {
+      logger.warn(`No team UUID mapping found for squad: ${squadName}`);
+      return `"Team[Team]" = "${squadName}"`; // Fallback to name matching
+    }
+    
+    // Use the correct JQL syntax for team field
+    return `"Team" = "${teamUuid}"`;
+  }
+
   extractStoryPoints(issue) {
     // Use the configured story points field
-    const storyPointsField = 'customfield_10003'; // PLACEHOLDER: Replace with actual field ID
+    const storyPointsField = 'customfield_10030'; // Story Points field
     
     const total = issue.fields[storyPointsField] || 0;
     const done = this.calculateDoneStoryPoints(issue);
@@ -281,7 +338,7 @@ class JiraIngestor {
     const doneStatuses = ['Done', 'Closed', 'Resolved'];
     
     if (doneStatuses.includes(issue.fields.status.name)) {
-      return issue.fields['customfield_10003'] || 0; // PLACEHOLDER: Story points field
+      return issue.fields['customfield_10030'] || 0; // Story points field
     }
     
     return 0;

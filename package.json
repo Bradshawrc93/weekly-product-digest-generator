@@ -50,8 +50,7 @@
     "lodash": "^4.17.21",
     "joi": "^17.11.0",
     "node-cache": "^5.1.2",
-    "rate-limiter-flexible": "^4.0.1",
-    "circuit-breaker-js": "^0.0.2"
+    "rate-limiter-flexible": "^4.0.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
