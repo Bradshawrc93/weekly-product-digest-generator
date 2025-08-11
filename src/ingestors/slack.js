@@ -16,21 +16,28 @@ class SlackIngestor {
     try {
       const decisions = await this.fetchDecisions(squad, dateRange);
       const risks = await this.fetchRisks(squad, dateRange);
-      const launches = await this.fetchLaunches(squad, dateRange);
+      const threads = await this.fetchSlackThreads(squad, dateRange);
       
       // Process and enrich data
       const processedDecisions = await this.processDecisions(decisions, squad);
       const processedRisks = await this.processRisks(risks, squad);
-      const processedLaunches = await this.processLaunches(launches, squad);
+      const processedThreads = await this.processThreads(threads, squad);
+      
+      // Separate squad-specific and general threads
+      const squadSpecificThreads = processedThreads.filter(thread => thread.isSquadSpecific);
+      const generalThreads = processedThreads.filter(thread => !thread.isSquadSpecific);
       
       return {
         decisions: processedDecisions,
         risks: processedRisks,
-        launches: processedLaunches,
+        threads: squadSpecificThreads,
+        generalThreads: generalThreads,
         summary: {
           totalDecisions: processedDecisions.length,
           totalRisks: processedRisks.length,
-          totalLaunches: processedLaunches.length,
+          totalThreads: processedThreads.length,
+          squadSpecificThreads: squadSpecificThreads.length,
+          generalThreads: generalThreads.length,
           decisionsByChannel: this.groupByChannel(processedDecisions),
           risksBySeverity: this.groupBySeverity(processedRisks)
         }
@@ -173,43 +180,43 @@ class SlackIngestor {
     }
   }
 
-  async fetchLaunches(squad, dateRange) {
-    logger.logSquad('debug', 'Fetching Slack launches', squad.name);
+  async fetchSlackThreads(squad, dateRange) {
+    logger.logSquad('debug', 'Fetching Slack threads', squad.name);
     
-    // Similar to decisions but with launch keywords
-    const allLaunches = [];
+    // Similar to decisions but with thread keywords
+    const allThreads = [];
     const channels = this.getChannelsForSquad(squad);
     
     for (const channel of channels) {
       try {
-        const channelLaunches = await this.fetchChannelLaunches(channel, squad, dateRange);
-        allLaunches.push(...channelLaunches);
+        const channelThreads = await this.fetchChannelThreads(channel, squad, dateRange);
+        allThreads.push(...channelThreads);
       } catch (error) {
-        logger.logSquad('warn', 'Failed to fetch launches for channel', squad.name, { 
+        logger.logSquad('warn', 'Failed to fetch threads for channel', squad.name, { 
           channel, 
           error: error.message 
         });
       }
     }
 
-    return allLaunches;
+    return allThreads;
   }
 
-  async fetchChannelLaunches(channel, squad, dateRange) {
+  async fetchChannelThreads(channel, squad, dateRange) {
     try {
       const channelId = await this.getChannelId(channel);
       if (!channelId) return [];
 
       const messages = await this.fetchChannelMessages(channelId, dateRange);
       
-      // Filter for launch-related messages
-      const launchMessages = messages.filter(message => 
-        this.isLaunchMessage(message, squad)
+      // Filter for thread-related messages
+      const threadMessages = messages.filter(message => 
+        this.isThreadMessage(message, squad)
       );
 
-      return launchMessages;
+      return threadMessages;
     } catch (error) {
-      logger.logSquad('error', 'Failed to fetch channel launches', squad.name, { 
+      logger.logSquad('error', 'Failed to fetch channel threads', squad.name, { 
         channel, 
         error: error.message 
       });
@@ -237,12 +244,26 @@ class SlackIngestor {
       // Remove # if present
       const cleanChannelName = channelName.replace('#', '');
       
-      const response = await this.client.conversations.list({
-        types: 'public_channel,private_channel'
-      });
+      // Hard-coded channel ID for #product since we can't list channels
+      if (cleanChannelName === 'product') {
+        return 'C08T8ARC5T9';
+      }
+      
+      // Try to list channels (may fail due to missing scope)
+      try {
+        const response = await this.client.conversations.list({
+          types: 'public_channel,private_channel'
+        });
 
-      const channel = response.channels.find(ch => ch.name === cleanChannelName);
-      return channel?.id;
+        const channel = response.channels.find(ch => ch.name === cleanChannelName);
+        return channel?.id;
+      } catch (listError) {
+        logger.logSquad('warn', 'Cannot list channels, using hard-coded IDs', { 
+          channelName: cleanChannelName,
+          error: listError.message 
+        });
+        return null;
+      }
     } catch (error) {
       logger.logSquad('error', 'Failed to get channel ID', { 
         channelName, 
@@ -255,7 +276,7 @@ class SlackIngestor {
   isDecisionMessage(message, squad) {
     if (!message.text) return false;
     
-    const decisionKeywords = ['decided', 'decision', 'agreed', 'agreement', 'approved', 'approval'];
+    const decisionKeywords = ['decided', 'decision', 'agreed', 'agreement', 'approved', 'approval', 'final', 'settled'];
     const text = message.text.toLowerCase();
     
     // Check for decision keywords
@@ -270,13 +291,16 @@ class SlackIngestor {
     const isNotBot = !message.bot_id;
     const isNotNoise = !this.isNoiseMessage(message);
     
-    return hasDecisionKeyword && (hasSquadMention || !squad.slackChannel) && isNotBot && isNotNoise;
+    // For shared channels like #product, be more inclusive
+    const isSharedChannel = squad.slackChannel === '#product';
+    
+    return hasDecisionKeyword && (hasSquadMention || isSharedChannel) && isNotBot && isNotNoise;
   }
 
   isRiskMessage(message, squad) {
     if (!message.text) return false;
     
-    const riskKeywords = ['risk', 'concern', 'issue', 'blocked', 'blocker', 'stuck', 'problem'];
+    const riskKeywords = ['risk', 'concern', 'issue', 'blocked', 'blocker', 'stuck', 'problem', 'trouble', 'challenge'];
     const text = message.text.toLowerCase();
     
     const hasRiskKeyword = riskKeywords.some(keyword => text.includes(keyword));
@@ -286,23 +310,134 @@ class SlackIngestor {
     const isNotBot = !message.bot_id;
     const isNotNoise = !this.isNoiseMessage(message);
     
-    return hasRiskKeyword && (hasSquadMention || !squad.slackChannel) && isNotBot && isNotNoise;
+    // For shared channels like #product, be more inclusive
+    const isSharedChannel = squad.slackChannel === '#product';
+    
+    return hasRiskKeyword && (hasSquadMention || isSharedChannel) && isNotBot && isNotNoise;
   }
 
-  isLaunchMessage(message, squad) {
+  isThreadMessage(message, squad) {
     if (!message.text) return false;
     
-    const launchKeywords = ['launch', 'deploy', 'release', 'shipped', 'live', 'production'];
+    const threadKeywords = ['launch', 'deploy', 'release', 'shipped', 'live', 'production', 'go-live', 'meeting', 'discussion', 'conversation', 'update', 'announcement'];
     const text = message.text.toLowerCase();
     
-    const hasLaunchKeyword = launchKeywords.some(keyword => text.includes(keyword));
+    const hasThreadKeyword = threadKeywords.some(keyword => text.includes(keyword));
     const hasSquadMention = squad.members.some(member => 
       text.includes(member.slackHandle.toLowerCase())
     );
     const isNotBot = !message.bot_id;
     const isNotNoise = !this.isNoiseMessage(message);
     
-    return hasLaunchKeyword && (hasSquadMention || !squad.slackChannel) && isNotBot && isNotNoise;
+    // For shared channels like #product, be more inclusive
+    const isSharedChannel = squad.slackChannel === '#product';
+    
+    return hasThreadKeyword && (hasSquadMention || isSharedChannel) && isNotBot && isNotNoise;
+  }
+
+  /**
+   * Determine if a message is squad-specific or general product conversation
+   */
+  isSquadSpecificMessage(message, squad) {
+    if (!message.text) return false;
+    
+    const text = message.text.toLowerCase();
+    
+    // Check for squad member mentions
+    const hasSquadMention = squad.members.some(member => 
+      text.includes(member.slackHandle.toLowerCase())
+    );
+    
+    // Check for squad-specific keywords or project names
+    const squadKeywords = this.getSquadKeywords(squad);
+    const hasSquadKeyword = squadKeywords.some(keyword => 
+      text.includes(keyword.toLowerCase())
+    );
+    
+    // Check for squad-specific channels
+    const isSquadChannel = squad.slackChannel && squad.slackChannel !== '#product';
+    
+    // Check for specific squad-related terms
+    const squadSpecificTerms = [
+      'our team',
+      'our squad',
+      'my team',
+      'my squad',
+      squad.name.toLowerCase(),
+      ...squadKeywords.map(k => k.toLowerCase())
+    ];
+    
+    const hasSquadSpecificTerm = squadSpecificTerms.some(term => 
+      text.includes(term)
+    );
+    
+    // If it mentions multiple squads or is very general, it's not squad-specific
+    const allSquadNames = [
+      'customer-facing', 'empower', 'smarteraccess', 'ui',
+      'human in the loop', 'hitl',
+      'developer efficiency',
+      'data collection', 'data lakehouse',
+      'thoughthub', 'platform',
+      'core rcm',
+      'voice',
+      'medical coding',
+      'deep research'
+    ];
+    
+    const mentionsMultipleSquads = allSquadNames.filter(name => 
+      text.includes(name)
+    ).length > 1;
+    
+    // If it mentions multiple squads, it's general
+    if (mentionsMultipleSquads) {
+      return false;
+    }
+    
+    // Check for general product messages that should NOT be squad-specific
+    const generalProductTerms = [
+      'hey team',
+      'quick reminder',
+      'all hands',
+      'weekly product',
+      'squad notes',
+      'notion page',
+      'meeting',
+      'everyone',
+      'all squads',
+      'team members'
+    ];
+    
+    const isGeneralProductMessage = generalProductTerms.some(term => 
+      text.includes(term)
+    );
+    
+    // If it's a general product message, it's not squad-specific
+    if (isGeneralProductMessage) {
+      return false;
+    }
+    
+    // For a message to be squad-specific, it must have a clear connection to the squad
+    // Either through mentions, keywords, or specific squad terms
+    return hasSquadMention || hasSquadKeyword || isSquadChannel || hasSquadSpecificTerm;
+  }
+
+  /**
+   * Get squad-specific keywords for better detection
+   */
+  getSquadKeywords(squad) {
+    const squadKeywordMap = {
+      'Voice': ['voice', 'audio', 'speech', 'recording', 'transcription'],
+      'Core RCM': ['rcm', 'revenue', 'billing', 'claims', 'payment'],
+      'Medical Coding': ['coding', 'icd', 'cpt', 'medical', 'diagnosis'],
+      'Data Collection / Data Lakehouse': ['data', 'lakehouse', 'collection', 'analytics', 'warehouse'],
+      'ThoughtHub Platform': ['thoughthub', 'platform', 'content', 'knowledge'],
+      'Developer Efficiency': ['developer', 'efficiency', 'tooling', 'automation', 'ci/cd'],
+      'Human in the loop (HITL)': ['hitl', 'human', 'review', 'approval', 'manual'],
+      'Customer-Facing (Empower/SmarterAccess UI)': ['empower', 'smarteraccess', 'ui', 'customer', 'frontend'],
+      'Deep Research': ['research', 'ai', 'ml', 'machine learning', 'deep learning']
+    };
+    
+    return squadKeywordMap[squad.name] || [];
   }
 
   isNoiseMessage(message) {
@@ -315,9 +450,17 @@ class SlackIngestor {
       return true;
     }
     
-    // Trivial acknowledgments
+    // Trivial acknowledgments - only if they're standalone or very short
     const trivialResponses = ['👍', 'thanks', 'thank you', 'ok', 'okay', 'got it', 'yep', 'yes', 'no'];
-    if (trivialResponses.some(response => text.toLowerCase().includes(response))) {
+    const isTrivialResponse = trivialResponses.some(response => {
+      const lowerText = text.toLowerCase();
+      // Only mark as noise if it's a standalone response or very short
+      return lowerText === response || 
+             lowerText === `@${response}` ||
+             (lowerText.length < 50 && lowerText.includes(response));
+    });
+    
+    if (isTrivialResponse) {
       return true;
     }
     
@@ -329,6 +472,10 @@ class SlackIngestor {
       const mentions = this.extractMentions(message.text, squad);
       const classification = this.classifyMessage(message.text);
       
+      // Extract topic and decision from message text
+      const topic = this.extractTopic(message.text);
+      const decision = this.extractDecision(message.text);
+      
       return {
         channel: message.channel,
         timestamp: message.ts,
@@ -337,6 +484,8 @@ class SlackIngestor {
         threadTs: message.thread_ts || message.ts,
         mentions: mentions,
         classification: classification,
+        topic: topic,
+        decision: decision,
         permalink: this.buildPermalink(message.channel, message.ts),
         reactions: message.reactions || [],
         attachments: message.attachments || []
@@ -349,24 +498,9 @@ class SlackIngestor {
       const mentions = this.extractMentions(message.text, squad);
       const severity = this.assessRiskSeverity(message.text);
       
-      return {
-        channel: message.channel,
-        timestamp: message.ts,
-        author: message.user,
-        text: message.text,
-        threadTs: message.thread_ts || message.ts,
-        mentions: mentions,
-        severity: severity,
-        permalink: this.buildPermalink(message.channel, message.ts),
-        reactions: message.reactions || [],
-        attachments: message.attachments || []
-      };
-    });
-  }
-
-  async processLaunches(messages, squad) {
-    return messages.map(message => {
-      const mentions = this.extractMentions(message.text, squad);
+      // Extract topic and description from message text
+      const topic = this.extractTopic(message.text);
+      const description = this.extractDescription(message.text);
       
       return {
         channel: message.channel,
@@ -375,9 +509,46 @@ class SlackIngestor {
         text: message.text,
         threadTs: message.thread_ts || message.ts,
         mentions: mentions,
+        severity: severity,
+        topic: topic,
+        description: description,
         permalink: this.buildPermalink(message.channel, message.ts),
         reactions: message.reactions || [],
         attachments: message.attachments || []
+      };
+    });
+  }
+
+  async processThreads(messages, squad) {
+    // Group messages by thread to count only parent threads
+    const threadGroups = new Map();
+    
+    messages.forEach(message => {
+      const threadTs = message.thread_ts || message.ts;
+      if (!threadGroups.has(threadTs)) {
+        threadGroups.set(threadTs, []);
+      }
+      threadGroups.get(threadTs).push(message);
+    });
+    
+    // Process only the parent messages (first message in each thread)
+    return Array.from(threadGroups.values()).map(threadMessages => {
+      const parentMessage = threadMessages[0]; // First message is the parent
+      const mentions = this.extractMentions(parentMessage.text, squad);
+      const isSquadSpecific = this.isSquadSpecificMessage(parentMessage, squad);
+      
+      return {
+        channel: parentMessage.channel,
+        timestamp: parentMessage.ts,
+        author: parentMessage.user,
+        text: parentMessage.text,
+        threadTs: parentMessage.thread_ts || parentMessage.ts,
+        mentions: mentions,
+        isSquadSpecific: isSquadSpecific,
+        permalink: this.buildPermalink(parentMessage.channel, parentMessage.ts),
+        reactions: parentMessage.reactions || [],
+        attachments: parentMessage.attachments || [],
+        replyCount: threadMessages.length - 1 // Number of replies
       };
     });
   }
@@ -427,9 +598,69 @@ class SlackIngestor {
     }
   }
 
+  extractTopic(text) {
+    // Extract the main topic from the message
+    const lines = text.split('\n');
+    const firstLine = lines[0].trim();
+    
+    // Try to extract a concise topic from the first line
+    if (firstLine.length > 0 && firstLine.length <= 100) {
+      return firstLine;
+    }
+    
+    // Fallback to first 50 characters
+    return text.substring(0, 50).trim() + (text.length > 50 ? '...' : '');
+  }
+
+  extractDecision(text) {
+    // Extract the decision from the message
+    const lowerText = text.toLowerCase();
+    
+    // Look for decision-related phrases
+    const decisionPhrases = [
+      'decided to',
+      'agreed to',
+      'approved',
+      'will',
+      'going to',
+      'planning to'
+    ];
+    
+    for (const phrase of decisionPhrases) {
+      const index = lowerText.indexOf(phrase);
+      if (index !== -1) {
+        const start = Math.max(0, index);
+        const end = Math.min(text.length, start + 200);
+        return text.substring(start, end).trim() + (end < text.length ? '...' : '');
+      }
+    }
+    
+    // Fallback to first 100 characters
+    return text.substring(0, 100).trim() + (text.length > 100 ? '...' : '');
+  }
+
+  extractDescription(text) {
+    // Extract a description from the message
+    const lines = text.split('\n');
+    
+    // Find the first substantial line
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.length > 10 && !trimmed.startsWith('@') && !trimmed.startsWith('http')) {
+        return trimmed.substring(0, 150).trim() + (trimmed.length > 150 ? '...' : '');
+      }
+    }
+    
+    // Fallback to first 100 characters
+    return text.substring(0, 100).trim() + (text.length > 100 ? '...' : '');
+  }
+
   buildPermalink(channelId, timestamp) {
-    // PLACEHOLDER: Build Slack permalink
-    // This would need the workspace domain
+    // Build Slack permalink with proper channel ID
+    if (!channelId) {
+      // Fallback to the hardcoded product channel ID
+      channelId = 'C08T8ARC5T9';
+    }
     return `https://slack.com/app_redirect?channel=${channelId}&message_ts=${timestamp}`;
   }
 

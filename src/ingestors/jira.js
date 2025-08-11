@@ -48,7 +48,7 @@ class JiraIngestor {
       // Process and enrich data
       const processedWorkstreams = await this.processWorkstreams(workstreams, squad);
       const processedEpics = await this.processEpics(epics, squad);
-      const processedIssues = await this.processIssues(issuesWithChanges, squad);
+      const processedIssues = await this.processIssues(issuesWithChanges, squad, dateRange);
       
       // Save current timestamp for next run
       await this.stateManager.saveLastRunTimestamp(dateRange.endDate);
@@ -258,7 +258,7 @@ class JiraIngestor {
     });
   }
 
-  async processIssues(issues, squad) {
+  async processIssues(issues, squad, dateRange) {
     return issues.map(issue => {
       const storyPoints = this.extractStoryPoints(issue);
       const targetQuarter = this.extractCustomField(issue, 'customfield_10368');
@@ -267,11 +267,8 @@ class JiraIngestor {
       
       const riskFactors = this.assessRiskFactors(issue, squad);
       
-      // Analyze changes for this issue
-      const changeSummary = this.changeAnalyzer.getChangeSummary(issue, { 
-        startDate: moment().subtract(8, 'days'), 
-        endDate: moment() 
-      });
+      // Analyze changes for this issue using the actual date range
+      const changeSummary = this.changeAnalyzer.getChangeSummary(issue, dateRange);
       
       return {
         key: issue.key,

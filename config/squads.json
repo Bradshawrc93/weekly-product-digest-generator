@@ -1,15 +1,45 @@
 {
   "squads": [
     {
+      "name": "EPIC Integration",
+      "description": "EPIC integration and development",
+      "members": [
+        {
+          "fullName": "Jasmine Shah",
+          "slackHandle": "@jasmine",
+          "role": "Product"
+        }
+      ],
+      "jiraConfig": {
+        "projectKey": "PO",
+        "projectName": "Product Operations",
+        "workstreams": [
+          {
+            "name": "EPIC Integration",
+            "key": "EPIC-INTEGRATION",
+            "description": "EPIC integration development"
+          }
+        ]
+      },
+      "slackChannel": "#product",
+      "notionRoadmapUrl": "https://notion.so/your-epic-integration-roadmap",
+      "githubRepos": [],
+      "bitbucketRepos": [],
+      "tags": ["epic", "integration"]
+    },
+    {
       "name": "Customer-Facing (Empower/SmarterAccess UI)",
       "description": "Customer-facing UI development for Empower and SmarterAccess",
       "members": [
         {
-          "fullName": "John Doe",
-          "slackHandle": "@johnd",
-          "githubUsername": "johndoe",
-          "email": "john.doe@company.com",
-          "role": "UI Lead"
+          "fullName": "Danny Mathieson",
+          "slackHandle": "@danny",
+          "role": "Product"
+        },
+        {
+          "fullName": "Dmytro Pukhovets",
+          "slackHandle": "@dmytro",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -39,11 +69,19 @@
       "description": "Human in the loop processes and workflows",
       "members": [
         {
-          "fullName": "Jane Smith",
-          "slackHandle": "@janes",
-          "githubUsername": "janesmith",
-          "email": "jane.smith@company.com",
-          "role": "HITL Lead"
+          "fullName": "Danny Mathieson",
+          "slackHandle": "@danny",
+          "role": "Product"
+        },
+        {
+          "fullName": "Craig Gifford",
+          "slackHandle": "@craig",
+          "role": "Product"
+        },
+        {
+          "fullName": "Geoffrey Plitt",
+          "slackHandle": "@geoffrey",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -68,11 +106,14 @@
       "description": "Developer productivity and efficiency tools",
       "members": [
         {
-          "fullName": "Mike Johnson",
-          "slackHandle": "@mikej",
-          "githubUsername": "mikejohnson",
-          "email": "mike.johnson@company.com",
-          "role": "Dev Efficiency Lead"
+          "fullName": "Asa Downs",
+          "slackHandle": "@asa",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Darrin Eden",
+          "slackHandle": "@darrin",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -97,11 +138,34 @@
       "description": "Data collection and lakehouse infrastructure",
       "members": [
         {
-          "fullName": "Alice Brown",
-          "slackHandle": "@aliceb",
-          "githubUsername": "alicebrown",
-          "email": "alice.brown@company.com",
-          "role": "Data Lead"
+          "fullName": "Craig Gifford",
+          "slackHandle": "@craig",
+          "role": "Product"
+        },
+        {
+          "fullName": "Jasmine Shah",
+          "slackHandle": "@jasmine",
+          "role": "Product"
+        },
+        {
+          "fullName": "Danny Mathieson",
+          "slackHandle": "@danny",
+          "role": "Product"
+        },
+        {
+          "fullName": "Blake DeBenon",
+          "slackHandle": "@blake",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Darrin Eden",
+          "slackHandle": "@darrin",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Cameron Franke",
+          "slackHandle": "@cameron",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -131,11 +195,29 @@
       "description": "ThoughtHub platform development and maintenance",
       "members": [
         {
-          "fullName": "Bob Wilson",
-          "slackHandle": "@bobw",
-          "githubUsername": "bobwilson",
-          "email": "bob.wilson@company.com",
-          "role": "Platform Lead"
+          "fullName": "Quenby Mitchell",
+          "slackHandle": "@quenby",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Sean Albito",
+          "slackHandle": "@sean",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Peter Agnew",
+          "slackHandle": "@peter",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Geoffrey Plitt",
+          "slackHandle": "@geoffrey",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Harry Pan",
+          "slackHandle": "@harry",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -160,11 +242,34 @@
       "description": "Core Revenue Cycle Management functionality",
       "members": [
         {
-          "fullName": "Carol Davis",
-          "slackHandle": "@carold",
-          "githubUsername": "caroldavis",
-          "email": "carol.davis@company.com",
-          "role": "RCM Lead"
+          "fullName": "Craig Gifford",
+          "slackHandle": "@craig",
+          "role": "Product"
+        },
+        {
+          "fullName": "Aneesh Kanakamedala",
+          "slackHandle": "@aneesh",
+          "role": "Product"
+        },
+        {
+          "fullName": "Jasmine Shah",
+          "slackHandle": "@jasmine",
+          "role": "Product"
+        },
+        {
+          "fullName": "Danny Mathieson",
+          "slackHandle": "@danny",
+          "role": "Product"
+        },
+        {
+          "fullName": "Andrew Armaneous",
+          "slackHandle": "@andrew",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Darrin Eden",
+          "slackHandle": "@darrin",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -189,11 +294,14 @@
       "description": "Voice technology and speech processing",
       "members": [
         {
-          "fullName": "David Lee",
-          "slackHandle": "@davidl",
-          "githubUsername": "davidlee",
-          "email": "david.lee@company.com",
-          "role": "Voice Lead"
+          "fullName": "Aneesh Kanakamedala",
+          "slackHandle": "@aneesh",
+          "role": "PM"
+        },
+        {
+          "fullName": "Jake McClanahan",
+          "slackHandle": "@jake",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -218,11 +326,14 @@
       "description": "Medical coding automation and processes",
       "members": [
         {
-          "fullName": "Eva Garcia",
-          "slackHandle": "@evag",
-          "githubUsername": "evagarcia",
-          "email": "eva.garcia@company.com",
-          "role": "Medical Coding Lead"
+          "fullName": "Cameron Franke",
+          "slackHandle": "@cameron",
+          "role": "Engineering"
+        },
+        {
+          "fullName": "Joe Meiring",
+          "slackHandle": "@joe",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {
@@ -247,11 +358,9 @@
       "description": "Deep research and advanced analytics",
       "members": [
         {
-          "fullName": "Frank Miller",
-          "slackHandle": "@frankm",
-          "githubUsername": "frankmiller",
-          "email": "frank.miller@company.com",
-          "role": "Research Lead"
+          "fullName": "Phil Bjorge",
+          "slackHandle": "@phil",
+          "role": "Engineering"
         }
       ],
       "jiraConfig": {

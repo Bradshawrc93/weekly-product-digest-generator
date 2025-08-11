@@ -42,8 +42,8 @@ const envSchema = Joi.object({
 const squadMemberSchema = Joi.object({
   fullName: Joi.string().min(1).required(),
   slackHandle: Joi.string().pattern(/^@/).required(),
-  githubUsername: Joi.string().min(1).required(),
-  email: Joi.string().email().required(),
+  githubUsername: Joi.string().min(1).optional(),
+  email: Joi.string().email().optional(),
   role: Joi.string().min(1).required(),
 });
 

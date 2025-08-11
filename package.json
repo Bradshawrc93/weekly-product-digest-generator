@@ -49,6 +49,7 @@
     "moment": "^2.29.4",
     "lodash": "^4.17.21",
     "joi": "^17.11.0",
+    "openai": "^4.20.1",
     "node-cache": "^5.1.2",
     "rate-limiter-flexible": "^4.0.1"
   },

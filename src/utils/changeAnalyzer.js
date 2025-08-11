@@ -37,7 +37,25 @@ class ChangeAnalyzer {
   analyzeChangelog(issue, dateRange) {
     const changes = [];
     const changelog = issue.changelog?.histories || [];
+    const issueCreated = moment(issue.fields.created);
 
+    // Check if issue was created within the date range
+    if (issueCreated.isBetween(dateRange.startDate, dateRange.endDate, 'day', '[]')) {
+      changes.push({
+        field: 'issue',
+        fieldDisplayName: 'Issue created',
+        severity: 'HIGH',
+        changeType: 'created',
+        fromValue: null,
+        toValue: issue.fields.status?.name || 'Unknown',
+        author: 'System',
+        timestamp: issueCreated.toISOString(),
+        date: issueCreated.format('YYYY-MM-DD'),
+        time: issueCreated.format('HH:mm:ss')
+      });
+    }
+
+    // Process changelog entries
     for (const history of changelog) {
       const changeDate = moment(history.created);
       
@@ -163,6 +181,8 @@ class ChangeAnalyzer {
       const { fieldDisplayName, changeType, fromValue, toValue, author, date } = change;
       
       switch (changeType) {
+        case 'created':
+          return `${fieldDisplayName}: Created with status "${toValue}" by ${author}`;
         case 'added':
           return `${fieldDisplayName}: Set to "${toValue}" by ${author}`;
         case 'removed':
