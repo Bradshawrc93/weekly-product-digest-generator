@@ -20,8 +20,8 @@
         }
       ],
       "jiraConfig": {
-        "projectKey": "PLAT",
-        "projectName": "Platform",
+        "projectKey": "PO",
+        "projectName": "Product Operations",
         "workstreams": [
           {
             "name": "API Infrastructure",
@@ -65,8 +65,8 @@
         }
       ],
       "jiraConfig": {
-        "projectKey": "MOB",
-        "projectName": "Mobile",
+        "projectKey": "PO",
+        "projectName": "Product Operations",
         "workstreams": [
           {
             "name": "iOS App",
@@ -110,8 +110,8 @@
         }
       ],
       "jiraConfig": {
-        "projectKey": "DATA",
-        "projectName": "Data",
+        "projectKey": "PO",
+        "projectName": "Product Operations",
         "workstreams": [
           {
             "name": "Data Pipeline",

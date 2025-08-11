@@ -11,326 +11,266 @@ const moment = require('moment');
 
 class DigestGenerator {
   constructor() {
-    this.config = null;
-    this.globalSettings = null;
-    this.ingestors = {};
-    this.processor = null;
-    this.aiGenerator = null;
-    this.publishers = {};
+    this.jiraIngestor = new JiraIngestor();
+    this.githubIngestor = new GitHubIngestor();
+    this.slackIngestor = new SlackIngestor();
+    this.dataProcessor = new DataProcessor();
+    this.aiGenerator = new AIGenerator();
+    this.notionPublisher = new NotionPublisher();
+    this.slackNotifier = new SlackNotifier();
   }
 
-  /**
-   * Initialize the digest generator
-   */
   async initialize() {
+    logger.info('Initializing Weekly Product Digest Generator');
+    
     try {
-      logger.info('Initializing DigestGenerator');
+      // Validate environment and configuration
+      await validateApiConnections();
       
-      // Load configuration
-      this.config = await loadSquadConfig();
-      this.globalSettings = this.config.globalSettings;
-      
-      // Initialize ingestors
-      this.ingestors = {
-        jira: new JiraIngestor(),
-        github: new GitHubIngestor(),
-        slack: new SlackIngestor(),
-      };
-      
-      // Initialize processor
-      this.processor = new DataProcessor();
-      
-      // Initialize AI generator
-      this.aiGenerator = new AIGenerator();
-      
-      // Initialize publishers
-      this.publishers = {
-        notion: new NotionPublisher(),
-        slack: new SlackNotifier(),
-      };
-      
-      logger.info('DigestGenerator initialized successfully');
+      logger.info('Weekly Product Digest Generator initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize DigestGenerator', { error: error.message });
+      logger.error('Failed to initialize Weekly Product Digest Generator', { error: error.message });
       throw error;
     }
   }
 
-  /**
-   * Test API connections
-   */
   async testConnections() {
     logger.info('Testing API connections');
-    const results = await validateApiConnections();
     
-    const failedConnections = Object.entries(results)
-      .filter(([_, success]) => !success)
-      .map(([api, _]) => api);
-    
-    if (failedConnections.length > 0) {
-      throw new Error(`Failed API connections: ${failedConnections.join(', ')}`);
+    try {
+      await validateApiConnections();
+      logger.info('All API connections successful');
+    } catch (error) {
+      logger.error('API connection test failed', { error: error.message });
+      throw error;
     }
-    
-    logger.info('All API connections validated successfully');
-    return results;
   }
 
-  /**
-   * Start the digest generator (for scheduled runs)
-   */
   async start() {
     await this.initialize();
-    
     // TODO: Initialize scheduler for automated runs
-    logger.info('DigestGenerator started successfully');
+    logger.info('Weekly Product Digest Generator started');
   }
 
-  /**
-   * Generate digest for specified parameters
-   */
   async generateDigest(options = {}) {
-    const {
-      squadName = null,
-      startDate = null,
-      endDate = null,
-      dryRun = false
-    } = options;
-
+    const startTime = Date.now();
+    logger.info('Starting digest generation', { options });
+    
     try {
-      logger.info('Starting digest generation', { squadName, startDate, endDate, dryRun });
+      // Calculate date range
+      const dateRange = this.calculateDateRange(options.startDate, options.endDate);
       
-      // Initialize if not already done
-      if (!this.config) {
-        await this.initialize();
-      }
-
-      // Determine date range
-      const dateRange = this.calculateDateRange(startDate, endDate);
-      logger.info('Date range calculated', { startDate: dateRange.startDate.format(), endDate: dateRange.endDate.format() });
-
-      // Determine squads to process
-      const squads = squadName ? [await getSquadByName(squadName)] : await getAllSquads();
-      logger.info('Squads to process', { squadCount: squads.length, squads: squads.map(s => s.name) });
-
-      const results = {
-        generatedDigests: [],
-        notionPages: [],
-        summary: {
-          totalSquads: squads.length,
-          successfulDigests: 0,
-          failedDigests: 0,
-          totalIssues: 0,
-          totalPRs: 0,
-          totalDecisions: 0,
-        }
-      };
-
+      // Get all squads or specific squad
+      const squads = options.squad ? [await getSquadByName(options.squad)] : await getAllSquads();
+      const globalSettings = await getGlobalSettings();
+      
+      logger.info('Processing squads', { 
+        squadCount: squads.length, 
+        dateRange: `${dateRange.startDate.format()} to ${dateRange.endDate.format()}` 
+      });
+      
       // Process each squad
+      const squadResults = [];
       for (const squad of squads) {
         try {
-          logger.logSquad('info', 'Processing squad', squad.name);
-          
-          const squadResult = await this.processSquad(squad, dateRange, dryRun);
-          results.generatedDigests.push(squadResult);
-          results.summary.successfulDigests++;
-          
-          // Update summary counts
-          results.summary.totalIssues += squadResult.issues.length;
-          results.summary.totalPRs += squadResult.prs.length;
-          results.summary.totalDecisions += squadResult.decisions.length;
-          
-          if (!dryRun && squadResult.notionPageId) {
-            results.notionPages.push(squadResult.notionPageId);
-          }
-          
-          logger.logSquad('info', 'Squad processed successfully', squad.name, { 
-            issues: squadResult.issues.length,
-            prs: squadResult.prs.length,
-            decisions: squadResult.decisions.length
-          });
-          
+          const result = await this.processSquad(squad, dateRange, options.dryRun);
+          squadResults.push(result);
         } catch (error) {
           logger.logSquad('error', 'Failed to process squad', squad.name, { error: error.message });
-          results.summary.failedDigests++;
+          squadResults.push({
+            squad: squad.name,
+            error: error.message,
+            issues: [],
+            prs: [],
+            decisions: [],
+            workstreams: [],
+            epics: []
+          });
         }
       }
-
-      // Generate executive roll-up if multiple squads
-      if (squads.length > 1 && !dryRun) {
+      
+      // Generate weekly summary
+      let weeklySummary = null;
+      if (squadResults.length > 1) {
+        weeklySummary = await this.generateWeeklySummary(squadResults, dateRange, globalSettings);
+      }
+      
+      // Publish to Notion
+      const publishedResults = [];
+      for (const result of squadResults) {
+        if (!result.error && !options.dryRun) {
+          try {
+            const notionResult = await this.notionPublisher.publishSquadDigest({
+              squad: result.squad,
+              digest: result.digest,
+              insights: result.insights,
+              dateRange
+            });
+            result.notionPageId = notionResult.pageId;
+            publishedResults.push(result);
+          } catch (error) {
+            logger.logSquad('error', 'Failed to publish squad digest to Notion', result.squad, { error: error.message });
+          }
+        }
+      }
+      
+      // Publish weekly summary
+      let weeklySummaryPageId = null;
+      if (weeklySummary && !options.dryRun) {
         try {
-          const rollupResult = await this.generateExecutiveRollup(results.generatedDigests, dateRange);
-          results.executiveRollup = rollupResult;
-          logger.info('Executive roll-up generated successfully');
+          const notionResult = await this.notionPublisher.publishWeeklySummary({
+            squadResults: publishedResults,
+            rollupSummary: weeklySummary,
+            dateRange,
+            globalSettings
+          });
+          weeklySummaryPageId = notionResult.pageId;
         } catch (error) {
-          logger.error('Failed to generate executive roll-up', { error: error.message });
+          logger.error('Failed to publish weekly summary to Notion', { error: error.message });
         }
       }
-
+      
       // Send notifications
-      if (!dryRun) {
-        try {
-          await this.sendNotifications(results, dateRange);
-          logger.info('Notifications sent successfully');
-        } catch (error) {
-          logger.error('Failed to send notifications', { error: error.message });
-        }
+      if (!options.dryRun) {
+        await this.sendNotifications({
+          squadResults: publishedResults,
+          weeklySummary,
+          weeklySummaryPageId,
+          dateRange,
+          globalSettings
+        });
       }
-
+      
+      const duration = Date.now() - startTime;
       logger.info('Digest generation completed', { 
-        successful: results.summary.successfulDigests,
-        failed: results.summary.failedDigests,
-        totalIssues: results.summary.totalIssues,
-        totalPRs: results.summary.totalPRs
+        duration, 
+        successfulSquads: publishedResults.length,
+        totalSquads: squads.length 
       });
-
-      return results;
-
+      
+      return {
+        squadResults: publishedResults,
+        weeklySummary,
+        weeklySummaryPageId,
+        summary: {
+          successfulDigests: publishedResults.length,
+          failedDigests: squads.length - publishedResults.length,
+          totalIssues: publishedResults.reduce((sum, r) => sum + r.issues.length, 0),
+          totalPRs: publishedResults.reduce((sum, r) => sum + r.prs.length, 0),
+          totalDecisions: publishedResults.reduce((sum, r) => sum + r.decisions.length, 0)
+        }
+      };
+      
     } catch (error) {
       logger.error('Digest generation failed', { error: error.message, stack: error.stack });
       throw error;
     }
   }
 
-  /**
-   * Process a single squad
-   */
   async processSquad(squad, dateRange, dryRun = false) {
-    const result = {
-      squad: squad.name,
-      dateRange,
-      issues: [],
-      prs: [],
-      decisions: [],
-      insights: {},
-      digest: null,
-      notionPageId: null,
-    };
-
+    logger.logSquad('info', 'Processing squad', squad.name);
+    
     try {
-      // 1. Collect data from all sources
-      logger.logSquad('info', 'Collecting data from sources', squad.name);
+      // Collect data from all sources
+      const jiraData = await this.jiraIngestor.collectData(squad, dateRange);
+      const githubData = await this.githubIngestor.collectData(squad, dateRange);
+      const slackData = await this.slackIngestor.collectData(squad, dateRange);
       
-      // Collect Jira data
-      const jiraData = await this.ingestors.jira.collectData(squad, dateRange);
-      result.issues = jiraData.issues;
-      logger.logSquad('info', 'Jira data collected', squad.name, { issueCount: jiraData.issues.length });
-
-      // Collect GitHub data
-      const githubData = await this.ingestors.github.collectData(squad, dateRange);
-      result.prs = githubData.prs;
-      logger.logSquad('info', 'GitHub data collected', squad.name, { prCount: githubData.prs.length });
-
-      // Collect Slack data
-      const slackData = await this.ingestors.slack.collectData(squad, dateRange);
-      result.decisions = slackData.decisions;
-      logger.logSquad('info', 'Slack data collected', squad.name, { decisionCount: slackData.decisions.length });
-
-      // 2. Process and cross-link data
-      logger.logSquad('info', 'Processing and cross-linking data', squad.name);
-      const processedData = await this.processor.processSquadData({
+      // Process and cross-link data
+      const processedData = await this.dataProcessor.processSquadData({
         squad,
+        workstreams: jiraData.workstreams,
+        epics: jiraData.epics,
         issues: jiraData.issues,
         prs: githubData.prs,
         decisions: slackData.decisions,
         dateRange
       });
-      result.insights = processedData.insights;
-
-      // 3. Generate AI summary
-      logger.logSquad('info', 'Generating AI summary', squad.name);
-      const aiSummary = await this.aiGenerator.generateSquadSummary({
+      
+      // Generate AI summary
+      const digest = await this.aiGenerator.generateSquadSummary({
         squad,
         processedData,
         dateRange
       });
-      result.digest = aiSummary;
-
-      // 4. Publish to Notion (if not dry run)
-      if (!dryRun) {
-        logger.logSquad('info', 'Publishing to Notion', squad.name);
-        const notionResult = await this.publishers.notion.publishSquadDigest({
-          squad,
-          digest: aiSummary,
-          insights: processedData.insights,
-          dateRange
-        });
-        result.notionPageId = notionResult.pageId;
-      }
-
-      return result;
-
+      
+      return {
+        squad: squad.name,
+        workstreams: jiraData.workstreams,
+        epics: jiraData.epics,
+        issues: jiraData.issues,
+        prs: githubData.prs,
+        decisions: slackData.decisions,
+        insights: processedData.insights,
+        digest
+      };
+      
     } catch (error) {
       logger.logSquad('error', 'Failed to process squad', squad.name, { error: error.message });
       throw error;
     }
   }
 
-  /**
-   * Generate executive roll-up
-   */
-  async generateExecutiveRollup(squadResults, dateRange) {
+  async generateWeeklySummary(squadResults, dateRange) {
+    logger.info('Generating weekly summary');
+    
     try {
-      logger.info('Generating executive roll-up');
+      // Process rollup data
+      const rollupData = await this.dataProcessor.processRollupData(squadResults, dateRange);
       
-      const rollupData = await this.processor.processRollupData(squadResults, dateRange);
+      // Generate AI summary
       const rollupSummary = await this.aiGenerator.generateRollupSummary(rollupData, dateRange);
       
-      const notionResult = await this.publishers.notion.publishExecutiveRollup({
-        squadResults,
-        rollupSummary,
-        dateRange
-      });
-      
-      return {
-        summary: rollupSummary,
-        notionPageId: notionResult.pageId
-      };
+      return rollupSummary;
       
     } catch (error) {
-      logger.error('Failed to generate executive roll-up', { error: error.message });
+      logger.error('Failed to generate weekly summary', { error: error.message });
       throw error;
     }
   }
 
-  /**
-   * Send notifications
-   */
-  async sendNotifications(results, dateRange) {
+  async sendNotifications(data) {
+    const { squadResults, weeklySummary, weeklySummaryPageId, dateRange, globalSettings } = data;
+    
     try {
-      logger.info('Sending notifications');
-      
-      await this.publishers.slack.sendDigestNotification({
-        results,
+      await this.slackNotifier.sendDigestNotification({
+        results: {
+          generatedDigests: squadResults,
+          executiveRollup: weeklySummary ? { notionPageId: weeklySummaryPageId } : null,
+          summary: {
+            successfulDigests: squadResults.length,
+            failedDigests: 0,
+            totalIssues: squadResults.reduce((sum, r) => sum + r.issues.length, 0),
+            totalPRs: squadResults.reduce((sum, r) => sum + r.prs.length, 0),
+            totalDecisions: squadResults.reduce((sum, r) => sum + r.decisions.length, 0)
+          }
+        },
         dateRange,
-        globalSettings: this.globalSettings
+        globalSettings
       });
       
+      logger.info('Notifications sent successfully');
     } catch (error) {
       logger.error('Failed to send notifications', { error: error.message });
-      throw error;
     }
   }
 
-  /**
-   * Calculate date range for digest
-   */
   calculateDateRange(startDate, endDate) {
+    let start, end;
+    
     if (startDate && endDate) {
-      return {
-        startDate: moment(startDate).startOf('day'),
-        endDate: moment(endDate).endOf('day')
-      };
+      start = moment(startDate);
+      end = moment(endDate);
+    } else if (startDate) {
+      start = moment(startDate);
+      end = start.clone().add(6, 'days');
+    } else {
+      // Default to current week (Monday to Sunday)
+      start = moment().startOf('week').add(1, 'day'); // Monday
+      end = start.clone().add(6, 'days'); // Sunday
     }
-
-    // Default to last week
-    const now = moment();
-    const lastWeekStart = now.clone().subtract(1, 'week').startOf('week');
-    const lastWeekEnd = now.clone().subtract(1, 'week').endOf('week');
-
-    return {
-      startDate: lastWeekStart,
-      endDate: lastWeekEnd
-    };
+    
+    return { startDate: start, endDate: end };
   }
 }
 

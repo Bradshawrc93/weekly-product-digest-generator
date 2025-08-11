@@ -25,19 +25,19 @@ class NotionPublisher {
     }
   }
 
-  async publishExecutiveRollup(data) {
-    const { squadResults, rollupSummary, dateRange } = data;
+  async publishWeeklySummary(data) {
+    const { squadResults, rollupSummary, dateRange, globalSettings } = data;
     
-    logger.info('Publishing executive rollup to Notion');
+    logger.info('Publishing weekly summary to Notion');
     
     try {
-      const pageId = await this.createRollupPage(squadResults, rollupSummary, dateRange);
+      const pageId = await this.createWeeklySummaryPage(squadResults, rollupSummary, dateRange, globalSettings);
       
-      logger.info('Executive rollup published successfully', { pageId });
+      logger.info('Weekly summary published successfully', { pageId });
       
       return { pageId };
     } catch (error) {
-      logger.error('Failed to publish executive rollup', { error: error.message });
+      logger.error('Failed to publish weekly summary', { error: error.message });
       throw error;
     }
   }
@@ -46,8 +46,8 @@ class NotionPublisher {
     logger.debug('Creating squad page', { squad: squad.name });
     
     try {
-      const properties = this.buildPageProperties(squad, insights, dateRange);
-      const content = this.buildContentBlocks(digest, insights, squad);
+      const properties = this.buildSquadPageProperties(squad, insights, dateRange);
+      const content = this.buildSquadContentBlocks(digest, insights, squad);
       
       const response = await this.client.pages.create({
         parent: {
@@ -64,12 +64,12 @@ class NotionPublisher {
     }
   }
 
-  async createRollupPage(squadResults, rollupSummary, dateRange) {
-    logger.debug('Creating rollup page');
+  async createWeeklySummaryPage(squadResults, rollupSummary, dateRange, globalSettings) {
+    logger.debug('Creating weekly summary page');
     
     try {
-      const properties = this.buildRollupProperties(squadResults, dateRange);
-      const content = this.buildRollupContent(squadResults, rollupSummary, dateRange);
+      const properties = this.buildWeeklySummaryProperties(squadResults, dateRange);
+      const content = this.buildWeeklySummaryContent(squadResults, rollupSummary, dateRange, globalSettings);
       
       const response = await this.client.pages.create({
         parent: {
@@ -81,102 +81,102 @@ class NotionPublisher {
       
       return response.id;
     } catch (error) {
-      logger.error('Failed to create rollup page', { error: error.message });
+      logger.error('Failed to create weekly summary page', { error: error.message });
       throw error;
     }
   }
 
-  buildPageProperties(squad, insights, dateRange) {
-    return {
-      'Squad': {
-        title: [
-          {
-            text: {
-              content: squad.name
-            }
-          }
-        ]
-      },
-      'Week Start': {
-        date: {
-          start: dateRange.startDate.format('YYYY-MM-DD')
-        }
-      },
-      'Week End': {
-        date: {
-          start: dateRange.endDate.format('YYYY-MM-DD')
-        }
-      },
-      'Velocity': {
-        number: insights.velocity.velocity || 0
-      },
-      'Shipped Count': {
-        number: insights.velocity.completedIssues || 0
-      },
-      'Risk Count': {
-        number: insights.risks.totalRisks || 0
-      },
-      'Status': {
-        select: {
-          name: 'Complete'
-        }
-      }
-    };
-  }
-
-  buildRollupProperties(squadResults, dateRange) {
-    const totalIssues = squadResults.reduce((sum, result) => sum + result.issues.length, 0);
-    const totalPRs = squadResults.reduce((sum, result) => sum + result.prs.length, 0);
-    const avgVelocity = squadResults.reduce((sum, result) => sum + (result.insights?.velocity?.velocity || 0), 0) / squadResults.length;
+  buildSquadPageProperties(squad, insights, dateRange) {
+    const weekRange = `${dateRange.startDate.format('MMM D')} - ${dateRange.endDate.format('MMM D, YYYY')}`;
     
     return {
-      'Squad': {
+      'Name': {
         title: [
           {
             text: {
-              content: 'Executive Roll-Up'
+              content: `${weekRange} - ${squad.name}`
             }
           }
         ]
-      },
-      'Week Start': {
-        date: {
-          start: dateRange.startDate.format('YYYY-MM-DD')
-        }
-      },
-      'Week End': {
-        date: {
-          start: dateRange.endDate.format('YYYY-MM-DD')
-        }
-      },
-      'Velocity': {
-        number: avgVelocity || 0
-      },
-      'Shipped Count': {
-        number: totalIssues || 0
-      },
-      'Risk Count': {
-        number: 0 // Would need to calculate total risks
-      },
-      'Status': {
-        select: {
-          name: 'Complete'
-        }
       }
+      // Created Time, Created by, and Last Edited by are auto-populated by Notion
     };
   }
 
-  buildContentBlocks(digest, insights, squad) {
+  buildWeeklySummaryProperties(squadResults, dateRange) {
+    const weekRange = `${dateRange.startDate.format('MMM D')} - ${dateRange.endDate.format('MMM D, YYYY')}`;
+    
+    return {
+      'Name': {
+        title: [
+          {
+            text: {
+              content: `Weekly Digest: ${weekRange}`
+            }
+          }
+        ]
+      }
+      // Created Time, Created by, and Last Edited by are auto-populated by Notion
+    };
+  }
+
+  buildSquadContentBlocks(digest, insights, squad) {
     const blocks = [];
     
-    // TL;DR Section
+    // Squad Header
     blocks.push({
       type: 'heading_1',
       heading_1: {
         rich_text: [
           {
             text: {
-              content: 'TL;DR'
+              content: `${squad.name} - Weekly Digest`
+            }
+          }
+        ]
+      }
+    });
+
+    // Executive Summary
+    blocks.push({
+      type: 'heading_2',
+      heading_2: {
+        rich_text: [
+          {
+            text: {
+              content: '📊 Executive Summary'
+            }
+          }
+        ]
+      }
+    });
+
+    // Key Metrics Callout
+    blocks.push({
+      type: 'callout',
+      callout: {
+        icon: {
+          emoji: '📈'
+        },
+        rich_text: [
+          {
+            text: {
+              content: `Velocity: ${(insights.velocity.velocity * 100).toFixed(1)}% | Issues Completed: ${insights.velocity.completedIssues} | Risk Score: ${(insights.risks.riskScore * 100).toFixed(1)}%`
+            }
+          }
+        ],
+        color: 'blue_background'
+      }
+    });
+    
+    // TL;DR Section
+    blocks.push({
+      type: 'heading_2',
+      heading_2: {
+        rich_text: [
+          {
+            text: {
+              content: '🎯 TL;DR'
             }
           }
         ]
@@ -200,12 +200,12 @@ class NotionPublisher {
     
     // What Shipped Section
     blocks.push({
-      type: 'heading_1',
-      heading_1: {
+      type: 'heading_2',
+      heading_2: {
         rich_text: [
           {
             text: {
-              content: 'What Shipped'
+              content: '🚀 What Shipped'
             }
           }
         ]
@@ -229,12 +229,12 @@ class NotionPublisher {
     
     // Work in Flight Section
     blocks.push({
-      type: 'heading_1',
-      heading_1: {
+      type: 'heading_2',
+      heading_2: {
         rich_text: [
           {
             text: {
-              content: 'Work in Flight'
+              content: '🔄 Work in Flight'
             }
           }
         ]
@@ -258,12 +258,12 @@ class NotionPublisher {
     
     // Risks & Blockers Section
     blocks.push({
-      type: 'heading_1',
-      heading_1: {
+      type: 'heading_2',
+      heading_2: {
         rich_text: [
           {
             text: {
-              content: 'Risks & Blockers'
+              content: '⚠️ Risks & Blockers'
             }
           }
         ]
@@ -306,12 +306,12 @@ class NotionPublisher {
     
     // Decisions Section
     blocks.push({
-      type: 'heading_1',
-      heading_1: {
+      type: 'heading_2',
+      heading_2: {
         rich_text: [
           {
             text: {
-              content: 'Decisions'
+              content: '💬 Key Decisions'
             }
           }
         ]
@@ -333,114 +333,69 @@ class NotionPublisher {
       });
     });
     
-    // Roadmap Snapshot Section
+    // Workstream Insights
+    if (insights.workstreamInsights && Object.keys(insights.workstreamInsights).length > 0) {
+      blocks.push({
+        type: 'heading_2',
+        heading_2: {
+          rich_text: [
+            {
+              text: {
+                content: '📋 Workstream Summary'
+              }
+            }
+          ]
+        }
+      });
+
+      Object.values(insights.workstreamInsights).forEach(workstream => {
+        blocks.push({
+          type: 'callout',
+          callout: {
+            icon: {
+              emoji: '📊'
+            },
+            rich_text: [
+              {
+                text: {
+                  content: `${workstream.name}: ${workstream.totalIssues} issues, ${(workstream.completionRate * 100).toFixed(1)}% complete, ${workstream.epicCount} epics`
+                }
+              }
+            ],
+            color: 'gray_background'
+          }
+        });
+      });
+    }
+    
+    return blocks;
+  }
+
+  buildWeeklySummaryContent(squadResults, rollupSummary, dateRange, globalSettings) {
+    const blocks = [];
+    
+    // Weekly Summary Header
     blocks.push({
       type: 'heading_1',
       heading_1: {
         rich_text: [
           {
             text: {
-              content: 'Roadmap Snapshot'
+              content: '📊 Weekly Product Operations Digest'
             }
           }
         ]
       }
     });
-    
-    blocks.push({
-      type: 'paragraph',
-      paragraph: {
-        rich_text: [
-          {
-            text: {
-              content: digest.roadmap
-            }
-          }
-        ]
-      }
-    });
-    
-    // Metrics Summary
+
+    // Executive Summary
     blocks.push({
       type: 'heading_2',
       heading_2: {
         rich_text: [
           {
             text: {
-              content: 'Metrics Summary'
-            }
-          }
-        ]
-      }
-    });
-    
-    blocks.push({
-      type: 'table',
-      table: {
-        table_width: 4,
-        children: [
-          {
-            type: 'table_row',
-            table_row: {
-              cells: [
-                [{ text: { content: 'Metric' } }],
-                [{ text: { content: 'Value' } }],
-                [{ text: { content: 'Target' } }],
-                [{ text: { content: 'Status' } }]
-              ]
-            }
-          },
-          {
-            type: 'table_row',
-            table_row: {
-              cells: [
-                [{ text: { content: 'Velocity' } }],
-                [{ text: { content: `${(insights.velocity.velocity * 100).toFixed(1)}%` } }],
-                [{ text: { content: '80%' } }],
-                [{ text: { content: insights.velocity.velocity >= 0.8 ? '✅' : '⚠️' } }]
-              ]
-            }
-          },
-          {
-            type: 'table_row',
-            table_row: {
-              cells: [
-                [{ text: { content: 'Issues Completed' } }],
-                [{ text: { content: insights.velocity.completedIssues.toString() } }],
-                [{ text: { content: 'N/A' } }],
-                [{ text: { content: '📊' } }]
-              ]
-            }
-          },
-          {
-            type: 'table_row',
-            table_row: {
-              cells: [
-                [{ text: { content: 'Risk Score' } }],
-                [{ text: { content: `${(insights.risks.riskScore * 100).toFixed(1)}%` } }],
-                [{ text: { content: '<30%' } }],
-                [{ text: { content: insights.risks.riskScore <= 0.3 ? '✅' : '⚠️' } }]
-              ]
-            }
-          }
-        ]
-      }
-    });
-    
-    return blocks;
-  }
-
-  buildRollupContent(squadResults, rollupSummary, dateRange) {
-    const blocks = [];
-    
-    // Executive Summary
-    blocks.push({
-      type: 'heading_1',
-      heading_1: {
-        rich_text: [
-          {
-            text: {
-              content: 'Executive Summary'
+              content: '🎯 Executive Summary'
             }
           }
         ]
@@ -461,54 +416,112 @@ class NotionPublisher {
         }
       });
     });
-    
-    // Squad Links
+
+    // Company-wide Metrics
     blocks.push({
       type: 'heading_2',
       heading_2: {
         rich_text: [
           {
             text: {
-              content: 'Squad Digests'
+              content: '📈 Company-wide Metrics'
             }
           }
         ]
       }
     });
-    
-    squadResults.forEach(result => {
-      if (result.notionPageId) {
-        blocks.push({
-          type: 'bulleted_list_item',
-          bulleted_list_item: {
-            rich_text: [
-              {
-                text: {
-                  content: result.squad
-                }
-              },
-              {
-                text: {
-                  content: ' - ',
-                  annotations: {
-                    color: 'gray'
-                  }
-                }
-              },
-              {
-                text: {
-                  content: `${result.issues} issues, ${result.prs} PRs, ${(result.insights?.velocity?.velocity * 100).toFixed(1)}% velocity`,
-                  annotations: {
-                    color: 'blue'
-                  }
-                }
-              }
-            ]
+
+    const totalIssues = squadResults.reduce((sum, result) => sum + result.issues.length, 0);
+    const totalPRs = squadResults.reduce((sum, result) => sum + result.prs.length, 0);
+    const totalDecisions = squadResults.reduce((sum, result) => sum + result.decisions.length, 0);
+    const avgVelocity = squadResults.reduce((sum, result) => sum + (result.insights?.velocity?.velocity || 0), 0) / squadResults.length;
+
+    blocks.push({
+      type: 'callout',
+      callout: {
+        icon: {
+          emoji: '📊'
+        },
+        rich_text: [
+          {
+            text: {
+              content: `Total Issues: ${totalIssues} | Total PRs: ${totalPRs} | Total Decisions: ${totalDecisions} | Average Velocity: ${(avgVelocity * 100).toFixed(1)}%`
+            }
           }
-        });
+        ],
+        color: 'blue_background'
       }
     });
-    
+
+    // Squad Performance
+    blocks.push({
+      type: 'heading_2',
+      heading_2: {
+        rich_text: [
+          {
+            text: {
+              content: '👥 Squad Performance'
+            }
+          }
+        ]
+      }
+    });
+
+    squadResults.forEach(result => {
+      const velocity = (result.insights?.velocity?.velocity * 100).toFixed(1) || '0.0';
+      const riskScore = (result.insights?.risks?.riskScore * 100).toFixed(1) || '0.0';
+      
+      blocks.push({
+        type: 'callout',
+        callout: {
+          icon: {
+            emoji: '👥'
+          },
+          rich_text: [
+            {
+              text: {
+                content: `${result.squad}: ${result.issues.length} issues, ${result.prs.length} PRs, ${velocity}% velocity, ${riskScore}% risk score`
+              }
+            }
+          ],
+          color: 'gray_background'
+        }
+      });
+    });
+
+    // Key Conversations & Decisions
+    blocks.push({
+      type: 'heading_2',
+      heading_2: {
+        rich_text: [
+          {
+            text: {
+              content: '💬 Key Conversations & Decisions'
+            }
+          }
+        ]
+      }
+    });
+
+    // Aggregate decisions from all squads
+    const allDecisions = squadResults.flatMap(result => result.decisions || []);
+    const uniqueDecisions = allDecisions.slice(0, 10); // Top 10 decisions
+
+    uniqueDecisions.forEach(decision => {
+      blocks.push({
+        type: 'bulleted_list_item',
+        bulleted_list_item: {
+          rich_text: [
+            {
+              text: {
+                content: `${decision.text} (${decision.owner})`
+              }
+            }
+          ]
+        }
+      });
+    });
+
     // Cross-Squad Dependencies
     if (rollupSummary.dependencies.length > 0) {
       blocks.push({
@@ -517,7 +530,7 @@ class NotionPublisher {
           rich_text: [
             {
               text: {
-                content: 'Cross-Squad Dependencies'
+                content: '🔗 Cross-Squad Dependencies'
               }
             }
           ]
@@ -539,7 +552,7 @@ class NotionPublisher {
         });
       });
     }
-    
+
     // Strategic Insights
     blocks.push({
       type: 'heading_2',
@@ -547,7 +560,7 @@ class NotionPublisher {
         rich_text: [
           {
             text: {
-              content: 'Strategic Insights'
+              content: '🎯 Strategic Insights'
             }
           }
         ]
@@ -568,7 +581,49 @@ class NotionPublisher {
         }
       });
     });
+
+    // Squad Links
+    blocks.push({
+      type: 'heading_2',
+      heading_2: {
+        rich_text: [
+          {
+            text: {
+              content: '📋 Detailed Squad Reports'
+            }
+          }
+        ]
+      }
+    });
     
+    squadResults.forEach(result => {
+      if (result.notionPageId) {
+        blocks.push({
+          type: 'bulleted_list_item',
+          bulleted_list_item: {
+            rich_text: [
+              {
+                text: {
+                  content: `${result.squad} - `,
+                  annotations: {
+                    color: 'gray'
+                  }
+                }
+              },
+              {
+                text: {
+                  content: `${result.issues.length} issues, ${result.prs.length} PRs, ${(result.insights?.velocity?.velocity * 100).toFixed(1)}% velocity`,
+                  annotations: {
+                    color: 'blue'
+                  }
+                }
+              }
+            ]
+          }
+        });
+      }
+    });
+
     return blocks;
   }
 }
