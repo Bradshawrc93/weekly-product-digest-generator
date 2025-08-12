@@ -165,10 +165,8 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Limit to first 3 squads with events
-    const limitedSquads = squadsWithEvents.slice(0, 3);
-
-    for (const squad of limitedSquads) {
+    // Show all squads with events in compact format
+    squadsWithEvents.forEach(squad => {
       const squadData = organizedData[squad.name];
       const changelogEvents = squadData?.changelogEvents || [];
 
@@ -180,10 +178,10 @@ class NotionPageGenerator {
       // Group events by ticket
       const groupedEvents = this.groupChangelogByTicket(changelogEvents);
       
-      // Limit to first 3 tickets per squad
-      const limitedEvents = groupedEvents.slice(0, 3);
-      
-      limitedEvents.forEach(ticketGroup => {
+      // Show first ticket with events
+      if (groupedEvents.length > 0) {
+        const ticketGroup = groupedEvents[0];
+        
         // Ticket header
         const ticketHeader = [
           notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
@@ -192,36 +190,21 @@ class NotionPageGenerator {
         ];
         blocks.push(notion.createMixedParagraph(ticketHeader));
 
-        // Events for this ticket (limit to 2 events per ticket)
-        const limitedTicketEvents = ticketGroup.events.slice(0, 2);
-        limitedTicketEvents.forEach(event => {
+        // Show first event for this ticket
+        if (ticketGroup.events.length > 0) {
+          const event = ticketGroup.events[0];
           const eventText = `${event.displayDate} - ${event.author} ${this.formatChangelogEvent(event)}`;
           blocks.push(notion.createBulletItem(eventText));
-        });
+        }
 
         blocks.push(notion.createParagraphBlock(''));
-      });
-      
-      // Add note if there were more events
-      if (groupedEvents.length > 3) {
-        blocks.push(notion.createParagraphBlock(`... and ${groupedEvents.length - 3} more tickets with changes.`));
       }
-    }
-
-    // Add summary of remaining squads with events
-    if (squadsWithEvents.length > 3) {
-      const remainingSquads = squadsWithEvents.slice(3);
-      blocks.push(notion.createHeadingBlock('**Other Squads with Changes**', 2));
       
-      remainingSquads.forEach(squad => {
-        const squadData = organizedData[squad.name];
-        const changelogEvents = squadData?.changelogEvents || [];
-        const groupedEvents = this.groupChangelogByTicket(changelogEvents);
-        
-        const summaryText = `${squad.displayName}: ${groupedEvents.length} tickets with ${changelogEvents.length} total changes`;
-        blocks.push(notion.createBulletItem(summaryText));
-      });
-    }
+      // Add summary of remaining activity
+      if (groupedEvents.length > 1) {
+        blocks.push(notion.createParagraphBlock(`... and ${groupedEvents.length - 1} more tickets with changes.`));
+      }
+    });
 
     return blocks;
   }
@@ -245,8 +228,8 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Limit to first 5 squads with stale tickets
-    const limitedSquads = squadsWithStale.slice(0, 5);
+    // Limit to first 2 squads with stale tickets (to leave room for others)
+    const limitedSquads = squadsWithStale.slice(0, 2);
 
     for (const squad of limitedSquads) {
       const squadData = organizedData[squad.name];
@@ -281,17 +264,42 @@ class NotionPageGenerator {
       blocks.push(notion.createParagraphBlock(''));
     }
 
-    // Add summary of remaining squads with stale tickets
-    if (squadsWithStale.length > 5) {
-      const remainingSquads = squadsWithStale.slice(5);
+    // Add detailed sections for remaining squads with stale tickets
+    if (squadsWithStale.length > 2) {
+      const remainingSquads = squadsWithStale.slice(2);
       blocks.push(notion.createHeadingBlock('**Other Squads with Stale Tickets**', 2));
       
       remainingSquads.forEach(squad => {
         const squadData = organizedData[squad.name];
         const staleTickets = squadData?.staleTickets || [];
+
+        // Squad header
+        blocks.push(
+          notion.createHeadingBlock(`**${squad.displayName}**`, 3)
+        );
+
+        // Limit to first 3 stale tickets per squad
+        const limitedStaleTickets = staleTickets.slice(0, 3);
         
-        const summaryText = `${squad.displayName}: ${staleTickets.length} stale tickets`;
-        blocks.push(notion.createBulletItem(summaryText));
+        // Stale tickets
+        limitedStaleTickets.forEach(ticket => {
+          const richText = [
+            notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
+            notion.createRichText(' - '),
+            notion.createRichText(ticket.summary),
+            notion.createRichText(` (${ticket.assignee})`, { italic: true }),
+            notion.createRichText(` - ${ticket.daysStale} days stale`, { color: 'red_background' })
+          ];
+          
+          blocks.push(notion.createMixedParagraph(richText));
+        });
+        
+        // Add note if there were more stale tickets
+        if (staleTickets.length > 3) {
+          blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 3} more stale tickets.`));
+        }
+
+        blocks.push(notion.createParagraphBlock(''));
       });
     }
 
@@ -317,8 +325,8 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Limit to first 3 squads with backlog
-    const limitedSquads = squadsWithBacklog.slice(0, 3);
+    // Limit to first 1 squad with backlog (to leave room for others)
+    const limitedSquads = squadsWithBacklog.slice(0, 1);
 
     for (const squad of limitedSquads) {
       const squadData = organizedData[squad.name];
@@ -362,17 +370,51 @@ class NotionPageGenerator {
       }
     }
 
-    // Add summary of remaining squads with backlog tickets
-    if (squadsWithBacklog.length > 3) {
-      const remainingSquads = squadsWithBacklog.slice(3);
+    // Add detailed sections for remaining squads with backlog tickets
+    if (squadsWithBacklog.length > 1) {
+      const remainingSquads = squadsWithBacklog.slice(1);
       blocks.push(notion.createHeadingBlock('**Other Squads with Backlog**', 2));
       
       remainingSquads.forEach(squad => {
         const squadData = organizedData[squad.name];
         const backlogTickets = squadData?.backlogTickets || [];
+
+        // Squad header
+        blocks.push(
+          notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+        );
+
+        // Group by priority
+        const groupedByPriority = this.groupTicketsByPriority(backlogTickets);
         
-        const summaryText = `${squad.displayName}: ${backlogTickets.length} backlog tickets`;
-        blocks.push(notion.createBulletItem(summaryText));
+        for (const [priority, tickets] of Object.entries(groupedByPriority)) {
+          if (tickets.length > 0) {
+            blocks.push(
+              notion.createHeadingBlock(`${priority} Priority`, 3)
+            );
+
+            // Limit to first 3 tickets per priority
+            const limitedTickets = tickets.slice(0, 3);
+            
+            limitedTickets.forEach(ticket => {
+              const richText = [
+                notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
+                notion.createRichText(' - '),
+                notion.createRichText(ticket.summary),
+                notion.createRichText(` (${ticket.assignee})`, { italic: true })
+              ];
+              
+              blocks.push(notion.createMixedParagraph(richText));
+            });
+            
+            // Add note if there were more tickets
+            if (tickets.length > 3) {
+              blocks.push(notion.createParagraphBlock(`... and ${tickets.length - 3} more ${priority.toLowerCase()} priority tickets.`));
+            }
+
+            blocks.push(notion.createParagraphBlock(''));
+          }
+        }
       });
     }
 
