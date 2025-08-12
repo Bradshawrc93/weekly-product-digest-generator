@@ -1,207 +1,212 @@
-# Technical Requirements - Product Operations Agent
+# Technical Requirements - Weekly Jira Report Generator
 
 ## Overview
 
-This document defines the technical requirements for the Product Operations Agent - a specialized AI assistant designed to automate and streamline product operations workflows.
+This document defines the technical requirements for a focused weekly report generator that creates Notion pages summarizing Jira activity over the past 7 days, organized by squad/team.
 
 ## Core Agent Responsibilities
 
-### 1. **Data Collection & Integration**
-- **Jira Integration**: Fetch and process project data, issues, epics, and sprint information
-- **Slack Integration**: Monitor channels for discussions, decisions, and announcements
-- **GitHub/Git Integration**: Track code changes, pull requests, and repository activity
-- **Notion Integration**: Read from and write to Notion databases and pages
-- **Calendar Integration**: Monitor scheduled meetings, deadlines, and milestones
+### 1. **Jira Data Collection**
+- **Issue Fetching**: Retrieve all Jira issues updated in the last 7 days
+- **Team/Squad Filtering**: Organize data by Jira Team field
+- **Changelog Collection**: Gather all history log events from the last 7 days
+- **Status Tracking**: Monitor ticket status changes and assignments
 
 ### 2. **Data Processing & Analysis**
-- **Cross-linking**: Connect related items across different platforms (Jira issues → PRs → Slack discussions)
-- **Trend Analysis**: Identify patterns in velocity, bottlenecks, and team performance
-- **Risk Assessment**: Detect potential blockers, delays, and resource conflicts
-- **Priority Analysis**: Evaluate and rank items based on business impact and urgency
+- **Work Completed**: Identify issues with work done in the last 7 days
+- **Stale Ticket Detection**: Find tickets in progress with no updates in last 5 days
+- **Action Counting**: Count all activities (comments, status changes, PRs, etc.) per squad
+- **Assignee Analysis**: Track tickets per assignee broken down by status
 
 ### 3. **Report Generation**
-- **Weekly Digests**: Create comprehensive weekly summaries for each team/squad
-- **Executive Summaries**: Generate high-level insights for leadership
-- **Sprint Reviews**: Compile sprint completion data and retrospective insights
-- **Roadmap Updates**: Track progress against quarterly and annual goals
+- **Weekly Notion Page**: Create structured Notion page in database
+- **Squad Summaries**: Per-squad breakdown of completed work
+- **Stale Ticket Reports**: List of tickets needing attention per squad
+- **Changelog Rollup**: Chronological list of all actions per squad
+- **Action Metrics**: Weekly action counts for trend analysis
 
-### 4. **Communication & Notifications**
-- **Automated Alerts**: Send notifications for critical issues, blockers, and milestones
-- **Status Updates**: Provide regular updates on project health and progress
-- **Meeting Summaries**: Generate pre and post-meeting materials
-- **Stakeholder Reports**: Create tailored reports for different audiences
+### 4. **Data Persistence**
+- **Action Logging**: Maintain rolling file of weekly action counts per squad
+- **Historical Data**: Store data for future graphing and trend analysis
 
 ## Technical Specifications
 
 ### Architecture Requirements
 
 #### **Modular Design**
-- **Ingestors**: Separate modules for each data source (Jira, Slack, GitHub, etc.)
-- **Processors**: Data transformation and analysis modules
-- **Generators**: Report and content generation modules
-- **Publishers**: Output modules for different destinations (Notion, Slack, Email)
-- **Utils**: Shared utilities and helper functions
+- **Jira Connector**: Module for Jira API integration and data fetching
+- **Data Processor**: Module for organizing and analyzing Jira data
+- **Report Generator**: Module for creating Notion page content
+- **Notion Publisher**: Module for writing to Notion database
+- **Data Logger**: Module for persisting action counts and historical data
 
 #### **Configuration Management**
-- **Environment Variables**: API keys, endpoints, and sensitive configuration
-- **Squad Configuration**: Team-specific settings and preferences
-- **Workflow Configuration**: Customizable automation rules and triggers
-- **Output Templates**: Configurable report formats and styling
+- **Environment Variables**: Jira API credentials, Notion API key, database ID
+- **Squad Configuration**: Mapping of Jira Team names to display names
+- **Status Configuration**: Mapping of Jira statuses to categories (backlog, to-do, in-progress, done)
+- **Report Templates**: Notion page structure and formatting
 
 #### **Data Management**
-- **State Persistence**: Track last run times, processed data, and incremental updates
-- **Caching**: Implement intelligent caching to reduce API calls
-- **Error Handling**: Robust error handling with retry logic and fallbacks
-- **Rate Limiting**: Respect API rate limits across all integrations
+- **Incremental Processing**: Only fetch data updated since last run
+- **Error Handling**: Robust error handling with retry logic
+- **Rate Limiting**: Respect Jira API rate limits
+- **Data Validation**: Ensure data integrity and completeness
 
 ### Integration Requirements
 
 #### **Jira Integration**
-- **Authentication**: OAuth2 or API token authentication
-- **Data Fetching**: Issues, epics, sprints, custom fields, and comments
-- **JQL Support**: Advanced querying for complex data retrieval
-- **Webhook Support**: Real-time updates for immediate processing
-
-#### **Slack Integration**
-- **Bot Integration**: Slack app with slash commands and interactive components
-- **Channel Monitoring**: Read messages from specified channels
-- **Message Filtering**: Focus on relevant discussions and decisions
-- **Thread Support**: Process threaded conversations for context
-
-#### **GitHub/Git Integration**
-- **Repository Access**: Read access to specified repositories
-- **PR Tracking**: Monitor pull requests, reviews, and merge status
-- **Commit Analysis**: Track code changes and their impact
-- **Branch Monitoring**: Monitor feature branches and releases
+- **Authentication**: API token authentication
+- **Data Fetching**: Issues updated in last 7 days, changelog history, team assignments
+- **JQL Support**: Query for issues by update date, team, and status
+- **Changelog Access**: Retrieve all history log events for specified time period
+- **Team Field**: Access to Jira Team custom field for squad organization
 
 #### **Notion Integration**
-- **Database Operations**: Read from and write to Notion databases
-- **Page Creation**: Generate structured pages with rich content
-- **Template Support**: Use predefined templates for consistent formatting
-- **Permission Handling**: Respect Notion workspace permissions
+- **Database Access**: Write access to specified Notion database
+- **Page Creation**: Generate structured pages with squad sections
+- **Rich Content**: Support for formatted text, lists, and links
+- **Template Structure**: Consistent page layout and formatting
 
 ### Output Requirements
 
-#### **Report Formats**
-- **Markdown**: Clean, structured markdown for easy reading
-- **Notion Pages**: Rich, interactive pages with proper formatting
-- **Slack Messages**: Concise, actionable messages with attachments
-- **Email**: HTML and plain text email formats
-- **JSON**: Structured data for programmatic consumption
+#### **Notion Page Structure**
+- **Page Title**: Weekly report with date range (e.g., "Weekly Report: Aug 1-7, 2024")
+- **Squad Sections**: Separate section for each squad/team
+- **Work Completed**: List of issues with work done in last 7 days
+- **Stale Tickets**: List of in-progress tickets with no updates in last 5 days
+- **Changelog**: Chronological list of all actions per squad
+- **Assignee Breakdown**: Tickets per assignee by status category
 
-#### **Content Structure**
-- **Executive Summary**: High-level insights and key metrics
-- **Detailed Analysis**: Comprehensive breakdown of activities
-- **Action Items**: Clear next steps and recommendations
-- **Visual Elements**: Charts, graphs, and progress indicators
-- **Cross-references**: Links between related items across platforms
+#### **Data Files**
+- **Action Counts**: JSON file with weekly action counts per squad
+- **Historical Data**: Rolling log of action counts for trend analysis
+- **Status Breakdown**: Per-assignee ticket counts by status category
 
 ### Performance Requirements
 
-#### **Scalability**
-- **Multi-team Support**: Handle multiple teams/squads simultaneously
-- **Incremental Processing**: Only process new/changed data
-- **Parallel Processing**: Handle multiple data sources concurrently
-- **Resource Optimization**: Efficient memory and CPU usage
+#### **Data Processing**
+- **Weekly Execution**: Run once per week to generate report
+- **Efficient Queries**: Optimize Jira API calls to minimize response time
+- **Data Caching**: Cache squad and status mappings to reduce API calls
+- **Error Recovery**: Handle API failures gracefully with retry logic
 
 #### **Reliability**
-- **Fault Tolerance**: Continue operation despite individual service failures
-- **Data Consistency**: Ensure data integrity across all operations
-- **Backup & Recovery**: Implement data backup and recovery procedures
-- **Monitoring**: Comprehensive logging and monitoring capabilities
+- **Data Accuracy**: Ensure all Jira data is captured correctly
+- **Consistent Formatting**: Maintain consistent Notion page structure
+- **Backup Data**: Preserve action count data for historical analysis
+- **Logging**: Track execution times and any errors encountered
 
 #### **Security**
-- **API Key Management**: Secure storage and rotation of API keys
-- **Data Privacy**: Respect data privacy and access controls
-- **Audit Logging**: Track all operations for security and compliance
-- **Access Control**: Implement role-based access controls
+- **API Key Storage**: Secure storage of Jira and Notion API credentials
+- **Data Access**: Only access authorized Jira projects and Notion databases
+- **Audit Trail**: Log all data access and modifications
 
 ## Workflow Requirements
 
-### **Scheduled Operations**
-- **Weekly Digests**: Generate team summaries every week
-- **Daily Updates**: Provide daily status updates
-- **Sprint Reviews**: Compile sprint data at sprint boundaries
-- **Quarterly Reviews**: Generate quarterly performance reports
+### **Weekly Report Generation**
+- **Automatic Execution**: Run weekly to generate report for previous 7 days
+- **Date Range**: Monday to Sunday (or configurable week boundaries)
+- **Report Creation**: Generate new Notion page in database
+- **Data Logging**: Update action count files for historical tracking
 
-### **Event-Driven Operations**
-- **Real-time Alerts**: Immediate notifications for critical events
-- **Meeting Preparation**: Generate materials before scheduled meetings
-- **Status Changes**: Update stakeholders when key items change status
-- **Milestone Tracking**: Monitor and report on milestone progress
+### **Data Collection Process**
+1. **Fetch Jira Issues**: Get all issues updated in last 7 days
+2. **Organize by Squad**: Group issues by Jira Team field
+3. **Collect Changelog**: Gather all history events from last 7 days
+4. **Identify Stale Tickets**: Find in-progress tickets with no recent updates
+5. **Count Actions**: Tally all activities per squad
 
-### **Manual Operations**
-- **On-demand Reports**: Generate reports when requested
-- **Custom Queries**: Support for ad-hoc data requests
-- **Data Export**: Export data in various formats
-- **Configuration Updates**: Update settings and preferences
+### **Report Structure**
+1. **Page Creation**: Create new Notion page with date range title
+2. **Squad Sections**: Add section for each squad with work completed
+3. **Stale Ticket Lists**: Include tickets needing attention per squad
+4. **Changelog Summary**: List all actions chronologically per squad
+5. **Assignee Breakdown**: Show ticket counts per assignee by status
 
 ## Quality Assurance
 
 ### **Testing Requirements**
-- **Unit Tests**: Comprehensive test coverage for all modules
-- **Integration Tests**: Test all integrations with external services
-- **End-to-End Tests**: Full workflow testing from data collection to output
-- **Performance Tests**: Load testing and performance benchmarking
+- **Jira API Testing**: Verify data fetching and changelog access
+- **Notion API Testing**: Test page creation and formatting
+- **Data Processing Testing**: Validate squad organization and action counting
+- **End-to-End Testing**: Full weekly report generation workflow
 
-### **Monitoring Requirements**
-- **Health Checks**: Monitor system health and availability
-- **Performance Metrics**: Track response times and resource usage
-- **Error Tracking**: Monitor and alert on errors and failures
-- **Usage Analytics**: Track feature usage and user engagement
+### **Data Validation**
+- **Jira Data Accuracy**: Ensure all issues and changelog events are captured
+- **Squad Mapping**: Verify correct team field mapping and organization
+- **Action Counting**: Validate accurate counting of all activities
+- **Notion Output**: Confirm proper page structure and formatting
 
-### **Documentation Requirements**
-- **API Documentation**: Comprehensive documentation for all integrations
-- **User Guides**: Clear instructions for setup and usage
-- **Troubleshooting**: Common issues and resolution procedures
-- **Architecture Diagrams**: Visual representation of system components
+### **Error Handling**
+- **API Failures**: Handle Jira and Notion API errors gracefully
+- **Data Inconsistencies**: Handle missing or malformed Jira data
+- **Rate Limiting**: Respect API limits and implement retry logic
+- **Logging**: Comprehensive logging for debugging and monitoring
 
 ## Success Criteria
 
 ### **Functional Success**
-- **Data Accuracy**: 99%+ accuracy in data collection and processing
-- **Report Quality**: High-quality, actionable reports generated consistently
-- **Integration Reliability**: 99.9% uptime for all integrations
-- **User Satisfaction**: Positive feedback from stakeholders and users
+- **Weekly Reports**: Generate consistent weekly Notion pages with date range
+- **Squad Coverage**: Include all squads with Jira activity in the last 7 days
+- **Data Completeness**: Capture all issues, changelog events, and actions
+- **Stale Ticket Detection**: Accurately identify tickets needing attention
 
 ### **Technical Success**
-- **Performance**: Sub-second response times for most operations
-- **Scalability**: Support for 10+ teams and 100+ users
-- **Maintainability**: Clean, well-documented, and maintainable code
-- **Security**: Zero security incidents or data breaches
+- **Jira Integration**: Reliable data fetching from Jira API
+- **Notion Publishing**: Consistent page creation and formatting
+- **Action Counting**: Accurate tallying of all activities per squad
+- **Data Persistence**: Reliable storage of historical action counts
 
 ### **Business Success**
-- **Time Savings**: Reduce manual reporting time by 80%+
-- **Decision Quality**: Improve decision-making with better data insights
-- **Team Productivity**: Increase team productivity through better visibility
-- **Stakeholder Communication**: Improve communication and alignment
+- **Time Savings**: Automate weekly reporting process
+- **Visibility**: Provide clear view of squad activity and progress
+- **Action Tracking**: Enable trend analysis through action count data
+- **Stale Ticket Management**: Help identify tickets needing attention
 
 ## Implementation Phases
 
-### **Phase 1: Core Infrastructure**
-- Basic project structure and configuration
-- Essential integrations (Jira, Slack, Notion)
-- Simple report generation
-- Basic error handling and logging
+### **Phase 1: Jira Integration & Basic Reporting**
+- Jira API integration for issue and changelog fetching
+- Squad/team organization by Jira Team field
+- Basic Notion page creation with squad sections
+- Action counting and data logging
 
-### **Phase 2: Advanced Features**
-- Advanced data processing and analysis
-- Custom report templates
-- Automated scheduling
-- Enhanced error handling and monitoring
+### **Phase 2: Enhanced Reporting & Stale Ticket Detection**
+- Stale ticket identification (no updates in 5 days)
+- Detailed changelog rollup per squad
+- Assignee breakdown by status categories
+- Improved Notion page formatting and structure
 
-### **Phase 3: Optimization**
+### **Phase 3: Data Analysis & Historical Tracking**
+- Historical action count tracking and storage
+- Trend analysis capabilities
+- Enhanced error handling and validation
 - Performance optimization
-- Advanced analytics and insights
-- Custom workflows and automation
-- Comprehensive testing and documentation
 
-### **Phase 4: Scale & Enhance**
-- Multi-team support
-- Advanced integrations
-- AI-powered insights
-- Enterprise features and security
+### **Phase 4: Slack Integration (Future)**
+- Slack data collection and integration
+- Combined Jira + Slack reporting
+- Enhanced action tracking across platforms
+- Advanced analytics and insights
 
 ---
 
-*This document serves as the definitive guide for implementing the Product Operations Agent. All development should align with these requirements to ensure a successful, scalable, and maintainable solution.*
+*This document serves as the definitive guide for implementing the Weekly Jira Report Generator. All development should align with these requirements to ensure a successful, focused, and maintainable solution.*
+
+## Key Data Points to Track
+
+### **Per Squad (Team)**
+- **Work Completed**: Issues with activity in last 7 days
+- **Stale Tickets**: In-progress tickets with no updates in last 5 days
+- **Action Count**: Total number of activities (comments, status changes, etc.)
+- **Changelog Events**: Chronological list of all actions
+
+### **Per Assignee**
+- **Ticket Counts**: Number of tickets by status category
+- **Status Breakdown**: Backlog, To-Do, In Progress, Done
+- **Activity Level**: Based on recent updates and actions
+
+### **Historical Data**
+- **Weekly Action Counts**: Rolling file of actions per squad per week
+- **Trend Data**: For future graphing and analysis
+- **Performance Metrics**: For team velocity tracking
