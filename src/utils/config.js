@@ -37,7 +37,8 @@ class Config {
       const configData = fs.readFileSync(configPath, 'utf8');
       const config = JSON.parse(configData);
       
-      this.squads = config.squads;
+      // Sort squads by order field
+      this.squads = config.squads.sort((a, b) => (a.order || 999) - (b.order || 999));
       this.statusCategories = config.statusCategories;
       this.settings = { ...this.settings, ...config.settings };
       

@@ -38,6 +38,19 @@ class WeeklyReportGenerator {
 
       // Step 2: Fetch Jira data
       const jiraData = await this.fetchJiraData(reportDateRange);
+      
+      // Debug: Log sample issue data to understand structure
+      if (jiraData.allIssues.length > 0) {
+        const sampleIssue = jiraData.allIssues[0];
+        logger.info('Sample issue structure', {
+          key: sampleIssue.key,
+          summary: sampleIssue.fields.summary,
+          status: sampleIssue.fields.status?.name,
+          fields: Object.keys(sampleIssue.fields).filter(key => 
+            key.includes('customfield') || key.includes('team') || key.includes('component')
+          )
+        });
+      }
 
       // Step 3: Calculate metrics
       const metrics = await this.calculateMetrics(reportDateRange, jiraData);

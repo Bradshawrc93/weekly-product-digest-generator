@@ -1,64 +1,74 @@
 {
   "squads": [
     {
-      "name": "Customer-Facing",
-      "displayName": "Customer-Facing (Empower/SmarterAccess UI)",
-      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-88",
-      "description": "Customer-facing UI and user experience"
-    },
-    {
-      "name": "HITL",
-      "displayName": "Human in the loop (HITL)",
-      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-86",
-      "description": "Human in the loop processes and workflows"
-    },
-    {
-      "name": "Developer Efficiency",
-      "displayName": "Developer Efficiency",
-      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-87",
-      "description": "Developer tools and efficiency improvements"
-    },
-    {
-      "name": "Data Collection",
-      "displayName": "Data Collection / Data Lakehouse",
-      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-85",
-      "description": "Data collection and lakehouse infrastructure"
-    },
-    {
-      "name": "ThoughtHub Platform",
-      "displayName": "ThoughtHub Platform",
-      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-84",
-      "description": "ThoughtHub platform development"
-    },
-    {
       "name": "Core RCM",
       "displayName": "Core RCM",
       "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-83",
-      "description": "Core revenue cycle management"
+      "description": "Core revenue cycle management",
+      "order": 1
     },
     {
       "name": "Voice",
       "displayName": "Voice",
       "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-82",
-      "description": "Voice technology and speech processing"
+      "description": "Voice technology and speech processing",
+      "order": 2
+    },
+    {
+      "name": "Customer-Facing",
+      "displayName": "Customer-Facing UI",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-88",
+      "description": "Customer-facing UI and user experience",
+      "order": 3
+    },
+    {
+      "name": "HITL",
+      "displayName": "HITL",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-86",
+      "description": "Human in the loop processes and workflows",
+      "order": 4
+    },
+    {
+      "name": "Team EPIC",
+      "displayName": "EPIC",
+      "jiraUuid": "a99ed0ed-66e8-442a-918f-87d6e330f4b9",
+      "description": "EPIC integration and development",
+      "order": 5
+    },
+    {
+      "name": "Developer Efficiency",
+      "displayName": "Developer Efficiency",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-87",
+      "description": "Developer tools and efficiency improvements",
+      "order": 6
+    },
+    {
+      "name": "Data Collection",
+      "displayName": "Data",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-85",
+      "description": "Data collection and lakehouse infrastructure",
+      "order": 7
+    },
+    {
+      "name": "ThoughtHub Platform",
+      "displayName": "ThoughtHub",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-84",
+      "description": "ThoughtHub platform development",
+      "order": 8
     },
     {
       "name": "Medical Coding",
       "displayName": "Medical Coding",
       "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-80",
-      "description": "Medical coding and classification"
+      "description": "Medical coding and classification",
+      "order": 9
     },
     {
       "name": "Deep Research",
-      "displayName": "Deep Research",
+      "displayName": "Deep R&D",
       "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-81",
-      "description": "Deep research and advanced analytics"
-    },
-    {
-      "name": "Team EPIC",
-      "displayName": "Team EPIC",
-      "jiraUuid": "a99ed0ed-66e8-442a-918f-87d6e330f4b9",
-      "description": "EPIC integration and development"
+      "description": "Deep research and advanced analytics",
+      "order": 10
     }
   ],
   "statusCategories": {

@@ -18,34 +18,34 @@ class NotionPageGenerator {
         title: `Weekly Report: ${dateRange.display}`,
         children: [
           // AI TL;DR placeholder
-          this.createAITLDRSection(),
+          ...this.createAITLDRSection(),
           
           // Metrics table
-          this.createMetricsTable(metrics),
+          ...this.createMetricsTable(metrics),
           
           // Divider
           notion.createDividerBlock(),
           
           // What Shipped section
-          this.createWhatShippedSection(organizedData),
+          ...this.createWhatShippedSection(organizedData),
           
           // Divider
           notion.createDividerBlock(),
           
           // Change Log section
-          this.createChangeLogSection(organizedData),
+          ...this.createChangeLogSection(organizedData),
           
           // Divider
           notion.createDividerBlock(),
           
           // Stale tickets section
-          this.createStaleTicketsSection(organizedData),
+          ...this.createStaleTicketsSection(organizedData),
           
           // Divider
           notion.createDividerBlock(),
           
           // On Deck section
-          this.createOnDeckSection(organizedData)
+          ...this.createOnDeckSection(organizedData)
         ]
       };
 
