@@ -152,13 +152,13 @@
 7. **On Deck**: Backlog tickets organized by priority per squad
 
 #### **Notion Table Structure**
-| Squad | Customer-Facing | HITL | Developer Efficiency | ... |
-|-------|----------------|------|---------------------|-----|
-| Done | 5 | 3 | 2 | ... |
-| Updated | 12 | 8 | 6 | ... |
-| Created | 3 | 1 | 4 | ... |
-| Stale | 2 | 1 | 0 | ... |
-| In-Progress | 8 | 6 | 5 | ... |
+| Squad | Customer-Facing | HITL | Developer Efficiency | Data Collection | ThoughtHub Platform | Core RCM | Voice | Medical Coding | Deep Research | Team EPIC |
+|-------|----------------|------|---------------------|-----------------|-------------------|----------|-------|----------------|---------------|-----------|
+| Done | 5 | 3 | 2 | 4 | 6 | 3 | 2 | 1 | 0 | 3 |
+| Updated | 12 | 8 | 6 | 10 | 15 | 7 | 5 | 3 | 2 | 8 |
+| Created | 3 | 1 | 4 | 2 | 5 | 2 | 1 | 0 | 1 | 2 |
+| Stale | 2 | 1 | 0 | 1 | 3 | 1 | 0 | 0 | 0 | 1 |
+| In-Progress | 8 | 6 | 5 | 7 | 12 | 5 | 3 | 2 | 1 | 6 |
 
 ### **JQL Queries Needed**
 

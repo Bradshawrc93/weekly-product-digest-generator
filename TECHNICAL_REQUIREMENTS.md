@@ -77,7 +77,7 @@ This document defines the technical requirements for a focused weekly report gen
 - **Page Title**: Weekly report with date range (e.g., "Weekly Report: Aug 1-7, 2024")
 - **AI TL;DR**: Placeholder section for future AI summary
 - **Metrics Table**: Notion table with:
-  - **Columns**: 10 squads
+  - **Columns**: 10 squads (Customer-Facing, HITL, Developer Efficiency, Data Collection, ThoughtHub Platform, Core RCM, Voice, Medical Coding, Deep Research, Team EPIC)
   - **Rows**: Done | Updated | Created | Stale | In-Progress
   - **Values**: Counts for each metric per squad
 - **What Shipped**: Completed tickets grouped by squad with Jira links

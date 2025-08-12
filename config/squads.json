@@ -53,6 +53,12 @@
       "displayName": "Deep Research",
       "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-81",
       "description": "Deep research and advanced analytics"
+    },
+    {
+      "name": "Team EPIC",
+      "displayName": "Team EPIC",
+      "jiraUuid": "a99ed0ed-66e8-442a-918f-87d6e330f4b9",
+      "description": "EPIC integration and development"
     }
   ],
   "statusCategories": {
