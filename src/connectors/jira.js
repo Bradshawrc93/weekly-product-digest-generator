@@ -253,10 +253,12 @@ class JiraConnector {
         if (field) {
           if (field.value) {
             return field.value;
+          } else if (field.id) {
+            return field.id;
           } else if (field.name) {
             return field.name;
           } else if (Array.isArray(field) && field.length > 0) {
-            return field[0].name || field[0].value;
+            return field[0].id || field[0].name || field[0].value;
           }
         }
       }

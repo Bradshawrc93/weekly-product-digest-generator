@@ -48,7 +48,9 @@ class WeeklyReportGenerator {
           status: sampleIssue.fields.status?.name,
           fields: Object.keys(sampleIssue.fields).filter(key => 
             key.includes('customfield') || key.includes('team') || key.includes('component')
-          )
+          ),
+          customfield_10001: sampleIssue.fields.customfield_10001,
+          project: sampleIssue.fields.project
         });
       }
 

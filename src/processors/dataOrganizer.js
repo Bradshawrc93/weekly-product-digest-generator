@@ -80,12 +80,35 @@ class DataOrganizer {
    */
   getTeamUuidFromIssue(issue) {
     try {
-      const teamField = issue.fields.customfield_10001;
-      if (teamField && teamField.value) {
-        return teamField.value;
+      // Try multiple possible field names for team
+      const possibleFields = [
+        'customfield_10001', // Team field
+        'customfield_10002', // Alternative team field
+        'components', // Components field
+        'project' // Project field
+      ];
+      
+      for (const fieldName of possibleFields) {
+        const field = issue.fields[fieldName];
+        if (field) {
+          if (field.value) {
+            return field.value;
+          } else if (field.id) {
+            return field.id;
+          } else if (field.name) {
+            return field.name;
+          } else if (Array.isArray(field) && field.length > 0) {
+            return field[0].id || field[0].name || field[0].value;
+          }
+        }
       }
+      
       return null;
     } catch (error) {
+      logger.warn('Failed to extract team from issue', { 
+        issueKey: issue.key,
+        error: error.message 
+      });
       return null;
     }
   }
