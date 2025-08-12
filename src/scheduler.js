@@ -81,10 +81,16 @@ class ReportScheduler {
    */
   logNextRunTime() {
     if (this.scheduledJob) {
-      const nextRun = this.scheduledJob.nextDate();
+      // Calculate next Monday at 6:00 AM EST (11:00 AM UTC)
+      const now = new Date();
+      const daysUntilMonday = (8 - now.getUTCDay()) % 7;
+      const nextMonday = new Date(now);
+      nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
+      nextMonday.setUTCHours(11, 0, 0, 0); // 11:00 AM UTC = 6:00 AM EST
+      
       logger.info('⏰ Next scheduled run:', {
-        date: nextRun.toISOString(),
-        localTime: nextRun.toLocaleString()
+        date: nextMonday.toISOString(),
+        localTime: nextMonday.toLocaleString()
       });
     }
   }
@@ -93,9 +99,20 @@ class ReportScheduler {
    * Get scheduler status
    */
   getStatus() {
+    let nextRun = null;
+    if (this.scheduledJob) {
+      // Calculate next Monday at 6:00 AM EST (11:00 AM UTC)
+      const now = new Date();
+      const daysUntilMonday = (8 - now.getUTCDay()) % 7;
+      const nextMonday = new Date(now);
+      nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
+      nextMonday.setUTCHours(11, 0, 0, 0); // 11:00 AM UTC = 6:00 AM EST
+      nextRun = nextMonday;
+    }
+    
     return {
       isRunning: this.scheduledJob ? this.scheduledJob.running : false,
-      nextRun: this.scheduledJob ? this.scheduledJob.nextDate() : null,
+      nextRun: nextRun,
       schedule: '0 11 * * 1 (Every Monday at 6:00 AM EST)'
     };
   }
