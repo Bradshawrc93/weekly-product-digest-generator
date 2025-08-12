@@ -208,9 +208,19 @@ class NotionPageGenerator {
       }
     }
 
-    // Add note if there were more squads
+    // Add summary of remaining squads with events
     if (squadsWithEvents.length > 3) {
-      blocks.push(notion.createParagraphBlock(`... and ${squadsWithEvents.length - 3} more squads with changes.`));
+      const remainingSquads = squadsWithEvents.slice(3);
+      blocks.push(notion.createHeadingBlock('**Other Squads with Changes**', 2));
+      
+      remainingSquads.forEach(squad => {
+        const squadData = organizedData[squad.name];
+        const changelogEvents = squadData?.changelogEvents || [];
+        const groupedEvents = this.groupChangelogByTicket(changelogEvents);
+        
+        const summaryText = `${squad.displayName}: ${groupedEvents.length} tickets with ${changelogEvents.length} total changes`;
+        blocks.push(notion.createBulletItem(summaryText));
+      });
     }
 
     return blocks;
@@ -271,9 +281,18 @@ class NotionPageGenerator {
       blocks.push(notion.createParagraphBlock(''));
     }
 
-    // Add note if there were more squads
+    // Add summary of remaining squads with stale tickets
     if (squadsWithStale.length > 5) {
-      blocks.push(notion.createParagraphBlock(`... and ${squadsWithStale.length - 5} more squads with stale tickets.`));
+      const remainingSquads = squadsWithStale.slice(5);
+      blocks.push(notion.createHeadingBlock('**Other Squads with Stale Tickets**', 2));
+      
+      remainingSquads.forEach(squad => {
+        const squadData = organizedData[squad.name];
+        const staleTickets = squadData?.staleTickets || [];
+        
+        const summaryText = `${squad.displayName}: ${staleTickets.length} stale tickets`;
+        blocks.push(notion.createBulletItem(summaryText));
+      });
     }
 
     return blocks;
@@ -343,9 +362,18 @@ class NotionPageGenerator {
       }
     }
 
-    // Add note if there were more squads
+    // Add summary of remaining squads with backlog tickets
     if (squadsWithBacklog.length > 3) {
-      blocks.push(notion.createParagraphBlock(`... and ${squadsWithBacklog.length - 3} more squads with backlog tickets.`));
+      const remainingSquads = squadsWithBacklog.slice(3);
+      blocks.push(notion.createHeadingBlock('**Other Squads with Backlog**', 2));
+      
+      remainingSquads.forEach(squad => {
+        const squadData = organizedData[squad.name];
+        const backlogTickets = squadData?.backlogTickets || [];
+        
+        const summaryText = `${squad.displayName}: ${backlogTickets.length} backlog tickets`;
+        blocks.push(notion.createBulletItem(summaryText));
+      });
     }
 
     return blocks;
