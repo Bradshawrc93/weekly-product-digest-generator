@@ -44,19 +44,19 @@ describe('DateUtils Module', () => {
   });
 
   test('should format date for Jira', () => {
-    const date = new Date('2024-01-15');
+    const date = moment('2024-01-15').toDate();
     const formatted = DateUtils.formatForJira(date);
     expect(formatted).toBe('2024-01-15');
   });
 
   test('should format date for display', () => {
-    const date = new Date('2024-01-15');
+    const date = moment('2024-01-15').toDate();
     const formatted = DateUtils.formatForDisplay(date);
     expect(formatted).toBe('Jan 15, 2024');
   });
 
   test('should format date for file', () => {
-    const date = new Date('2024-01-15');
+    const date = moment('2024-01-15').toDate();
     const formatted = DateUtils.formatForFile(date);
     expect(formatted).toBe('2024-01-15');
   });
