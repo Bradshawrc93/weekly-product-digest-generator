@@ -284,10 +284,8 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Limit to first 1 squad with backlog (to leave room for others)
-    const limitedSquads = squadsWithBacklog.slice(0, 1);
-
-    for (const squad of limitedSquads) {
+    // Show all squads with backlog tickets in compact format
+    squadsWithBacklog.forEach(squad => {
       const squadData = organizedData[squad.name];
       const backlogTickets = squadData?.backlogTickets || [];
 
@@ -305,8 +303,8 @@ class NotionPageGenerator {
             notion.createHeadingBlock(`${priority} Priority`, 3)
           );
 
-          // Limit to first 5 tickets per priority
-          const limitedTickets = tickets.slice(0, 5);
+          // Show first 3 tickets per priority
+          const limitedTickets = tickets.slice(0, 3);
           
           limitedTickets.forEach(ticket => {
             const richText = [
@@ -320,62 +318,14 @@ class NotionPageGenerator {
           });
           
           // Add note if there were more tickets
-          if (tickets.length > 5) {
-            blocks.push(notion.createParagraphBlock(`... and ${tickets.length - 5} more ${priority.toLowerCase()} priority tickets.`));
+          if (tickets.length > 3) {
+            blocks.push(notion.createParagraphBlock(`... and ${tickets.length - 3} more ${priority.toLowerCase()} priority tickets.`));
           }
 
           blocks.push(notion.createParagraphBlock(''));
         }
       }
-    }
-
-    // Add detailed sections for remaining squads with backlog tickets
-    if (squadsWithBacklog.length > 1) {
-      const remainingSquads = squadsWithBacklog.slice(1);
-      blocks.push(notion.createHeadingBlock('**Other Squads with Backlog**', 2));
-      
-      remainingSquads.forEach(squad => {
-        const squadData = organizedData[squad.name];
-        const backlogTickets = squadData?.backlogTickets || [];
-
-        // Squad header
-        blocks.push(
-          notion.createHeadingBlock(`**${squad.displayName}**`, 2)
-        );
-
-        // Group by priority
-        const groupedByPriority = this.groupTicketsByPriority(backlogTickets);
-        
-        for (const [priority, tickets] of Object.entries(groupedByPriority)) {
-          if (tickets.length > 0) {
-            blocks.push(
-              notion.createHeadingBlock(`${priority} Priority`, 3)
-            );
-
-            // Limit to first 3 tickets per priority
-            const limitedTickets = tickets.slice(0, 3);
-            
-            limitedTickets.forEach(ticket => {
-              const richText = [
-                notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
-                notion.createRichText(' - '),
-                notion.createRichText(ticket.summary),
-                notion.createRichText(` (${ticket.assignee})`, { italic: true })
-              ];
-              
-              blocks.push(notion.createMixedParagraph(richText));
-            });
-            
-            // Add note if there were more tickets
-            if (tickets.length > 3) {
-              blocks.push(notion.createParagraphBlock(`... and ${tickets.length - 3} more ${priority.toLowerCase()} priority tickets.`));
-            }
-
-            blocks.push(notion.createParagraphBlock(''));
-          }
-        }
-      });
-    }
+    });
 
     return blocks;
   }
