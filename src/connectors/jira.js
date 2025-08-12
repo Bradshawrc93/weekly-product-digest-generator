@@ -190,6 +190,30 @@ class JiraConnector {
   }
 
   /**
+   * Get blocked tickets
+   */
+  async getBlockedTickets(squadUuids = null) {
+    let jql = 'status in ("Blocked")';
+    
+    if (squadUuids && squadUuids.length > 0) {
+      const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
+      jql += ` AND "Team" in (${squadFilter})`;
+    }
+    
+    jql += ' ORDER BY priority DESC, updated ASC';
+    
+    return this.searchIssues(jql, [
+      'summary', 
+      'status', 
+      'priority', 
+      'assignee', 
+      'created', 
+      'updated',
+      'customfield_10001' // Team field
+    ]);
+  }
+
+  /**
    * Get changelog for specific issues
    */
   async getChangelog(issueKeys, dateRange) {

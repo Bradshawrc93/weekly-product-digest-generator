@@ -42,6 +42,7 @@ class MetricsCalculator {
       const squadNew = this.filterIssuesBySquad(jiraData.newIssues, squad.jiraUuid);
       const squadStale = this.filterIssuesBySquad(jiraData.staleIssues, squad.jiraUuid);
       const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid);
+      const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid);
 
       // Calculate metrics
       const done = squadCompleted.length;
@@ -49,15 +50,17 @@ class MetricsCalculator {
       const created = squadNew.length;
       const stale = squadStale.length;
       const inProgress = this.countInProgressIssues(squadIssues);
+      const blocked = squadBlocked.length;
 
-      logger.logSquadData(squad.name, 'metrics', { done, updated, created, stale, inProgress });
+      logger.logSquadData(squad.name, 'metrics', { done, updated, created, stale, inProgress, blocked });
 
       return {
         done,
         updated,
         created,
         stale,
-        inProgress
+        inProgress,
+        blocked
       };
     } catch (error) {
       logger.error('Failed to calculate squad metrics', { 
@@ -207,7 +210,7 @@ class MetricsCalculator {
    * Validate metrics data
    */
   validateMetrics(metrics) {
-    const requiredFields = ['done', 'updated', 'created', 'stale', 'inProgress'];
+    const requiredFields = ['done', 'updated', 'created', 'stale', 'inProgress', 'blocked'];
     
     for (const [squadName, squadMetrics] of Object.entries(metrics)) {
       for (const field of requiredFields) {
@@ -236,6 +239,7 @@ class MetricsCalculator {
       totalCreated: 0,
       totalStale: 0,
       totalInProgress: 0,
+      totalBlocked: 0,
       mostActiveSquad: null,
       leastActiveSquad: null
     };
@@ -251,6 +255,7 @@ class MetricsCalculator {
       summary.totalCreated += squadMetrics.created;
       summary.totalStale += squadMetrics.stale;
       summary.totalInProgress += squadMetrics.inProgress;
+      summary.totalBlocked += squadMetrics.blocked;
 
       if (activity > maxActivity) {
         maxActivity = activity;

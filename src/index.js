@@ -141,12 +141,17 @@ class WeeklyReportGenerator {
     const backlogIssues = await jiraConnector.getBacklogTickets(squadUuids);
     logger.info('Fetched backlog tickets', { count: backlogIssues.length });
 
+    // Fetch blocked tickets
+    const blockedIssues = await jiraConnector.getBlockedTickets(squadUuids);
+    logger.info('Fetched blocked tickets', { count: blockedIssues.length });
+
     return {
       allIssues,
       completedIssues,
       newIssues,
       staleIssues,
-      backlogIssues
+      backlogIssues,
+      blockedIssues
     };
   }
 

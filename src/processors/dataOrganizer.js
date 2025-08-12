@@ -42,12 +42,14 @@ class DataOrganizer {
       const squadNew = this.filterIssuesBySquad(jiraData.newIssues, squad.jiraUuid);
       const squadStale = this.filterIssuesBySquad(jiraData.staleIssues, squad.jiraUuid);
       const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid);
+      const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid);
 
       return {
         completedTickets: this.formatCompletedTickets(squadCompleted, dateRange),
         changelogEvents: this.extractChangelogEvents(squadIssues, dateRange),
         staleTickets: this.formatStaleTickets(squadStale),
         backlogTickets: this.formatBacklogTickets(squadBacklog),
+        blockedTickets: this.formatBlockedTickets(squadBlocked),
         newTickets: this.formatNewTickets(squadNew, dateRange)
       };
     } catch (error) {
@@ -60,6 +62,7 @@ class DataOrganizer {
         changelogEvents: [],
         staleTickets: [],
         backlogTickets: [],
+        blockedTickets: [],
         newTickets: []
       };
     }
@@ -249,6 +252,25 @@ class DataOrganizer {
   }
 
   /**
+   * Format blocked tickets for display
+   */
+  formatBlockedTickets(issues) {
+    return issues.map(issue => {
+      const daysBlocked = DateUtils.daysSinceUpdate(issue.fields.updated);
+      
+      return {
+        key: issue.key,
+        summary: issue.fields.summary,
+        assignee: issue.fields.assignee?.displayName || 'Unassigned',
+        lastUpdated: DateUtils.formatForDisplay(issue.fields.updated),
+        daysBlocked,
+        priority: issue.fields.priority?.name || 'Medium',
+        jiraUrl: `${config.jira.baseUrl}/browse/${issue.key}`
+      };
+    }).sort((a, b) => b.daysBlocked - a.daysBlocked);
+  }
+
+  /**
    * Format new tickets for display
    */
   formatNewTickets(issues, dateRange) {
@@ -302,6 +324,7 @@ class DataOrganizer {
       totalChangelogEvents: 0,
       totalStale: 0,
       totalBacklog: 0,
+      totalBlocked: 0,
       totalNew: 0,
       squadsWithActivity: 0
     };
@@ -311,6 +334,7 @@ class DataOrganizer {
       summary.totalChangelogEvents += squadData.changelogEvents.length;
       summary.totalStale += squadData.staleTickets.length;
       summary.totalBacklog += squadData.backlogTickets.length;
+      summary.totalBlocked += squadData.blockedTickets.length;
       summary.totalNew += squadData.newTickets.length;
       
       if (squadData.completedTickets.length > 0 || squadData.changelogEvents.length > 0) {

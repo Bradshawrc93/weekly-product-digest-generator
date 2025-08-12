@@ -17,8 +17,8 @@ class NotionPageGenerator {
       const pageData = {
         title: `Weekly Report: ${dateRange.display}`,
         children: [
-          // AI TL;DR placeholder
-          ...this.createAITLDRSection(),
+          // AI TL;DR section
+          ...this.createAITLDRSection(metrics, organizedData),
           
           // Metrics table
           ...this.createMetricsTable(metrics),
@@ -44,6 +44,12 @@ class NotionPageGenerator {
           // Divider
           notion.createDividerBlock(),
           
+          // Blocked tickets section
+          ...this.createBlockedTicketsSection(organizedData),
+          
+          // Divider
+          notion.createDividerBlock(),
+          
           // On Deck section
           ...this.createOnDeckSection(organizedData)
         ]
@@ -64,17 +70,89 @@ class NotionPageGenerator {
   }
 
   /**
-   * Create AI TL;DR section (placeholder)
+   * Create AI TL;DR section
    */
-  createAITLDRSection() {
+  createAITLDRSection(metrics, organizedData) {
+    const aiSummary = this.generateAITLDRSummary(metrics, organizedData);
+    
     return [
       notion.createHeadingBlock('🤖 AI TL;DR', 1),
-      notion.createCalloutBlock(
-        'AI-powered summary coming soon! This section will provide intelligent insights and key highlights from the weekly data.',
-        '🚀'
-      ),
+      notion.createCalloutBlock(aiSummary, '🚀'),
       notion.createParagraphBlock('')
     ];
+  }
+
+  /**
+   * Generate AI TL;DR summary based on data
+   */
+  generateAITLDRSummary(metrics, organizedData) {
+    try {
+      // Calculate key metrics
+      const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
+      const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
+      const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
+      const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
+      const totalUpdated = Object.values(metrics).reduce((sum, squad) => sum + squad.updated, 0);
+
+      // Find most and least active squads
+      let mostActiveSquad = null;
+      let leastActiveSquad = null;
+      let maxActivity = 0;
+      let minActivity = Infinity;
+
+      Object.entries(metrics).forEach(([squadName, squadMetrics]) => {
+        const activity = squadMetrics.done + squadMetrics.updated + squadMetrics.created;
+        if (activity > maxActivity) {
+          maxActivity = activity;
+          mostActiveSquad = squadName;
+        }
+        if (activity < minActivity && activity > 0) {
+          minActivity = activity;
+          leastActiveSquad = squadName;
+        }
+      });
+
+      // Find squads with most stale tickets
+      const staleBySquad = Object.entries(metrics)
+        .filter(([_, squadMetrics]) => squadMetrics.stale > 0)
+        .sort(([_, a], [__, b]) => b.stale - a.stale);
+
+      // Generate summary
+      let summary = `Team activity was ${totalDone > 5 ? 'strong' : totalDone > 2 ? 'moderate' : 'minimal'} this week with ${totalDone} tickets completed across all squads. `;
+      
+      if (mostActiveSquad) {
+        const squadMetrics = metrics[mostActiveSquad];
+        summary += `${mostActiveSquad} squad led productivity with ${squadMetrics.done} completion${squadMetrics.done !== 1 ? 's' : ''} and ${squadMetrics.updated} update${squadMetrics.updated !== 1 ? 's' : ''}. `;
+      }
+
+      if (totalStale > 0) {
+        summary += `The concerning trend is ${totalStale} stale tickets across multiple squads`;
+        if (staleBySquad.length > 0) {
+          const topStaleSquad = staleBySquad[0];
+          summary += `, with ${topStaleSquad[0]} leading at ${topStaleSquad[1].stale} stale tickets`;
+        }
+        summary += '. ';
+      }
+
+      if (totalBlocked === 0) {
+        summary += 'No blocked tickets is positive. ';
+      } else {
+        summary += `${totalBlocked} blocked tickets need immediate attention. `;
+      }
+
+      if (totalStale > 10) {
+        summary += 'Immediate attention needed on workflow bottlenecks and stale ticket resolution.';
+      } else if (totalStale > 5) {
+        summary += 'Some attention needed on stale ticket management.';
+      } else {
+        summary += 'Overall workflow appears healthy.';
+      }
+
+      return summary;
+    } catch (error) {
+      logger.error('Failed to generate AI TL;DR summary', { error: error.message });
+      return 'AI summary generation failed. Please check the data and try again.';
+    }
   }
 
   /**
@@ -91,7 +169,8 @@ class NotionPageGenerator {
         ['Updated', ...this.squads.map(squad => metrics[squad.name]?.updated || 0)],
         ['Created', ...this.squads.map(squad => metrics[squad.name]?.created || 0)],
         ['Stale', ...this.squads.map(squad => metrics[squad.name]?.stale || 0)],
-        ['In-Progress', ...this.squads.map(squad => metrics[squad.name]?.inProgress || 0)]
+        ['In-Progress', ...this.squads.map(squad => metrics[squad.name]?.inProgress || 0)],
+        ['Blocked', ...this.squads.map(squad => metrics[squad.name]?.blocked || 0)]
       ];
 
       return [
@@ -120,7 +199,7 @@ class NotionPageGenerator {
       if (completedTickets.length > 0) {
         // Squad header
         blocks.push(
-          notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+          notion.createHeadingBlock(squad.displayName, 2)
         );
 
         // Completed tickets
@@ -221,20 +300,15 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Show all squads with stale tickets in compact format
+    // Show all squads with stale tickets using toggle blocks
     squadsWithStale.forEach(squad => {
       const squadData = organizedData[squad.name];
       const staleTickets = squadData?.staleTickets || [];
 
-      // Squad header
-      blocks.push(
-        notion.createHeadingBlock(`${squad.displayName}`, 2)
-      );
-
-      // Show first 3 stale tickets (most important ones)
-      const limitedStaleTickets = staleTickets.slice(0, 3);
+      // Create toggle children for all stale tickets
+      const toggleChildren = [];
       
-      limitedStaleTickets.forEach(ticket => {
+      staleTickets.forEach(ticket => {
         const richText = [
           notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
           notion.createRichText(' - '),
@@ -243,14 +317,60 @@ class NotionPageGenerator {
           notion.createRichText(` - ${ticket.daysStale} days stale`, { color: 'red_background' })
         ];
         
-        blocks.push(notion.createMixedParagraph(richText));
+        toggleChildren.push(notion.createMixedParagraph(richText));
       });
-      
-      // Add note if there were more stale tickets
-      if (staleTickets.length > 3) {
-        blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 3} more stale tickets.`));
-      }
 
+      // Create toggle block with squad name and all tickets
+      const toggleText = `${squad.displayName} (${staleTickets.length} stale tickets)`;
+      blocks.push(notion.createToggleBlock(toggleText, toggleChildren));
+      blocks.push(notion.createParagraphBlock(''));
+    });
+
+    return blocks;
+  }
+
+  /**
+   * Create Blocked Tickets section
+   */
+  createBlockedTicketsSection(organizedData) {
+    const blocks = [
+      notion.createHeadingBlock('🚪 Blocked - Needs Unblocking', 1)
+    ];
+
+    // Only show squads with blocked tickets
+    const squadsWithBlocked = this.squads.filter(squad => {
+      const squadData = organizedData[squad.name];
+      return squadData?.blockedTickets?.length > 0;
+    });
+
+    if (squadsWithBlocked.length === 0) {
+      blocks.push(notion.createParagraphBlock('No blocked tickets this week.'));
+      return blocks;
+    }
+
+    // Show all squads with blocked tickets using toggle blocks
+    squadsWithBlocked.forEach(squad => {
+      const squadData = organizedData[squad.name];
+      const blockedTickets = squadData?.blockedTickets || [];
+
+      // Create toggle children for all blocked tickets
+      const toggleChildren = [];
+      
+      blockedTickets.forEach(ticket => {
+        const richText = [
+          notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
+          notion.createRichText(' - '),
+          notion.createRichText(ticket.summary),
+          notion.createRichText(` (${ticket.assignee})`, { italic: true }),
+          notion.createRichText(` - ${ticket.daysBlocked} days blocked`, { color: 'orange_background' })
+        ];
+        
+        toggleChildren.push(notion.createMixedParagraph(richText));
+      });
+
+      // Create toggle block with squad name and all tickets
+      const toggleText = `${squad.displayName} (${blockedTickets.length} blocked tickets)`;
+      blocks.push(notion.createToggleBlock(toggleText, toggleChildren));
       blocks.push(notion.createParagraphBlock(''));
     });
 
@@ -276,29 +396,25 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Show all squads with backlog tickets in compact format
+    // Show all squads with backlog tickets using toggle blocks
     squadsWithBacklog.forEach(squad => {
       const squadData = organizedData[squad.name];
       const backlogTickets = squadData?.backlogTickets || [];
 
-      // Squad header
-      blocks.push(
-        notion.createHeadingBlock(`${squad.displayName}`, 2)
-      );
+      // Create toggle children for all backlog tickets
+      const toggleChildren = [];
 
       // Group by priority
       const groupedByPriority = this.groupTicketsByPriority(backlogTickets);
       
       for (const [priority, tickets] of Object.entries(groupedByPriority)) {
         if (tickets.length > 0) {
-          blocks.push(
+          toggleChildren.push(
             notion.createHeadingBlock(`${priority} Priority`, 3)
           );
 
-          // Show first 3 tickets per priority
-          const limitedTickets = tickets.slice(0, 3);
-          
-          limitedTickets.forEach(ticket => {
+          // Show all tickets per priority
+          tickets.forEach(ticket => {
             const richText = [
               notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
               notion.createRichText(' - '),
@@ -306,17 +422,18 @@ class NotionPageGenerator {
               notion.createRichText(` (${ticket.assignee})`, { italic: true })
             ];
             
-            blocks.push(notion.createMixedParagraph(richText));
+            toggleChildren.push(notion.createMixedParagraph(richText));
           });
-          
-          // Add note if there were more tickets
-          if (tickets.length > 3) {
-            blocks.push(notion.createParagraphBlock(`... and ${tickets.length - 3} more ${priority.toLowerCase()} priority tickets.`));
-          }
 
-          blocks.push(notion.createParagraphBlock(''));
+          toggleChildren.push(notion.createParagraphBlock(''));
         }
       }
+
+      // Create toggle block with squad name and all tickets
+      const totalTickets = backlogTickets.length;
+      const toggleText = `${squad.displayName} (${totalTickets} backlog tickets)`;
+      blocks.push(notion.createToggleBlock(toggleText, toggleChildren));
+      blocks.push(notion.createParagraphBlock(''));
     });
 
     return blocks;
