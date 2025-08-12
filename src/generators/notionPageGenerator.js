@@ -228,10 +228,8 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Limit to first 2 squads with stale tickets (to leave room for others)
-    const limitedSquads = squadsWithStale.slice(0, 2);
-
-    for (const squad of limitedSquads) {
+    // Show all squads with stale tickets in compact format
+    squadsWithStale.forEach(squad => {
       const squadData = organizedData[squad.name];
       const staleTickets = squadData?.staleTickets || [];
 
@@ -240,8 +238,8 @@ class NotionPageGenerator {
         notion.createHeadingBlock(`**${squad.displayName}**`, 2)
       );
 
-      // Limit to first 5 stale tickets per squad
-      const limitedStaleTickets = staleTickets.slice(0, 5);
+      // Show first 2 stale tickets
+      const limitedStaleTickets = staleTickets.slice(0, 2);
       
       // Stale tickets
       limitedStaleTickets.forEach(ticket => {
@@ -257,51 +255,12 @@ class NotionPageGenerator {
       });
       
       // Add note if there were more stale tickets
-      if (staleTickets.length > 5) {
-        blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 5} more stale tickets.`));
+      if (staleTickets.length > 2) {
+        blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 2} more stale tickets.`));
       }
 
       blocks.push(notion.createParagraphBlock(''));
-    }
-
-    // Add detailed sections for remaining squads with stale tickets
-    if (squadsWithStale.length > 2) {
-      const remainingSquads = squadsWithStale.slice(2);
-      blocks.push(notion.createHeadingBlock('**Other Squads with Stale Tickets**', 2));
-      
-      remainingSquads.forEach(squad => {
-        const squadData = organizedData[squad.name];
-        const staleTickets = squadData?.staleTickets || [];
-
-        // Squad header
-        blocks.push(
-          notion.createHeadingBlock(`**${squad.displayName}**`, 3)
-        );
-
-        // Limit to first 3 stale tickets per squad
-        const limitedStaleTickets = staleTickets.slice(0, 3);
-        
-        // Stale tickets
-        limitedStaleTickets.forEach(ticket => {
-          const richText = [
-            notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
-            notion.createRichText(' - '),
-            notion.createRichText(ticket.summary),
-            notion.createRichText(` (${ticket.assignee})`, { italic: true }),
-            notion.createRichText(` - ${ticket.daysStale} days stale`, { color: 'red_background' })
-          ];
-          
-          blocks.push(notion.createMixedParagraph(richText));
-        });
-        
-        // Add note if there were more stale tickets
-        if (staleTickets.length > 3) {
-          blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 3} more stale tickets.`));
-        }
-
-        blocks.push(notion.createParagraphBlock(''));
-      });
-    }
+    });
 
     return blocks;
   }
