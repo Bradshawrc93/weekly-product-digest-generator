@@ -1,0 +1,70 @@
+{
+  "squads": [
+    {
+      "name": "Customer-Facing",
+      "displayName": "Customer-Facing (Empower/SmarterAccess UI)",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-88",
+      "description": "Customer-facing UI and user experience"
+    },
+    {
+      "name": "HITL",
+      "displayName": "Human in the loop (HITL)",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-86",
+      "description": "Human in the loop processes and workflows"
+    },
+    {
+      "name": "Developer Efficiency",
+      "displayName": "Developer Efficiency",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-87",
+      "description": "Developer tools and efficiency improvements"
+    },
+    {
+      "name": "Data Collection",
+      "displayName": "Data Collection / Data Lakehouse",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-85",
+      "description": "Data collection and lakehouse infrastructure"
+    },
+    {
+      "name": "ThoughtHub Platform",
+      "displayName": "ThoughtHub Platform",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-84",
+      "description": "ThoughtHub platform development"
+    },
+    {
+      "name": "Core RCM",
+      "displayName": "Core RCM",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-83",
+      "description": "Core revenue cycle management"
+    },
+    {
+      "name": "Voice",
+      "displayName": "Voice",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-82",
+      "description": "Voice technology and speech processing"
+    },
+    {
+      "name": "Medical Coding",
+      "displayName": "Medical Coding",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-80",
+      "description": "Medical coding and classification"
+    },
+    {
+      "name": "Deep Research",
+      "displayName": "Deep Research",
+      "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-81",
+      "description": "Deep research and advanced analytics"
+    }
+  ],
+  "statusCategories": {
+    "backlog": ["Backlog", "Open"],
+    "todo": ["To Do", "Ready", "Ready for Development"],
+    "inProgress": ["In Progress", "Development", "Review", "Testing"],
+    "done": ["Done", "Closed", "Resolved", "Complete"]
+  },
+  "settings": {
+    "reportTitle": "Weekly Jira Report",
+    "staleTicketThreshold": 5,
+    "lookbackDays": 7,
+    "dateFormat": "MMM D, YYYY"
+  }
+}
