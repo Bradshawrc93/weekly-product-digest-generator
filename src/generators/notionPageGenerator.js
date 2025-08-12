@@ -172,16 +172,14 @@ class NotionPageGenerator {
 
       // Squad header
       blocks.push(
-        notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+        notion.createHeadingBlock(`${squad.displayName}`, 2)
       );
 
       // Group events by ticket
       const groupedEvents = this.groupChangelogByTicket(changelogEvents);
       
-      // Show first ticket with events
-      if (groupedEvents.length > 0) {
-        const ticketGroup = groupedEvents[0];
-        
+      // Show all tickets with events
+      groupedEvents.forEach(ticketGroup => {
         // Ticket header
         const ticketHeader = [
           notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
@@ -198,12 +196,7 @@ class NotionPageGenerator {
         }
 
         blocks.push(notion.createParagraphBlock(''));
-      }
-      
-      // Add summary of remaining activity
-      if (groupedEvents.length > 1) {
-        blocks.push(notion.createParagraphBlock(`... and ${groupedEvents.length - 1} more tickets with changes.`));
-      }
+      });
     });
 
     return blocks;
@@ -235,13 +228,12 @@ class NotionPageGenerator {
 
       // Squad header
       blocks.push(
-        notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+        notion.createHeadingBlock(`${squad.displayName}`, 2)
       );
 
-      // Show first 2 stale tickets
-      const limitedStaleTickets = staleTickets.slice(0, 2);
+      // Show first 3 stale tickets (most important ones)
+      const limitedStaleTickets = staleTickets.slice(0, 3);
       
-      // Stale tickets
       limitedStaleTickets.forEach(ticket => {
         const richText = [
           notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
@@ -255,8 +247,8 @@ class NotionPageGenerator {
       });
       
       // Add note if there were more stale tickets
-      if (staleTickets.length > 2) {
-        blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 2} more stale tickets.`));
+      if (staleTickets.length > 3) {
+        blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 3} more stale tickets.`));
       }
 
       blocks.push(notion.createParagraphBlock(''));
@@ -291,7 +283,7 @@ class NotionPageGenerator {
 
       // Squad header
       blocks.push(
-        notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+        notion.createHeadingBlock(`${squad.displayName}`, 2)
       );
 
       // Group by priority
