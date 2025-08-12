@@ -154,41 +154,63 @@ class NotionPageGenerator {
       notion.createHeadingBlock('📝 Change Log', 1)
     ];
 
-    for (const squad of this.squads) {
+    // Only show squads with changelog events
+    const squadsWithEvents = this.squads.filter(squad => {
+      const squadData = organizedData[squad.name];
+      return squadData?.changelogEvents?.length > 0;
+    });
+
+    if (squadsWithEvents.length === 0) {
+      blocks.push(notion.createParagraphBlock('No changelog events this week.'));
+      return blocks;
+    }
+
+    // Limit to first 3 squads with events
+    const limitedSquads = squadsWithEvents.slice(0, 3);
+
+    for (const squad of limitedSquads) {
       const squadData = organizedData[squad.name];
       const changelogEvents = squadData?.changelogEvents || [];
 
-      if (changelogEvents.length > 0) {
-        // Squad header
-        blocks.push(
-          notion.createHeadingBlock(`**${squad.displayName}**`, 2)
-        );
+      // Squad header
+      blocks.push(
+        notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+      );
 
-        // Group events by ticket
-        const groupedEvents = this.groupChangelogByTicket(changelogEvents);
-        
-        groupedEvents.forEach(ticketGroup => {
-          // Ticket header
-          const ticketHeader = [
-            notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
-            notion.createRichText(' - '),
-            notion.createRichText(ticketGroup.summary, { bold: true })
-          ];
-          blocks.push(notion.createMixedParagraph(ticketHeader));
+      // Group events by ticket
+      const groupedEvents = this.groupChangelogByTicket(changelogEvents);
+      
+      // Limit to first 3 tickets per squad
+      const limitedEvents = groupedEvents.slice(0, 3);
+      
+      limitedEvents.forEach(ticketGroup => {
+        // Ticket header
+        const ticketHeader = [
+          notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
+          notion.createRichText(' - '),
+          notion.createRichText(ticketGroup.summary, { bold: true })
+        ];
+        blocks.push(notion.createMixedParagraph(ticketHeader));
 
-          // Events for this ticket
-          ticketGroup.events.forEach(event => {
-            const eventText = `${event.displayDate} - ${event.author} ${this.formatChangelogEvent(event)}`;
-            blocks.push(notion.createBulletItem(eventText));
-          });
-
-          blocks.push(notion.createParagraphBlock(''));
+        // Events for this ticket (limit to 2 events per ticket)
+        const limitedTicketEvents = ticketGroup.events.slice(0, 2);
+        limitedTicketEvents.forEach(event => {
+          const eventText = `${event.displayDate} - ${event.author} ${this.formatChangelogEvent(event)}`;
+          blocks.push(notion.createBulletItem(eventText));
         });
+
+        blocks.push(notion.createParagraphBlock(''));
+      });
+      
+      // Add note if there were more events
+      if (groupedEvents.length > 3) {
+        blocks.push(notion.createParagraphBlock(`... and ${groupedEvents.length - 3} more tickets with changes.`));
       }
     }
 
-    if (blocks.length === 1) {
-      blocks.push(notion.createParagraphBlock('No changelog events this week.'));
+    // Add note if there were more squads
+    if (squadsWithEvents.length > 3) {
+      blocks.push(notion.createParagraphBlock(`... and ${squadsWithEvents.length - 3} more squads with changes.`));
     }
 
     return blocks;
@@ -202,35 +224,56 @@ class NotionPageGenerator {
       notion.createHeadingBlock('⚠️ Stale - Needs Review', 1)
     ];
 
-    for (const squad of this.squads) {
+    // Only show squads with stale tickets
+    const squadsWithStale = this.squads.filter(squad => {
+      const squadData = organizedData[squad.name];
+      return squadData?.staleTickets?.length > 0;
+    });
+
+    if (squadsWithStale.length === 0) {
+      blocks.push(notion.createParagraphBlock('No stale tickets this week.'));
+      return blocks;
+    }
+
+    // Limit to first 5 squads with stale tickets
+    const limitedSquads = squadsWithStale.slice(0, 5);
+
+    for (const squad of limitedSquads) {
       const squadData = organizedData[squad.name];
       const staleTickets = squadData?.staleTickets || [];
 
-      if (staleTickets.length > 0) {
-        // Squad header
-        blocks.push(
-          notion.createHeadingBlock(`**${squad.displayName}**`, 2)
-        );
+      // Squad header
+      blocks.push(
+        notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+      );
 
-        // Stale tickets
-        staleTickets.forEach(ticket => {
-          const richText = [
-            notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
-            notion.createRichText(' - '),
-            notion.createRichText(ticket.summary),
-            notion.createRichText(` (${ticket.assignee})`, { italic: true }),
-            notion.createRichText(` - ${ticket.daysStale} days stale`, { color: 'red_background' })
-          ];
-          
-          blocks.push(notion.createMixedParagraph(richText));
-        });
-
-        blocks.push(notion.createParagraphBlock(''));
+      // Limit to first 5 stale tickets per squad
+      const limitedStaleTickets = staleTickets.slice(0, 5);
+      
+      // Stale tickets
+      limitedStaleTickets.forEach(ticket => {
+        const richText = [
+          notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
+          notion.createRichText(' - '),
+          notion.createRichText(ticket.summary),
+          notion.createRichText(` (${ticket.assignee})`, { italic: true }),
+          notion.createRichText(` - ${ticket.daysStale} days stale`, { color: 'red_background' })
+        ];
+        
+        blocks.push(notion.createMixedParagraph(richText));
+      });
+      
+      // Add note if there were more stale tickets
+      if (staleTickets.length > 5) {
+        blocks.push(notion.createParagraphBlock(`... and ${staleTickets.length - 5} more stale tickets.`));
       }
+
+      blocks.push(notion.createParagraphBlock(''));
     }
 
-    if (blocks.length === 1) {
-      blocks.push(notion.createParagraphBlock('No stale tickets this week.'));
+    // Add note if there were more squads
+    if (squadsWithStale.length > 5) {
+      blocks.push(notion.createParagraphBlock(`... and ${squadsWithStale.length - 5} more squads with stale tickets.`));
     }
 
     return blocks;
@@ -244,44 +287,65 @@ class NotionPageGenerator {
       notion.createHeadingBlock('🎯 On Deck', 1)
     ];
 
-    for (const squad of this.squads) {
+    // Only show squads with backlog tickets
+    const squadsWithBacklog = this.squads.filter(squad => {
+      const squadData = organizedData[squad.name];
+      return squadData?.backlogTickets?.length > 0;
+    });
+
+    if (squadsWithBacklog.length === 0) {
+      blocks.push(notion.createParagraphBlock('No backlog tickets to display.'));
+      return blocks;
+    }
+
+    // Limit to first 3 squads with backlog
+    const limitedSquads = squadsWithBacklog.slice(0, 3);
+
+    for (const squad of limitedSquads) {
       const squadData = organizedData[squad.name];
       const backlogTickets = squadData?.backlogTickets || [];
 
-      if (backlogTickets.length > 0) {
-        // Squad header
-        blocks.push(
-          notion.createHeadingBlock(`**${squad.displayName}**`, 2)
-        );
+      // Squad header
+      blocks.push(
+        notion.createHeadingBlock(`**${squad.displayName}**`, 2)
+      );
 
-        // Group by priority
-        const groupedByPriority = this.groupTicketsByPriority(backlogTickets);
-        
-        for (const [priority, tickets] of Object.entries(groupedByPriority)) {
-          if (tickets.length > 0) {
-            blocks.push(
-              notion.createHeadingBlock(`${priority} Priority`, 3)
-            );
+      // Group by priority
+      const groupedByPriority = this.groupTicketsByPriority(backlogTickets);
+      
+      for (const [priority, tickets] of Object.entries(groupedByPriority)) {
+        if (tickets.length > 0) {
+          blocks.push(
+            notion.createHeadingBlock(`${priority} Priority`, 3)
+          );
 
-            tickets.forEach(ticket => {
-              const richText = [
-                notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
-                notion.createRichText(' - '),
-                notion.createRichText(ticket.summary),
-                notion.createRichText(` (${ticket.assignee})`, { italic: true })
-              ];
-              
-              blocks.push(notion.createMixedParagraph(richText));
-            });
-
-            blocks.push(notion.createParagraphBlock(''));
+          // Limit to first 5 tickets per priority
+          const limitedTickets = tickets.slice(0, 5);
+          
+          limitedTickets.forEach(ticket => {
+            const richText = [
+              notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
+              notion.createRichText(' - '),
+              notion.createRichText(ticket.summary),
+              notion.createRichText(` (${ticket.assignee})`, { italic: true })
+            ];
+            
+            blocks.push(notion.createMixedParagraph(richText));
+          });
+          
+          // Add note if there were more tickets
+          if (tickets.length > 5) {
+            blocks.push(notion.createParagraphBlock(`... and ${tickets.length - 5} more ${priority.toLowerCase()} priority tickets.`));
           }
+
+          blocks.push(notion.createParagraphBlock(''));
         }
       }
     }
 
-    if (blocks.length === 1) {
-      blocks.push(notion.createParagraphBlock('No backlog tickets to display.'));
+    // Add note if there were more squads
+    if (squadsWithBacklog.length > 3) {
+      blocks.push(notion.createParagraphBlock(`... and ${squadsWithBacklog.length - 3} more squads with backlog tickets.`));
     }
 
     return blocks;
