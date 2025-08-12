@@ -7,11 +7,11 @@
 
 # Bot User OAuth Token (xoxb-...)
 # Get this from: https://api.slack.com/apps > Your App > OAuth & Permissions
-SLACK_BOT_TOKEN=xoxb-828520110258-9332158844806-cpLkneeCXIGuVeDKmgVk67oo
+SLACK_BOT_TOKEN=your-slack-bot-token-here
 
 # App Signing Secret
 # Get this from: https://api.slack.com/apps > Your App > Basic Information
-SLACK_SIGNING_SECRET=cebdea09fdcf720e457419127c45711f
+SLACK_SIGNING_SECRET=your-slack-signing-secret-here
 
 # =============================================================================
 # JIRA CONFIGURATION
@@ -21,11 +21,11 @@ SLACK_SIGNING_SECRET=cebdea09fdcf720e457419127c45711f
 JIRA_BASE_URL=https://thoughtfulautomation.atlassian.net
 
 # Email address used for Jira API authentication
-JIRA_EMAIL=cody.bradshaw@thoughtful.ai
+JIRA_EMAIL=your-jira-email@company.com
 
 # Jira API Token (not your password)
 # Generate at: https://id.atlassian.com/manage-profile/security/api-tokens
-JIRA_API_TOKEN=ATATT3xFfGF06TuBo9htsHVF7JP-pQkD66mz7X5UoGAvMYfgqrAGdRvzLEviIQkKrrzLoEyhda_iDHyxoj8pNkcbLGrFzEGadg9yVeOX-oukg_bin-JwdsTcNlsB_4iJHNY52xn_YK-2p8EdPlnJ6qMJdgcUdwA5wAUmzwLpyJhPWlePzeJiJY0=C5062826
+JIRA_API_TOKEN=your-jira-api-token-here
 
 # =============================================================================
 # NOTION CONFIGURATION
@@ -33,7 +33,7 @@ JIRA_API_TOKEN=ATATT3xFfGF06TuBo9htsHVF7JP-pQkD66mz7X5UoGAvMYfgqrAGdRvzLEviIQkKr
 
 # Notion Integration API Key
 # Get this from: https://www.notion.so/my-integrations
-NOTION_API_KEY=secret_OhBPZ9m96U0HUXXSInlVO3x5WTyiZ0AkC4419YtfnAp
+NOTION_API_KEY=your-notion-api-key-here
 
 # Target Notion Database ID where digest pages will be created
 # This is the ID from the database URL: https://notion.so/thoughtfulautomation/24cf43a78fa480bfa37ce13900e224c1
@@ -59,7 +59,7 @@ BITBUCKET_WORKSPACE=your-company-workspace
 
 # OpenAI API Key for AI-powered summarization
 # Get this from: https://platform.openai.com/api-keys
-OPENAI_API_KEY=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
+OPENAI_API_KEY=your-openai-api-key-here
 
 # =============================================================================
 # OPTIONAL CONFIGURATION
