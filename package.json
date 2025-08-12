@@ -7,6 +7,9 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
+    "scheduler": "node src/runScheduler.js",
+    "scheduler:dev": "nodemon src/runScheduler.js",
+    "scheduler:test": "node src/testScheduler.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "generate-report": "node src/index.js",
@@ -39,7 +42,8 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
-    "nock": "^13.3.3"
+    "nock": "^13.3.3",
+    "nodemon": "^3.0.2"
   },
   "engines": {
     "node": ">=18.0.0",
