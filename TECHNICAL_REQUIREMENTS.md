@@ -8,26 +8,30 @@ This document defines the technical requirements for a focused weekly report gen
 
 ### 1. **Jira Data Collection**
 - **Issue Fetching**: Retrieve all Jira issues updated in the last 7 days
-- **Team/Squad Filtering**: Organize data by Jira Team field
+- **Team/Squad Filtering**: Organize data by Jira Team field using UUIDs
 - **Changelog Collection**: Gather all history log events from the last 7 days
 - **Status Tracking**: Monitor ticket status changes and assignments
+- **Priority Data**: Capture priority information for backlog organization
 
 ### 2. **Data Processing & Analysis**
-- **Work Completed**: Identify issues with work done in the last 7 days
-- **Stale Ticket Detection**: Find tickets in progress with no updates in last 5 days
-- **Action Counting**: Count all activities (comments, status changes, PRs, etc.) per squad
-- **Assignee Analysis**: Track tickets per assignee broken down by status
+- **Completed Work**: Identify issues moved to Done status in the last 7 days
+- **Updated Tickets**: Count tickets with any activity in the last 7 days
+- **Created Tickets**: Count new tickets created in the last 7 days
+- **Stale Ticket Detection**: Find in-progress tickets with no updates in last 5 days
+- **In-Progress Count**: Count tickets currently in progress
+- **Backlog Analysis**: Organize backlog tickets by priority
 
 ### 3. **Report Generation**
-- **Weekly Notion Page**: Create structured Notion page in database
-- **Squad Summaries**: Per-squad breakdown of completed work
-- **Stale Ticket Reports**: List of tickets needing attention per squad
-- **Changelog Rollup**: Chronological list of all actions per squad
-- **Action Metrics**: Weekly action counts for trend analysis
+- **AI TL;DR**: Placeholder for future AI-generated summary
+- **Metrics Table**: Notion table with squad columns and metric rows
+- **What Shipped Section**: Completed tickets grouped by squad with Jira links
+- **Change Log Section**: Detailed history log events per ticket per squad
+- **Stale Tickets Section**: Tickets needing review per squad
+- **On Deck Section**: Backlog tickets organized by priority per squad
 
 ### 4. **Data Persistence**
-- **Action Logging**: Maintain rolling file of weekly action counts per squad
-- **Historical Data**: Store data for future graphing and trend analysis
+- **Weekly Metrics**: Store date range, squad, and metric counts for analysis
+- **Historical Data**: Maintain rolling file of weekly metrics for trend analysis
 
 ## Technical Specifications
 
@@ -71,16 +75,20 @@ This document defines the technical requirements for a focused weekly report gen
 
 #### **Notion Page Structure**
 - **Page Title**: Weekly report with date range (e.g., "Weekly Report: Aug 1-7, 2024")
-- **Squad Sections**: Separate section for each squad/team
-- **Work Completed**: List of issues with work done in last 7 days
-- **Stale Tickets**: List of in-progress tickets with no updates in last 5 days
-- **Changelog**: Chronological list of all actions per squad
-- **Assignee Breakdown**: Tickets per assignee by status category
+- **AI TL;DR**: Placeholder section for future AI summary
+- **Metrics Table**: Notion table with:
+  - **Columns**: 10 squads
+  - **Rows**: Done | Updated | Created | Stale | In-Progress
+  - **Values**: Counts for each metric per squad
+- **What Shipped**: Completed tickets grouped by squad with Jira links
+- **Change Log**: History log events per ticket per squad
+- **Stale - Needs Review**: In-progress tickets with no updates in 5+ days
+- **On Deck**: Backlog tickets organized by priority per squad
 
 #### **Data Files**
-- **Action Counts**: JSON file with weekly action counts per squad
-- **Historical Data**: Rolling log of action counts for trend analysis
-- **Status Breakdown**: Per-assignee ticket counts by status category
+- **Weekly Metrics**: JSON file with date range, squad, and metric counts
+- **Historical Data**: Rolling log of weekly metrics for trend analysis
+- **Structure**: `{dateRange, squads: {squadName: {done, updated, created, stale, inProgress}}}`
 
 ### Performance Requirements
 
@@ -183,11 +191,11 @@ This document defines the technical requirements for a focused weekly report gen
 - Enhanced error handling and validation
 - Performance optimization
 
-### **Phase 4: Slack Integration (Future)**
-- Slack data collection and integration
-- Combined Jira + Slack reporting
-- Enhanced action tracking across platforms
-- Advanced analytics and insights
+### **Phase 4: AI TL;DR Generation (Future)**
+- AI-powered summary generation
+- Intelligent insights and recommendations
+- Automated executive summaries
+- Enhanced reporting capabilities
 
 ---
 
@@ -196,17 +204,39 @@ This document defines the technical requirements for a focused weekly report gen
 ## Key Data Points to Track
 
 ### **Per Squad (Team)**
-- **Work Completed**: Issues with activity in last 7 days
-- **Stale Tickets**: In-progress tickets with no updates in last 5 days
-- **Action Count**: Total number of activities (comments, status changes, etc.)
-- **Changelog Events**: Chronological list of all actions
+- **Done**: Tickets moved to Done status in last 7 days
+- **Updated**: Tickets with any activity in last 7 days
+- **Created**: New tickets created in last 7 days
+- **Stale**: In-progress tickets with no updates in last 5 days
+- **In-Progress**: Current count of tickets in progress
+- **Changelog Events**: History log events per ticket in last 7 days
+- **Backlog Tickets**: Tickets in backlog organized by priority
 
-### **Per Assignee**
-- **Ticket Counts**: Number of tickets by status category
-- **Status Breakdown**: Backlog, To-Do, In Progress, Done
-- **Activity Level**: Based on recent updates and actions
+### **Weekly Metrics Structure**
+```json
+{
+  "dateRange": "2024-08-01 to 2024-08-07",
+  "squads": {
+    "Customer-Facing": {
+      "done": 5,
+      "updated": 12,
+      "created": 3,
+      "stale": 2,
+      "inProgress": 8
+    },
+    "HITL": {
+      "done": 3,
+      "updated": 8,
+      "created": 1,
+      "stale": 1,
+      "inProgress": 6
+    }
+    // ... other squads
+  }
+}
+```
 
 ### **Historical Data**
-- **Weekly Action Counts**: Rolling file of actions per squad per week
-- **Trend Data**: For future graphing and analysis
-- **Performance Metrics**: For team velocity tracking
+- **Weekly Metrics File**: Rolling log of weekly metrics for trend analysis
+- **Data Analysis**: For future graphing and performance tracking
+- **Squad Performance**: Track velocity and activity patterns over time
