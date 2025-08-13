@@ -20,9 +20,6 @@ class NotionPageGenerator {
           // AI TL;DR section
           ...this.createAITLDRSection(metrics, organizedData),
           
-          // Metrics table
-          ...this.createMetricsTable(metrics),
-          
           // Divider
           notion.createDividerBlock(),
           
