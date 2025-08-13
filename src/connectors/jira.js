@@ -94,10 +94,10 @@ class JiraConnector {
   }
 
   /**
-   * Get stale tickets (in progress with no updates in 5+ days)
+   * Get stale tickets (in progress with no updates in 15+ days)
    */
   async getStaleTickets(squadUuids = null) {
-    let jql = 'status in ("In Progress") AND updated <= -5d';
+    let jql = 'status in ("In Progress") AND updated <= -15d';
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');

@@ -167,9 +167,9 @@
 updated >= -7d ORDER BY updated DESC
 ```
 
-#### **Stale Tickets (No Updates in 5+ Days)**
+#### **Stale Tickets (No Updates in 15+ Days)**
 ```sql
-status in ("In Progress") AND updated <= -5d ORDER BY updated ASC
+status in ("In Progress") AND updated <= -15d ORDER BY updated ASC
 ```
 
 #### **Completed Tickets (Moved to Done in Last 7 Days)**
