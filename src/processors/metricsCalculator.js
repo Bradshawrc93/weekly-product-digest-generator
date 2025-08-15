@@ -44,11 +44,14 @@ class MetricsCalculator {
       const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid);
       const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid);
 
+      // Filter out Workstream tickets from stale metrics
+      const filteredSquadStale = this.filterOutWorkstreamTickets(squadStale);
+
       // Calculate metrics
       const done = squadCompleted.length;
       const updated = this.countUpdatedIssues(squadIssues, dateRange);
       const created = squadNew.length;
-      const stale = squadStale.length;
+      const stale = filteredSquadStale.length;
       const inProgress = this.countInProgressIssues(squadIssues);
       const blocked = squadBlocked.length;
 
@@ -78,6 +81,16 @@ class MetricsCalculator {
     return issues.filter(issue => {
       const teamUuid = this.getTeamUuidFromIssue(issue);
       return teamUuid === squadUuid;
+    });
+  }
+
+  /**
+   * Filter out Workstream tickets from issues
+   */
+  filterOutWorkstreamTickets(issues) {
+    return issues.filter(issue => {
+      const issueType = issue.fields.issuetype?.name;
+      return issueType !== 'Workstream';
     });
   }
 

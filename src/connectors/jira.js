@@ -89,7 +89,8 @@ class JiraConnector {
       'assignee', 
       'created', 
       'updated',
-      'customfield_10001' // Team field
+      'customfield_10001', // Team field
+      'issuetype' // Issue type field
     ]);
   }
 
@@ -97,7 +98,7 @@ class JiraConnector {
    * Get stale tickets (in progress with no updates in 15+ days)
    */
   async getStaleTickets(squadUuids = null) {
-    let jql = 'status in ("In Progress") AND updated <= -15d';
+    let jql = 'status in ("In Progress") AND updated <= -15d AND issuetype != "Workstream"';
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
@@ -113,7 +114,8 @@ class JiraConnector {
       'assignee', 
       'created', 
       'updated',
-      'customfield_10001' // Team field
+      'customfield_10001', // Team field
+      'issuetype' // Issue type field
     ]);
   }
 
@@ -137,7 +139,8 @@ class JiraConnector {
       'assignee', 
       'created', 
       'updated',
-      'customfield_10001' // Team field
+      'customfield_10001', // Team field
+      'issuetype' // Issue type field
     ]);
   }
 
@@ -161,7 +164,8 @@ class JiraConnector {
       'assignee', 
       'created', 
       'updated',
-      'customfield_10001' // Team field
+      'customfield_10001', // Team field
+      'issuetype' // Issue type field
     ]);
   }
 
@@ -169,7 +173,7 @@ class JiraConnector {
    * Get backlog tickets organized by priority
    */
   async getBacklogTickets(squadUuids = null) {
-    let jql = 'status in ("Backlog", "Open")';
+    let jql = 'status in ("Backlog", "Open") AND issuetype != "Workstream"';
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
@@ -185,7 +189,8 @@ class JiraConnector {
       'assignee', 
       'created', 
       'updated',
-      'customfield_10001' // Team field
+      'customfield_10001', // Team field
+      'issuetype' // Issue type field
     ]);
   }
 
@@ -209,7 +214,8 @@ class JiraConnector {
       'assignee', 
       'created', 
       'updated',
-      'customfield_10001' // Team field
+      'customfield_10001', // Team field
+      'issuetype' // Issue type field
     ]);
   }
 

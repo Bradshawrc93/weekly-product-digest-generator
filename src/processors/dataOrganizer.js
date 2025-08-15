@@ -44,11 +44,15 @@ class DataOrganizer {
       const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid);
       const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid);
 
+      // Filter out Workstream tickets from stale and backlog (on deck) categories
+      const filteredSquadStale = this.filterOutWorkstreamTickets(squadStale);
+      const filteredSquadBacklog = this.filterOutWorkstreamTickets(squadBacklog);
+
       return {
         completedTickets: this.formatCompletedTickets(squadCompleted, dateRange),
         changelogEvents: this.extractChangelogEvents(squadIssues, dateRange),
-        staleTickets: this.formatStaleTickets(squadStale),
-        backlogTickets: this.formatBacklogTickets(squadBacklog),
+        staleTickets: this.formatStaleTickets(filteredSquadStale),
+        backlogTickets: this.formatBacklogTickets(filteredSquadBacklog),
         blockedTickets: this.formatBlockedTickets(squadBlocked),
         newTickets: this.formatNewTickets(squadNew, dateRange)
       };
@@ -75,6 +79,16 @@ class DataOrganizer {
     return issues.filter(issue => {
       const teamUuid = this.getTeamUuidFromIssue(issue);
       return teamUuid === squadUuid;
+    });
+  }
+
+  /**
+   * Filter out Workstream tickets from issues
+   */
+  filterOutWorkstreamTickets(issues) {
+    return issues.filter(issue => {
+      const issueType = issue.fields.issuetype?.name;
+      return issueType !== 'Workstream';
     });
   }
 
