@@ -95,7 +95,41 @@ class JiraConnector {
   }
 
   /**
+   * Get children of an epic
+   */
+  async getEpicChildren(epicKey) {
+    try {
+      const jql = `"Epic Link" = "${epicKey}"`;
+      
+      const children = await this.searchIssues(jql, [
+        'summary', 
+        'status', 
+        'priority', 
+        'assignee', 
+        'created', 
+        'updated',
+        'customfield_10001', // Team field
+        'issuetype' // Issue type field
+      ]);
+
+      logger.info('Epic children fetched', { 
+        epicKey,
+        childCount: children.length 
+      });
+
+      return children;
+    } catch (error) {
+      logger.error('Failed to fetch epic children', { 
+        epicKey,
+        error: error.message 
+      });
+      return [];
+    }
+  }
+
+  /**
    * Get stale tickets (in progress with no updates in 15+ days)
+   * Excludes epics that have children with recent activity
    */
   async getStaleTickets(squadUuids = null) {
     let jql = 'status in ("In Progress") AND updated <= -15d AND issuetype != "Workstream"';
@@ -107,7 +141,7 @@ class JiraConnector {
     
     jql += ' ORDER BY updated ASC';
     
-    return this.searchIssues(jql, [
+    const staleTickets = await this.searchIssues(jql, [
       'summary', 
       'status', 
       'priority', 
@@ -117,6 +151,36 @@ class JiraConnector {
       'customfield_10001', // Team field
       'issuetype' // Issue type field
     ]);
+
+    // Filter out epics that have children with recent activity
+    const filteredStaleTickets = [];
+    
+    for (const ticket of staleTickets) {
+      const issueType = ticket.fields.issuetype?.name;
+      
+      // If it's an epic, check if it has children with recent activity
+      if (issueType === 'Epic') {
+        const children = await this.getEpicChildren(ticket.key);
+        const hasActiveChildren = children.some(child => {
+          const daysSinceUpdate = DateUtils.daysSinceUpdate(child.fields.updated);
+          return daysSinceUpdate < 15; // Consider children active if updated within 15 days
+        });
+        
+        if (!hasActiveChildren) {
+          filteredStaleTickets.push(ticket);
+        } else {
+          logger.info('Excluding epic from stale tickets due to active children', {
+            epicKey: ticket.key,
+            childCount: children.length
+          });
+        }
+      } else {
+        // Non-epic tickets are included as before
+        filteredStaleTickets.push(ticket);
+      }
+    }
+
+    return filteredStaleTickets;
   }
 
   /**
