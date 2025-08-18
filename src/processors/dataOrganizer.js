@@ -234,22 +234,69 @@ class DataOrganizer {
     const events = [];
     
     for (const comment of comments) {
+      // Extract plain text from comment body (Jira API returns rich text objects)
+      const commentText = this.extractCommentText(comment.body);
+      
       events.push({
         ticketKey: issue.key,
         ticketSummary: issue.fields.summary,
         author: comment.author.displayName,
         field: 'comment',
         fromString: '',
-        toString: comment.body || '',
+        toString: commentText,
         created: comment.created,
         displayDate: DateUtils.formatForDisplay(comment.created),
         jiraUrl: `${config.jira.baseUrl}/browse/${issue.key}`,
         type: 'comment',
-        commentBody: comment.body || ''
+        commentBody: commentText
       });
     }
     
     return events;
+  }
+
+  /**
+   * Extract plain text from Jira comment body (which can be string or rich text object)
+   */
+  extractCommentText(body) {
+    if (!body) return '';
+    
+    // If it's already a string, return it
+    if (typeof body === 'string') {
+      return body;
+    }
+    
+    // If it's an object with content property (Jira API v3 format)
+    if (body.content && Array.isArray(body.content)) {
+      return this.extractTextFromContent(body.content);
+    }
+    
+    // If it's an object with plain property (older Jira API format)
+    if (body.plain) {
+      return body.plain;
+    }
+    
+    // Fallback: try to stringify the object
+    return JSON.stringify(body);
+  }
+
+  /**
+   * Extract text from Jira content array (for API v3)
+   */
+  extractTextFromContent(content) {
+    if (!Array.isArray(content)) return '';
+    
+    let text = '';
+    
+    for (const item of content) {
+      if (item.type === 'text' && item.text) {
+        text += item.text;
+      } else if (item.content && Array.isArray(item.content)) {
+        text += this.extractTextFromContent(item.content);
+      }
+    }
+    
+    return text;
   }
 
   /**
