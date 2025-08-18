@@ -262,7 +262,7 @@ class NotionPageGenerator {
       maxChangelogBlocks
     });
 
-    // Show squads with events in compact format, limiting total blocks
+    // Show squads with events using toggle blocks (collapsible sections)
     let blocksUsed = 1; // Heading block
     let squadsShown = 0;
     let eventsShown = 0;
@@ -278,59 +278,42 @@ class NotionPageGenerator {
       // Group events by ticket
       const groupedEvents = this.groupChangelogByTicket(changelogEvents);
       
-      // Calculate blocks needed for this squad
-      const squadBlocksNeeded = 2 + (groupedEvents.length * 2); // Squad header + ticket blocks
+      // Create toggle children for all changelog events
+      const toggleChildren = [];
       
-      if (blocksUsed + squadBlocksNeeded > maxChangelogBlocks) {
-        // Show summary for this squad instead of all events
-        blocks.push(
-          notion.createHeadingBlock(`${squad.displayName}`, 2)
-        );
-        blocks.push(
-          notion.createParagraphBlock(`${groupedEvents.length} tickets had updates this week.`)
-        );
-        blocksUsed += 2;
-        squadsShown++;
-        continue;
-      }
-
-      // Squad header
-      blocks.push(
-        notion.createHeadingBlock(`${squad.displayName}`, 2)
-      );
-      blocksUsed += 1;
-
-      // Show tickets with events (limited)
+      // Show all tickets with events in the toggle
       for (const ticketGroup of groupedEvents) {
-        if (blocksUsed >= maxChangelogBlocks) {
-          break;
-        }
-
         // Ticket header
         const ticketHeader = [
           notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
           notion.createRichText(' - '),
           notion.createRichText(ticketGroup.summary, { bold: true })
         ];
-        blocks.push(notion.createMixedParagraph(ticketHeader));
-        blocksUsed += 1;
+        toggleChildren.push(notion.createMixedParagraph(ticketHeader));
 
         // Show first event for this ticket
         if (ticketGroup.events.length > 0) {
           const event = ticketGroup.events[0];
           const eventText = `${event.displayDate} - ${event.author} ${this.formatChangelogEvent(event)}`;
-          blocks.push(notion.createBulletItem(eventText));
-          blocksUsed += 1;
+          toggleChildren.push(notion.createBulletItem(eventText));
           eventsShown++;
         }
+
+        // Add spacing between tickets
+        toggleChildren.push(notion.createParagraphBlock(''));
       }
 
+      // Create toggle block with squad name and all events
+      const toggleText = `${squad.displayName} (${groupedEvents.length} tickets updated)`;
+      blocks.push(notion.createToggleBlock(toggleText, toggleChildren));
+      blocks.push(notion.createParagraphBlock(''));
+      
+      blocksUsed += 2; // Toggle block + spacing
       squadsShown++;
     }
 
     // Add summary if we had to truncate
     if (squadsShown < squadsWithEvents.length) {
-      blocks.push(notion.createParagraphBlock(''));
       blocks.push(
         notion.createCalloutBlock(
           `Showing changelog for ${squadsShown} of ${squadsWithEvents.length} squads due to space constraints.`,
