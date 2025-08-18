@@ -5,6 +5,7 @@ const { logger } = require('../utils/logger');
 class NotionPageGenerator {
   constructor() {
     this.squads = config.squads;
+    this.maxBlocks = 95; // Leave some buffer below Notion's 100 limit
   }
 
   /**
@@ -16,47 +17,75 @@ class NotionPageGenerator {
 
       const pageData = {
         title: `Weekly Report: ${dateRange.display}`,
-        children: [
-          // AI TL;DR section
-          ...this.createAITLDRSection(metrics, organizedData),
-          
-          // Divider
-          notion.createDividerBlock(),
-          
-          // What Shipped section
-          ...this.createWhatShippedSection(organizedData),
-          
-          // Divider
-          notion.createDividerBlock(),
-          
-          // Change Log section
-          ...this.createChangeLogSection(organizedData),
-          
-          // Divider
-          notion.createDividerBlock(),
-          
-          // Stale tickets section
-          ...this.createStaleTicketsSection(organizedData),
-          
-          // Divider
-          notion.createDividerBlock(),
-          
-          // Blocked tickets section
-          ...this.createBlockedTicketsSection(organizedData),
-          
-          // Divider
-          notion.createDividerBlock(),
-          
-          // On Deck section
-          ...this.createOnDeckSection(organizedData)
-        ]
+        children: []
       };
+
+      let blockCount = 0;
+
+      // AI TL;DR section
+      const aiTldrBlocks = this.createAITLDRSection(metrics, organizedData);
+      pageData.children.push(...aiTldrBlocks);
+      blockCount += aiTldrBlocks.length;
+
+      // Divider
+      pageData.children.push(notion.createDividerBlock());
+      blockCount += 1;
+
+      // What Shipped section
+      const whatShippedBlocks = this.createWhatShippedSection(organizedData);
+      pageData.children.push(...whatShippedBlocks);
+      blockCount += whatShippedBlocks.length;
+
+      // Divider
+      pageData.children.push(notion.createDividerBlock());
+      blockCount += 1;
+
+      // Change Log section (with block limit)
+      const changeLogBlocks = this.createChangeLogSection(organizedData, blockCount);
+      pageData.children.push(...changeLogBlocks);
+      blockCount += changeLogBlocks.length;
+
+      // Only add remaining sections if we have room
+      if (blockCount < this.maxBlocks - 20) { // Reserve 20 blocks for remaining sections
+        // Divider
+        pageData.children.push(notion.createDividerBlock());
+        blockCount += 1;
+
+        // Stale tickets section
+        const staleBlocks = this.createStaleTicketsSection(organizedData);
+        pageData.children.push(...staleBlocks);
+        blockCount += staleBlocks.length;
+
+        // Divider
+        pageData.children.push(notion.createDividerBlock());
+        blockCount += 1;
+
+        // Blocked tickets section
+        const blockedBlocks = this.createBlockedTicketsSection(organizedData);
+        pageData.children.push(...blockedBlocks);
+        blockCount += blockedBlocks.length;
+
+        // Divider
+        pageData.children.push(notion.createDividerBlock());
+        blockCount += 1;
+
+        // On Deck section
+        const onDeckBlocks = this.createOnDeckSection(organizedData);
+        pageData.children.push(...onDeckBlocks);
+        blockCount += onDeckBlocks.length;
+      }
+
+      logger.info('Page generation complete', { 
+        totalBlocks: blockCount,
+        title: pageData.title 
+      });
 
       const response = await notion.createPage(pageData);
       
       logger.info('Weekly report page generated successfully', { 
         pageId: response.id,
-        title: pageData.title 
+        title: pageData.title,
+        totalBlocks: blockCount
       });
 
       return response;
@@ -225,7 +254,7 @@ class NotionPageGenerator {
   /**
    * Create Change Log section
    */
-  createChangeLogSection(organizedData) {
+  createChangeLogSection(organizedData, currentBlockCount) {
     const blocks = [
       notion.createHeadingBlock('📝 Change Log', 1)
     ];
@@ -241,21 +270,60 @@ class NotionPageGenerator {
       return blocks;
     }
 
-    // Show all squads with events in compact format
-    squadsWithEvents.forEach(squad => {
+    // Calculate remaining blocks available for changelog
+    const remainingBlocks = this.maxBlocks - currentBlockCount - 20; // Reserve 20 for other sections
+    const maxChangelogBlocks = Math.max(remainingBlocks, 30); // Minimum 30 blocks for changelog
+
+    logger.info('Changelog block allocation', { 
+      currentBlocks: currentBlockCount,
+      remainingBlocks,
+      maxChangelogBlocks
+    });
+
+    // Show squads with events in compact format, limiting total blocks
+    let blocksUsed = 1; // Heading block
+    let squadsShown = 0;
+    let eventsShown = 0;
+
+    for (const squad of squadsWithEvents) {
+      if (blocksUsed >= maxChangelogBlocks) {
+        break;
+      }
+
       const squadData = organizedData[squad.name];
       const changelogEvents = squadData?.changelogEvents || [];
+
+      // Group events by ticket
+      const groupedEvents = this.groupChangelogByTicket(changelogEvents);
+      
+      // Calculate blocks needed for this squad
+      const squadBlocksNeeded = 2 + (groupedEvents.length * 2); // Squad header + ticket blocks
+      
+      if (blocksUsed + squadBlocksNeeded > maxChangelogBlocks) {
+        // Show summary for this squad instead of all events
+        blocks.push(
+          notion.createHeadingBlock(`${squad.displayName}`, 2)
+        );
+        blocks.push(
+          notion.createParagraphBlock(`${groupedEvents.length} tickets had updates this week.`)
+        );
+        blocksUsed += 2;
+        squadsShown++;
+        continue;
+      }
 
       // Squad header
       blocks.push(
         notion.createHeadingBlock(`${squad.displayName}`, 2)
       );
+      blocksUsed += 1;
 
-      // Group events by ticket
-      const groupedEvents = this.groupChangelogByTicket(changelogEvents);
-      
-      // Show all tickets with events
-      groupedEvents.forEach(ticketGroup => {
+      // Show tickets with events (limited)
+      for (const ticketGroup of groupedEvents) {
+        if (blocksUsed >= maxChangelogBlocks) {
+          break;
+        }
+
         // Ticket header
         const ticketHeader = [
           notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
@@ -263,16 +331,37 @@ class NotionPageGenerator {
           notion.createRichText(ticketGroup.summary, { bold: true })
         ];
         blocks.push(notion.createMixedParagraph(ticketHeader));
+        blocksUsed += 1;
 
         // Show first event for this ticket
         if (ticketGroup.events.length > 0) {
           const event = ticketGroup.events[0];
           const eventText = `${event.displayDate} - ${event.author} ${this.formatChangelogEvent(event)}`;
           blocks.push(notion.createBulletItem(eventText));
+          blocksUsed += 1;
+          eventsShown++;
         }
+      }
 
-        blocks.push(notion.createParagraphBlock(''));
-      });
+      squadsShown++;
+    }
+
+    // Add summary if we had to truncate
+    if (squadsShown < squadsWithEvents.length) {
+      blocks.push(notion.createParagraphBlock(''));
+      blocks.push(
+        notion.createCalloutBlock(
+          `Showing changelog for ${squadsShown} of ${squadsWithEvents.length} squads due to space constraints.`,
+          'ℹ️'
+        )
+      );
+    }
+
+    logger.info('Changelog section generated', { 
+      squadsShown,
+      eventsShown,
+      blocksUsed,
+      totalSquads: squadsWithEvents.length
     });
 
     return blocks;
