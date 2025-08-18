@@ -45,35 +45,32 @@ class NotionPageGenerator {
       pageData.children.push(...changeLogBlocks);
       blockCount += changeLogBlocks.length;
 
-      // Only add remaining sections if we have room
-      if (blockCount < this.maxBlocks - 20) { // Reserve 20 blocks for remaining sections
-        // Divider
-        pageData.children.push(notion.createDividerBlock());
-        blockCount += 1;
+      // Divider
+      pageData.children.push(notion.createDividerBlock());
+      blockCount += 1;
 
-        // Stale tickets section
-        const staleBlocks = this.createStaleTicketsSection(organizedData);
-        pageData.children.push(...staleBlocks);
-        blockCount += staleBlocks.length;
+      // Stale tickets section
+      const staleBlocks = this.createStaleTicketsSection(organizedData);
+      pageData.children.push(...staleBlocks);
+      blockCount += staleBlocks.length;
 
-        // Divider
-        pageData.children.push(notion.createDividerBlock());
-        blockCount += 1;
+      // Divider
+      pageData.children.push(notion.createDividerBlock());
+      blockCount += 1;
 
-        // Blocked tickets section
-        const blockedBlocks = this.createBlockedTicketsSection(organizedData);
-        pageData.children.push(...blockedBlocks);
-        blockCount += blockedBlocks.length;
+      // Blocked tickets section
+      const blockedBlocks = this.createBlockedTicketsSection(organizedData);
+      pageData.children.push(...blockedBlocks);
+      blockCount += blockedBlocks.length;
 
-        // Divider
-        pageData.children.push(notion.createDividerBlock());
-        blockCount += 1;
+      // Divider
+      pageData.children.push(notion.createDividerBlock());
+      blockCount += 1;
 
-        // On Deck section
-        const onDeckBlocks = this.createOnDeckSection(organizedData);
-        pageData.children.push(...onDeckBlocks);
-        blockCount += onDeckBlocks.length;
-      }
+      // On Deck section
+      const onDeckBlocks = this.createOnDeckSection(organizedData);
+      pageData.children.push(...onDeckBlocks);
+      blockCount += onDeckBlocks.length;
 
       logger.info('Page generation complete', { 
         totalBlocks: blockCount,
@@ -124,7 +121,7 @@ class NotionPageGenerator {
       );
 
       // Generate story-driven summary
-      let summary = `🚀 **This Week's Story**: `;
+      let summary = `This Week's Story: `;
       
       if (totalDone > 0) {
         summary += `We shipped ${totalDone} key deliverables`;
@@ -141,19 +138,19 @@ class NotionPageGenerator {
       if (squadsWithActivity.length > 0) {
         const heroSquad = squadsWithActivity
           .sort(([_, a], [__, b]) => (b.done + b.created) - (a.done + a.created))[0];
-        summary += `**${heroSquad[0]}** emerged as this week's MVP with the most impactful contributions. `;
+        summary += `${heroSquad[0]} emerged as this week's MVP with the most impactful contributions. `;
       }
 
       if (totalStale > 0 || totalBlocked > 0) {
-        summary += `🔧 **What's Next**: We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. `;
+        summary += `What's Next: We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. `;
       } else {
-        summary += `✨ **Clean Operations**: All systems are running smoothly with no bottlenecks. `;
+        summary += `Clean Operations: All systems are running smoothly with no bottlenecks. `;
       }
 
       if (totalDone >= totalCreated) {
-        summary += `🎯 **Bottom Line**: We're delivering faster than we're creating new work - excellent execution rhythm.`;
+        summary += `Bottom Line: We're delivering faster than we're creating new work - excellent execution rhythm.`;
       } else {
-        summary += `📈 **Bottom Line**: We're building a strong pipeline for future deliveries.`;
+        summary += `Bottom Line: We're building a strong pipeline for future deliveries.`;
       }
 
       return summary;
@@ -253,8 +250,8 @@ class NotionPageGenerator {
     }
 
     // Calculate remaining blocks available for changelog
-    const remainingBlocks = this.maxBlocks - currentBlockCount - 20; // Reserve 20 for other sections
-    const maxChangelogBlocks = Math.max(remainingBlocks, 30); // Minimum 30 blocks for changelog
+    const remainingBlocks = this.maxBlocks - currentBlockCount - 40; // Reserve 40 for other sections
+    const maxChangelogBlocks = Math.max(remainingBlocks, 20); // Minimum 20 blocks for changelog
 
     logger.info('Changelog block allocation', { 
       currentBlocks: currentBlockCount,
