@@ -9,23 +9,24 @@ class ReportScheduler {
   }
 
   /**
-   * Start the scheduler to run reports on Mondays at 6am EST
+   * Start the scheduler to run reports on Mondays at 8am ET
    */
   startScheduler() {
     logger.info('🕐 Starting weekly report scheduler...');
     
-    // Schedule job to run every Monday at 6:00 AM EST (11:00 AM UTC)
+    // Schedule job to run every Monday at 8:00 AM ET
     // Cron format: minute hour day month day-of-week
-    // 0 11 * * 1 = Every Monday at 11:00 AM UTC (6:00 AM EST)
-    this.scheduledJob = cron.schedule('0 11 * * 1', async () => {
+    // Using America/New_York timezone to handle DST automatically
+    // 0 8 * * 1 = Every Monday at 8:00 AM ET
+    this.scheduledJob = cron.schedule('0 8 * * 1', async () => {
       await this.runScheduledReport();
     }, {
       scheduled: true,
-      timezone: 'UTC' // Using UTC to avoid daylight saving time issues
+      timezone: 'America/New_York' // Using ET timezone to handle DST automatically
     });
 
     logger.info('✅ Scheduler started successfully');
-    logger.info('📅 Next run: Every Monday at 6:00 AM EST (11:00 AM UTC)');
+    logger.info('📅 Next run: Every Monday at 8:00 AM ET');
     
     // Log when the next run will be
     this.logNextRunTime();
@@ -81,16 +82,16 @@ class ReportScheduler {
    */
   logNextRunTime() {
     if (this.scheduledJob) {
-      // Calculate next Monday at 6:00 AM EST (11:00 AM UTC)
+      // Calculate next Monday at 8:00 AM ET
       const now = new Date();
-      const daysUntilMonday = (8 - now.getUTCDay()) % 7;
+      const daysUntilMonday = (8 - now.getDay()) % 7;
       const nextMonday = new Date(now);
-      nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
-      nextMonday.setUTCHours(11, 0, 0, 0); // 11:00 AM UTC = 6:00 AM EST
+      nextMonday.setDate(now.getDate() + daysUntilMonday);
+      nextMonday.setHours(8, 0, 0, 0); // 8:00 AM ET
       
       logger.info('⏰ Next scheduled run:', {
         date: nextMonday.toISOString(),
-        localTime: nextMonday.toLocaleString()
+        localTime: nextMonday.toLocaleString('en-US', { timeZone: 'America/New_York' })
       });
     }
   }
@@ -101,19 +102,19 @@ class ReportScheduler {
   getStatus() {
     let nextRun = null;
     if (this.scheduledJob) {
-      // Calculate next Monday at 6:00 AM EST (11:00 AM UTC)
+      // Calculate next Monday at 8:00 AM ET
       const now = new Date();
-      const daysUntilMonday = (8 - now.getUTCDay()) % 7;
+      const daysUntilMonday = (8 - now.getDay()) % 7;
       const nextMonday = new Date(now);
-      nextMonday.setUTCDate(now.getUTCDate() + daysUntilMonday);
-      nextMonday.setUTCHours(11, 0, 0, 0); // 11:00 AM UTC = 6:00 AM EST
+      nextMonday.setDate(now.getDate() + daysUntilMonday);
+      nextMonday.setHours(8, 0, 0, 0); // 8:00 AM ET
       nextRun = nextMonday;
     }
     
     return {
       isRunning: this.scheduledJob ? this.scheduledJob.running : false,
       nextRun: nextRun,
-      schedule: '0 11 * * 1 (Every Monday at 6:00 AM EST)'
+      schedule: '0 8 * * 1 (Every Monday at 8:00 AM ET)'
     };
   }
 
