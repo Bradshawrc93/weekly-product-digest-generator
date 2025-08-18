@@ -96,11 +96,11 @@ class NotionPageGenerator {
    * Create AI TL;DR section
    */
   createAITLDRSection(metrics, organizedData) {
-    const aiSummary = this.generateAITLDRSummary(metrics, organizedData);
+    const aiSummaryRichText = this.generateAITLDRSummaryRichText(metrics, organizedData);
     
     return [
       notion.createHeadingBlock('🤖 AI TL;DR', 1),
-      notion.createCalloutBlock(aiSummary, '🚀'),
+      notion.createRichTextCalloutBlock(aiSummaryRichText, '🚀'),
       notion.createParagraphBlock('')
     ];
   }
@@ -157,6 +157,122 @@ class NotionPageGenerator {
     } catch (error) {
       logger.error('Failed to generate AI TL;DR summary', { error: error.message });
       return 'AI summary generation failed. Please check the data and try again.';
+    }
+  }
+
+  /**
+   * Generate AI TL;DR summary with rich text formatting
+   */
+  generateAITLDRSummaryRichText(metrics, organizedData) {
+    try {
+      // Calculate key metrics
+      const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
+      const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
+      const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
+      const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
+
+      const squadsWithActivity = Object.entries(metrics).filter(([_, squad]) => 
+        squad.done > 0 || squad.created > 0
+      );
+
+      // Build rich text array
+      const richTextArray = [];
+
+      // Start with "This Week's Story: "
+      richTextArray.push({
+        type: 'text',
+        text: { content: 'This Week\'s Story: ' },
+        annotations: { bold: true }
+      });
+      
+      if (totalDone > 0) {
+        richTextArray.push({
+          type: 'text',
+          text: { content: `We shipped ${totalDone} key deliverables` }
+        });
+        if (totalCreated > 0) {
+          richTextArray.push({
+            type: 'text',
+            text: { content: ` while launching ${totalCreated} new initiatives` }
+          });
+        }
+        richTextArray.push({
+          type: 'text',
+          text: { content: '. ' }
+        });
+      } else if (totalCreated > 0) {
+        richTextArray.push({
+          type: 'text',
+          text: { content: `We kicked off ${totalCreated} new initiatives, setting the stage for next week's deliveries. ` }
+        });
+      } else {
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'Focus was on refinement and planning this week. ' }
+        });
+      }
+
+      if (squadsWithActivity.length > 0) {
+        const heroSquad = squadsWithActivity
+          .sort(([_, a], [__, b]) => (b.done + b.created) - (a.done + a.created))[0];
+        richTextArray.push({
+          type: 'text',
+          text: { content: `${heroSquad[0]} emerged as this week's MVP with the most impactful contributions. ` },
+          annotations: { bold: true }
+        });
+      }
+
+      if (totalStale > 0 || totalBlocked > 0) {
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'What\'s Next: ' },
+          annotations: { bold: true }
+        });
+        richTextArray.push({
+          type: 'text',
+          text: { content: `We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. ` }
+        });
+      } else {
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'Clean Operations: ' },
+          annotations: { bold: true }
+        });
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'All systems are running smoothly with no bottlenecks. ' }
+        });
+      }
+
+      if (totalDone >= totalCreated) {
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'Bottom Line: ' },
+          annotations: { bold: true }
+        });
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'We\'re delivering faster than we\'re creating new work - excellent execution rhythm.' }
+        });
+      } else {
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'Bottom Line: ' },
+          annotations: { bold: true }
+        });
+        richTextArray.push({
+          type: 'text',
+          text: { content: 'We\'re building a strong pipeline for future deliveries.' }
+        });
+      }
+
+      return richTextArray;
+    } catch (error) {
+      logger.error('Failed to generate AI TL;DR summary', { error: error.message });
+      return [{
+        type: 'text',
+        text: { content: 'AI summary generation failed. Please check the data and try again.' }
+      }];
     }
   }
 
@@ -535,6 +651,15 @@ class NotionPageGenerator {
    * Format changelog event for display
    */
   formatChangelogEvent(event) {
+    if (event.type === 'comment') {
+      // Truncate comment body if too long
+      const commentBody = event.commentBody || '';
+      const truncatedComment = commentBody.length > 100 
+        ? commentBody.substring(0, 100) + '...' 
+        : commentBody;
+      return `added comment: "${truncatedComment}"`;
+    }
+    
     switch (event.field) {
       case 'status':
         return `changed status from "${event.fromString}" to "${event.toString}"`;

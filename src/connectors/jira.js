@@ -184,6 +184,58 @@ class JiraConnector {
   }
 
   /**
+   * Get comments for a specific issue
+   */
+  async getIssueComments(issueKey) {
+    try {
+      const response = await axios.get(`${this.baseUrl}/rest/api/3/issue/${issueKey}/comment`, {
+        headers: this.headers
+      });
+
+      return response.data.comments || [];
+    } catch (error) {
+      logger.error('Failed to fetch comments for issue', { 
+        issueKey,
+        error: error.message 
+      });
+      return [];
+    }
+  }
+
+  /**
+   * Get comments for multiple issues within a date range
+   */
+  async getCommentsForIssues(issueKeys, dateRange) {
+    const allComments = [];
+    
+    for (const issueKey of issueKeys) {
+      try {
+        const comments = await this.getIssueComments(issueKey);
+        
+        // Filter comments within the date range
+        const filteredComments = comments.filter(comment => {
+          const commentDate = DateUtils.formatForJira(comment.created);
+          return DateUtils.isDateInRange(commentDate, dateRange.start, dateRange.end);
+        });
+        
+        if (filteredComments.length > 0) {
+          allComments.push({
+            issueKey,
+            comments: filteredComments
+          });
+        }
+      } catch (error) {
+        logger.error('Failed to fetch comments for issue', { 
+          issueKey,
+          error: error.message 
+        });
+      }
+    }
+    
+    return allComments;
+  }
+
+  /**
    * Get completed tickets (moved to Done in last 7 days)
    */
   async getCompletedTickets(dateRange, squadUuids = null) {
@@ -197,7 +249,7 @@ class JiraConnector {
     jql += ' ORDER BY updated DESC';
     
     return this.searchIssues(jql, [
-      'summary', 
+      'summary',
       'status', 
       'priority', 
       'assignee', 

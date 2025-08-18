@@ -219,6 +219,24 @@ class NotionConnector {
   }
 
   /**
+   * Create a callout block with rich text
+   */
+  createRichTextCalloutBlock(richTextArray, icon = '💡') {
+    return {
+      object: 'block',
+      type: 'callout',
+      callout: {
+        rich_text: richTextArray,
+        icon: {
+          type: 'emoji',
+          emoji: icon
+        },
+        color: 'default_background'
+      }
+    };
+  }
+
+  /**
    * Create a toggle block
    */
   createToggleBlock(text, children = []) {

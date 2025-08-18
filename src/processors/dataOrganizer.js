@@ -50,7 +50,7 @@ class DataOrganizer {
 
       return {
         completedTickets: this.formatCompletedTickets(squadCompleted, dateRange),
-        changelogEvents: this.extractChangelogEvents(squadIssues, dateRange),
+        changelogEvents: this.extractChangelogEvents(squadIssues, dateRange, jiraData.comments),
         staleTickets: this.formatStaleTickets(filteredSquadStale),
         backlogTickets: this.formatBacklogTickets(filteredSquadBacklog),
         blockedTickets: this.formatBlockedTickets(squadBlocked),
@@ -177,12 +177,19 @@ class DataOrganizer {
   /**
    * Extract changelog events from issues
    */
-  extractChangelogEvents(issues, dateRange) {
+  extractChangelogEvents(issues, dateRange, comments = []) {
     const events = [];
     
     for (const issue of issues) {
       const issueEvents = this.extractIssueChangelogEvents(issue, dateRange);
       events.push(...issueEvents);
+      
+      // Add comment events for this issue
+      const issueComments = comments.find(item => item.issueKey === issue.key);
+      if (issueComments) {
+        const commentEvents = this.extractCommentEvents(issue, issueComments.comments);
+        events.push(...commentEvents);
+      }
     }
     
     // Sort by creation date
@@ -210,10 +217,36 @@ class DataOrganizer {
             toString: item.toString || '',
             created: history.created,
             displayDate: DateUtils.formatForDisplay(history.created),
-            jiraUrl: `${config.jira.baseUrl}/browse/${issue.key}`
+            jiraUrl: `${config.jira.baseUrl}/browse/${issue.key}`,
+            type: 'changelog'
           });
         }
       }
+    }
+    
+    return events;
+  }
+
+  /**
+   * Extract comment events from a single issue
+   */
+  extractCommentEvents(issue, comments) {
+    const events = [];
+    
+    for (const comment of comments) {
+      events.push({
+        ticketKey: issue.key,
+        ticketSummary: issue.fields.summary,
+        author: comment.author.displayName,
+        field: 'comment',
+        fromString: '',
+        toString: comment.body || '',
+        created: comment.created,
+        displayDate: DateUtils.formatForDisplay(comment.created),
+        jiraUrl: `${config.jira.baseUrl}/browse/${issue.key}`,
+        type: 'comment',
+        commentBody: comment.body || ''
+      });
     }
     
     return events;
