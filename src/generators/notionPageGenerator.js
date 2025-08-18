@@ -115,63 +115,45 @@ class NotionPageGenerator {
     try {
       // Calculate key metrics
       const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
+      const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
       const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
       const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
-      const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
-      const totalUpdated = Object.values(metrics).reduce((sum, squad) => sum + squad.updated, 0);
 
-      // Find most and least active squads
-      let mostActiveSquad = null;
-      let leastActiveSquad = null;
-      let maxActivity = 0;
-      let minActivity = Infinity;
+      const squadsWithActivity = Object.entries(metrics).filter(([_, squad]) => 
+        squad.done > 0 || squad.created > 0
+      );
 
-      Object.entries(metrics).forEach(([squadName, squadMetrics]) => {
-        const activity = squadMetrics.done + squadMetrics.updated + squadMetrics.created;
-        if (activity > maxActivity) {
-          maxActivity = activity;
-          mostActiveSquad = squadName;
-        }
-        if (activity < minActivity && activity > 0) {
-          minActivity = activity;
-          leastActiveSquad = squadName;
-        }
-      });
-
-      // Find squads with most stale tickets
-      const staleBySquad = Object.entries(metrics)
-        .filter(([_, squadMetrics]) => squadMetrics.stale > 0)
-        .sort(([_, a], [__, b]) => b.stale - a.stale);
-
-      // Generate summary
-      let summary = `Team activity was ${totalDone > 5 ? 'strong' : totalDone > 2 ? 'moderate' : 'minimal'} this week with ${totalDone} tickets completed across all squads. `;
+      // Generate story-driven summary
+      let summary = `🚀 **This Week's Story**: `;
       
-      if (mostActiveSquad) {
-        const squadMetrics = metrics[mostActiveSquad];
-        summary += `${mostActiveSquad} squad led productivity with ${squadMetrics.done} completion${squadMetrics.done !== 1 ? 's' : ''} and ${squadMetrics.updated} update${squadMetrics.updated !== 1 ? 's' : ''}. `;
-      }
-
-      if (totalStale > 0) {
-        summary += `The concerning trend is ${totalStale} stale tickets across multiple squads`;
-        if (staleBySquad.length > 0) {
-          const topStaleSquad = staleBySquad[0];
-          summary += `, with ${topStaleSquad[0]} leading at ${topStaleSquad[1].stale} stale tickets`;
+      if (totalDone > 0) {
+        summary += `We shipped ${totalDone} key deliverables`;
+        if (totalCreated > 0) {
+          summary += ` while launching ${totalCreated} new initiatives`;
         }
-        summary += '. ';
+        summary += `. `;
+      } else if (totalCreated > 0) {
+        summary += `We kicked off ${totalCreated} new initiatives, setting the stage for next week's deliveries. `;
+      } else {
+        summary += `Focus was on refinement and planning this week. `;
       }
 
-      if (totalBlocked === 0) {
-        summary += 'No blocked tickets is positive. ';
-      } else {
-        summary += `${totalBlocked} blocked tickets need immediate attention. `;
+      if (squadsWithActivity.length > 0) {
+        const heroSquad = squadsWithActivity
+          .sort(([_, a], [__, b]) => (b.done + b.created) - (a.done + a.created))[0];
+        summary += `**${heroSquad[0]}** emerged as this week's MVP with the most impactful contributions. `;
       }
 
-      if (totalStale > 10) {
-        summary += 'Immediate attention needed on workflow bottlenecks and stale ticket resolution.';
-      } else if (totalStale > 5) {
-        summary += 'Some attention needed on stale ticket management.';
+      if (totalStale > 0 || totalBlocked > 0) {
+        summary += `🔧 **What's Next**: We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. `;
       } else {
-        summary += 'Overall workflow appears healthy.';
+        summary += `✨ **Clean Operations**: All systems are running smoothly with no bottlenecks. `;
+      }
+
+      if (totalDone >= totalCreated) {
+        summary += `🎯 **Bottom Line**: We're delivering faster than we're creating new work - excellent execution rhythm.`;
+      } else {
+        summary += `📈 **Bottom Line**: We're building a strong pipeline for future deliveries.`;
       }
 
       return summary;
