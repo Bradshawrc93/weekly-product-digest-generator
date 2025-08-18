@@ -172,7 +172,7 @@ class NotionPageGenerator {
       const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
 
       const squadsWithActivity = Object.entries(metrics).filter(([_, squad]) => 
-        squad.done > 0 || squad.created > 0
+        squad.done > 0 || squad.created > 0 || squad.updated > 0
       );
 
       // Build rich text array
@@ -213,11 +213,26 @@ class NotionPageGenerator {
       }
 
       if (squadsWithActivity.length > 0) {
+        // Determine most impactful squad: prioritize shipped items, then total activity (done + created + updated)
         const heroSquad = squadsWithActivity
-          .sort(([_, a], [__, b]) => (b.done + b.created) - (a.done + a.created))[0];
+          .sort(([_, a], [__, b]) => {
+            // First priority: most shipped items
+            if (b.done !== a.done) {
+              return b.done - a.done;
+            }
+            // Second priority: most total activity (done + created + updated)
+            const aTotal = a.done + a.created + a.updated;
+            const bTotal = b.done + b.created + b.updated;
+            return bTotal - aTotal;
+          })[0];
+        
+        // Get squad display name
+        const squadConfig = this.squads.find(s => s.name === heroSquad[0]);
+        const squadDisplayName = squadConfig ? squadConfig.displayName : heroSquad[0];
+        
         richTextArray.push({
           type: 'text',
-          text: { content: `${heroSquad[0]} emerged as this week's MVP with the most impactful contributions. ` },
+          text: { content: `${squadDisplayName} ranked as this week's MVP with the most impactful contributions. ` },
           annotations: { bold: true }
         });
       }
@@ -230,7 +245,7 @@ class NotionPageGenerator {
         });
         richTextArray.push({
           type: 'text',
-          text: { content: `We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. ` }
+          text: { content: `We need to review ${totalStale} items that have been listed as stale and unblock ${totalBlocked} critical path items. ` }
         });
       } else {
         richTextArray.push({
@@ -244,27 +259,15 @@ class NotionPageGenerator {
         });
       }
 
-      if (totalDone >= totalCreated) {
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'Bottom Line: ' },
-          annotations: { bold: true }
-        });
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'We\'re delivering faster than we\'re creating new work - excellent execution rhythm.' }
-        });
-      } else {
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'Bottom Line: ' },
-          annotations: { bold: true }
-        });
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'We\'re building a strong pipeline for future deliveries.' }
-        });
-      }
+      richTextArray.push({
+        type: 'text',
+        text: { content: 'Bottom Line: ' },
+        annotations: { bold: true }
+      });
+      richTextArray.push({
+        type: 'text',
+        text: { content: 'We\'re building a strong pipeline for future deliveries.' }
+      });
 
       return richTextArray;
     } catch (error) {
