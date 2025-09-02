@@ -397,8 +397,23 @@ class NotionPageGenerator {
       // Create toggle children for all changelog events
       const toggleChildren = [];
       
-      // Show all tickets with events in the toggle
+      // Show tickets with events in the toggle (limit to prevent Notion API errors)
+      const maxToggleChildren = 90; // Stay well below Notion's 100 limit
+      let childrenCount = 0;
+      
       for (const ticketGroup of groupedEvents) {
+        // Check if we can add more children (each ticket adds 3 blocks: header, event, spacing)
+        if (childrenCount + 3 > maxToggleChildren) {
+          // Add truncation notice if we hit the limit
+          if (childrenCount < maxToggleChildren) {
+            toggleChildren.push(notion.createCalloutBlock(
+              `... and ${groupedEvents.length - toggleChildren.length / 3} more tickets (truncated due to Notion limits)`,
+              'ℹ️'
+            ));
+          }
+          break;
+        }
+        
         // Ticket header
         const ticketHeader = [
           notion.createRichTextWithLink(ticketGroup.key, `${config.jira.baseUrl}/browse/${ticketGroup.key}`),
@@ -406,6 +421,7 @@ class NotionPageGenerator {
           notion.createRichText(ticketGroup.summary, { bold: true })
         ];
         toggleChildren.push(notion.createMixedParagraph(ticketHeader));
+        childrenCount++;
 
         // Show first event for this ticket
         if (ticketGroup.events.length > 0) {
@@ -413,10 +429,12 @@ class NotionPageGenerator {
           const eventText = `${event.displayDate} - ${event.author} ${this.formatChangelogEvent(event)}`;
           toggleChildren.push(notion.createBulletItem(eventText));
           eventsShown++;
+          childrenCount++;
         }
 
         // Add spacing between tickets
         toggleChildren.push(notion.createParagraphBlock(''));
+        childrenCount++;
       }
 
       // Create toggle block with squad name and all events
@@ -568,20 +586,33 @@ class NotionPageGenerator {
       const squadData = organizedData[squad.name];
       const backlogTickets = squadData?.backlogTickets || [];
 
-      // Create toggle children for all backlog tickets
+      // Create toggle children for backlog tickets (limit to prevent Notion API errors)
       const toggleChildren = [];
+      const maxToggleChildren = 90; // Stay well below Notion's 100 limit
+      let childrenCount = 0;
 
       // Group by priority
       const groupedByPriority = this.groupTicketsByPriority(backlogTickets);
       
       for (const [priority, tickets] of Object.entries(groupedByPriority)) {
-        if (tickets.length > 0) {
+        if (tickets.length > 0 && childrenCount < maxToggleChildren) {
           toggleChildren.push(
             notion.createHeadingBlock(`${priority} Priority`, 3)
           );
+          childrenCount++;
 
-          // Show all tickets per priority
-          tickets.forEach(ticket => {
+          // Show tickets per priority (with limit)
+          for (const ticket of tickets) {
+            if (childrenCount + 2 > maxToggleChildren) {
+              // Add truncation notice
+              toggleChildren.push(notion.createCalloutBlock(
+                `... and ${tickets.length - (childrenCount - 1)} more ${priority.toLowerCase()} priority tickets (truncated due to Notion limits)`,
+                'ℹ️'
+              ));
+              childrenCount++;
+              break;
+            }
+            
             const richText = [
               notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
               notion.createRichText(' - '),
@@ -590,9 +621,13 @@ class NotionPageGenerator {
             ];
             
             toggleChildren.push(notion.createMixedParagraph(richText));
-          });
+            childrenCount++;
+          }
 
-          toggleChildren.push(notion.createParagraphBlock(''));
+          if (childrenCount < maxToggleChildren) {
+            toggleChildren.push(notion.createParagraphBlock(''));
+            childrenCount++;
+          }
         }
       }
 
