@@ -37,12 +37,13 @@ class MetricsCalculator {
    */
   async calculateSquadMetrics(squad, dateRange, jiraData) {
     try {
-      const squadIssues = this.filterIssuesBySquad(jiraData.allIssues, squad.jiraUuid);
-      const squadCompleted = this.filterIssuesBySquad(jiraData.completedIssues, squad.jiraUuid);
-      const squadNew = this.filterIssuesBySquad(jiraData.newIssues, squad.jiraUuid);
-      const squadStale = this.filterIssuesBySquad(jiraData.staleIssues, squad.jiraUuid);
-      const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid);
-      const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid);
+      const projectKey = squad.projectKey || null;
+      const squadIssues = this.filterIssuesBySquad(jiraData.allIssues, squad.jiraUuid, projectKey);
+      const squadCompleted = this.filterIssuesBySquad(jiraData.completedIssues, squad.jiraUuid, projectKey);
+      const squadNew = this.filterIssuesBySquad(jiraData.newIssues, squad.jiraUuid, projectKey);
+      const squadStale = this.filterIssuesBySquad(jiraData.staleIssues, squad.jiraUuid, projectKey);
+      const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid, projectKey);
+      const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid, projectKey);
 
       // Filter out Workstream tickets from stale metrics
       const filteredSquadStale = this.filterOutWorkstreamTickets(squadStale);
@@ -75,10 +76,16 @@ class MetricsCalculator {
   }
 
   /**
-   * Filter issues by squad UUID
+   * Filter issues by squad UUID or project key
    */
-  filterIssuesBySquad(issues, squadUuid) {
+  filterIssuesBySquad(issues, squadUuid, projectKey = null) {
     return issues.filter(issue => {
+      // If projectKey is provided, filter by project
+      if (projectKey) {
+        return issue.fields.project?.key === projectKey;
+      }
+      
+      // Otherwise, filter by team UUID (existing logic)
       const teamUuid = this.getTeamUuidFromIssue(issue);
       return teamUuid === squadUuid;
     });

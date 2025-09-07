@@ -2,6 +2,25 @@ const config = require('../utils/config');
 const { logger } = require('../utils/logger');
 const DateUtils = require('../utils/dateUtils');
 
+/**
+ * Extract text content from Atlassian Document Format (ADF)
+ */
+function extractTextFromADF(adfObject) {
+  if (!adfObject || typeof adfObject !== 'object') {
+    return null;
+  }
+
+  if (adfObject.type === 'text') {
+    return adfObject.text || '';
+  }
+
+  if (adfObject.content && Array.isArray(adfObject.content)) {
+    return adfObject.content.map(item => extractTextFromADF(item)).join('');
+  }
+
+  return '';
+}
+
 class DataOrganizer {
   constructor() {
     this.squads = config.squads;
@@ -37,12 +56,13 @@ class DataOrganizer {
    */
   async organizeSquadData(squad, dateRange, jiraData) {
     try {
-      const squadIssues = this.filterIssuesBySquad(jiraData.allIssues, squad.jiraUuid);
-      const squadCompleted = this.filterIssuesBySquad(jiraData.completedIssues, squad.jiraUuid);
-      const squadNew = this.filterIssuesBySquad(jiraData.newIssues, squad.jiraUuid);
-      const squadStale = this.filterIssuesBySquad(jiraData.staleIssues, squad.jiraUuid);
-      const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid);
-      const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid);
+      const projectKey = squad.projectKey || null;
+      const squadIssues = this.filterIssuesBySquad(jiraData.allIssues, squad.jiraUuid, projectKey);
+      const squadCompleted = this.filterIssuesBySquad(jiraData.completedIssues, squad.jiraUuid, projectKey);
+      const squadNew = this.filterIssuesBySquad(jiraData.newIssues, squad.jiraUuid, projectKey);
+      const squadStale = this.filterIssuesBySquad(jiraData.staleIssues, squad.jiraUuid, projectKey);
+      const squadBacklog = this.filterIssuesBySquad(jiraData.backlogIssues, squad.jiraUuid, projectKey);
+      const squadBlocked = this.filterIssuesBySquad(jiraData.blockedIssues, squad.jiraUuid, projectKey);
 
       // Filter out Workstream tickets from stale and backlog (on deck) categories
       const filteredSquadStale = this.filterOutWorkstreamTickets(squadStale);
@@ -73,10 +93,16 @@ class DataOrganizer {
   }
 
   /**
-   * Filter issues by squad UUID
+   * Filter issues by squad UUID or project key
    */
-  filterIssuesBySquad(issues, squadUuid) {
+  filterIssuesBySquad(issues, squadUuid, projectKey = null) {
     return issues.filter(issue => {
+      // If projectKey is provided, filter by project
+      if (projectKey) {
+        return issue.fields.project?.key === projectKey;
+      }
+      
+      // Otherwise, filter by team UUID (existing logic)
       const teamUuid = this.getTeamUuidFromIssue(issue);
       return teamUuid === squadUuid;
     });
@@ -140,6 +166,7 @@ class DataOrganizer {
       return {
         key: issue.key,
         summary: issue.fields.summary,
+        description: extractTextFromADF(issue.fields.description) || 'No ticket description found',
         assignee: issue.fields.assignee?.displayName || 'Unassigned',
         completedDate: DateUtils.formatForDisplay(completedDate),
         priority: issue.fields.priority?.name || 'Medium',
@@ -309,6 +336,7 @@ class DataOrganizer {
       return {
         key: issue.key,
         summary: issue.fields.summary,
+        description: extractTextFromADF(issue.fields.description) || 'No ticket description found',
         assignee: issue.fields.assignee?.displayName || 'Unassigned',
         lastUpdated: DateUtils.formatForDisplay(issue.fields.updated),
         daysStale,
@@ -355,6 +383,7 @@ class DataOrganizer {
       return {
         key: issue.key,
         summary: issue.fields.summary,
+        description: extractTextFromADF(issue.fields.description) || 'No ticket description found',
         assignee: issue.fields.assignee?.displayName || 'Unassigned',
         lastUpdated: DateUtils.formatForDisplay(issue.fields.updated),
         daysBlocked,

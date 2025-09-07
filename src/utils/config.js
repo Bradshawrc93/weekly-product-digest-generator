@@ -84,7 +84,9 @@ class Config {
   }
 
   getAllSquadUuids() {
-    return this.squads.map(squad => squad.jiraUuid);
+    return this.squads
+      .filter(squad => !squad.projectKey) // Exclude project-based squads
+      .map(squad => squad.jiraUuid);
   }
 
   getAllSquadNames() {

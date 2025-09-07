@@ -41,7 +41,7 @@ class JiraConnector {
   /**
    * Search for issues using JQL
    */
-  async searchIssues(jql, fields = ['summary', 'status', 'priority', 'assignee', 'created', 'updated'], maxResults = 1000) {
+  async searchIssues(jql, fields = ['summary', 'status', 'priority', 'assignee', 'created', 'updated', 'description', 'project'], maxResults = 1000) {
     try {
       const response = await axios.post(`${this.baseUrl}/rest/api/3/search`, {
         jql,
@@ -77,20 +77,22 @@ class JiraConnector {
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
-      jql += ` AND "Team" in (${squadFilter})`;
+      jql += ` AND ("Team" in (${squadFilter}) OR project = CX)`;
     }
     
     jql += ' ORDER BY updated DESC';
     
     return this.searchIssues(jql, [
-      'summary', 
+      'summary',
+      'description', // Add description field
       'status', 
       'priority', 
       'assignee', 
       'created', 
       'updated',
       'customfield_10001', // Team field
-      'issuetype' // Issue type field
+      'issuetype', // Issue type field
+      'project' // Project field
     ]);
   }
 
@@ -102,7 +104,8 @@ class JiraConnector {
       const jql = `"Epic Link" = "${epicKey}"`;
       
       const children = await this.searchIssues(jql, [
-        'summary', 
+        'summary',
+        'description', // Add description field
         'status', 
         'priority', 
         'assignee', 
@@ -136,7 +139,7 @@ class JiraConnector {
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
-      jql += ` AND "Team" in (${squadFilter})`;
+      jql += ` AND ("Team" in (${squadFilter}) OR project = CX)`;
     }
     
     jql += ' ORDER BY updated ASC';
@@ -149,7 +152,8 @@ class JiraConnector {
       'created', 
       'updated',
       'customfield_10001', // Team field
-      'issuetype' // Issue type field
+      'issuetype', // Issue type field
+      'project' // Project field
     ]);
 
     // Filter out epics that have children with recent activity
@@ -243,20 +247,22 @@ class JiraConnector {
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
-      jql += ` AND "Team" in (${squadFilter})`;
+      jql += ` AND ("Team" in (${squadFilter}) OR project = CX)`;
     }
     
     jql += ' ORDER BY updated DESC';
     
     return this.searchIssues(jql, [
       'summary',
+      'description', // Add description field
       'status', 
       'priority', 
       'assignee', 
       'created', 
       'updated',
       'customfield_10001', // Team field
-      'issuetype' // Issue type field
+      'issuetype', // Issue type field
+      'project' // Project field
     ]);
   }
 
@@ -268,20 +274,22 @@ class JiraConnector {
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
-      jql += ` AND "Team" in (${squadFilter})`;
+      jql += ` AND ("Team" in (${squadFilter}) OR project = CX)`;
     }
     
     jql += ' ORDER BY created DESC';
     
     return this.searchIssues(jql, [
-      'summary', 
+      'summary',
+      'description', // Add description field
       'status', 
       'priority', 
       'assignee', 
       'created', 
       'updated',
       'customfield_10001', // Team field
-      'issuetype' // Issue type field
+      'issuetype', // Issue type field
+      'project' // Project field
     ]);
   }
 
@@ -293,20 +301,22 @@ class JiraConnector {
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
-      jql += ` AND "Team" in (${squadFilter})`;
+      jql += ` AND ("Team" in (${squadFilter}) OR project = CX)`;
     }
     
     jql += ' ORDER BY priority DESC, created ASC';
     
     return this.searchIssues(jql, [
-      'summary', 
+      'summary',
+      'description', // Add description field
       'status', 
       'priority', 
       'assignee', 
       'created', 
       'updated',
       'customfield_10001', // Team field
-      'issuetype' // Issue type field
+      'issuetype', // Issue type field
+      'project' // Project field
     ]);
   }
 
@@ -318,20 +328,22 @@ class JiraConnector {
     
     if (squadUuids && squadUuids.length > 0) {
       const squadFilter = squadUuids.map(uuid => `"${uuid}"`).join(', ');
-      jql += ` AND "Team" in (${squadFilter})`;
+      jql += ` AND ("Team" in (${squadFilter}) OR project = CX)`;
     }
     
     jql += ' ORDER BY priority DESC, updated ASC';
     
     return this.searchIssues(jql, [
-      'summary', 
+      'summary',
+      'description', // Add description field
       'status', 
       'priority', 
       'assignee', 
       'created', 
       'updated',
       'customfield_10001', // Team field
-      'issuetype' // Issue type field
+      'issuetype', // Issue type field
+      'project' // Project field
     ]);
   }
 

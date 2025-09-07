@@ -1,0 +1,1063 @@
+CX BOARD TICKETS ANALYSIS
+Date Range: Sep 1 - Sep 7, 2025
+Generated: 2025-09-07T17:50:13.731Z
+
+================================================================================
+
+COMPLETED TICKETS (22 total)
+----------------------------------------
+1. CX-7460: Upgrade KNative Serving to 1.17.2
+   Status: Done
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2025-09-05T20:54:26.982+0000
+   Updated: 2025-09-05T22:13:15.675+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7460
+
+2. CX-7332: Add CodeArtifact repository permissions for cross-account access
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-04T20:10:54.322+0000
+   Updated: 2025-09-04T20:29:14.129+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"CodeArtifact is a python repository hosted on AWS that we use to share code between repos, one example is the...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7332
+
+3. CX-7238: Ingest Excel file for mapping
+   Status: Done
+   Assignee: Andrew Armaneous
+   Priority: Medium
+   Created: 2025-09-03T23:13:12.075+0000
+   Updated: 2025-09-04T16:50:47.351+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7238
+
+4. CX-7237: Update relay service to make onboarding easier
+   Status: Done
+   Assignee: Rishabh Sareen
+   Priority: Medium
+   Created: 2025-09-03T20:34:55.912+0000
+   Updated: 2025-09-03T23:24:48.514+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7237
+
+5. CX-7235: Ensure Plan G is registered as Medigap plan
+   Status: Done
+   Assignee: Andrew Armaneous
+   Priority: Medium
+   Created: 2025-09-03T19:23:42.765+0000
+   Updated: 2025-09-03T20:01:53.372+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7235
+
+6. CX-7234: Automatic refresh of secrets 
+   Status: Done
+   Assignee: Peter Agnew
+   Priority: Medium
+   Created: 2025-09-03T18:57:00.771+0000
+   Updated: 2025-09-03T21:56:49.138+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Secrets are not getting pulled into / refreshed in the clusters. "}]},{"type":"paragraph","content":[{"type":...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7234
+
+7. CX-7195: Build new WorkTimeline
+   Status: Done
+   Assignee: Dmytro Pukhovets
+   Priority: Medium
+   Created: 2025-09-02T15:56:18.036+0000
+   Updated: 2025-09-04T16:33:34.122+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7195
+
+8. CX-7193: chore(deps): next vulnerability in frontend
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-30T12:20:52.619+0000
+   Updated: 2025-09-03T19:35:20.854+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"link:"},{"type":"text","text":"https://github.com/Thoughtful-Automation/frontend/security/dependabot/55","mar...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7193
+
+9. CX-7192: chore(deps): next vulnerability in frontend
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-30T12:20:52.351+0000
+   Updated: 2025-09-03T19:35:20.776+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"link:"},{"type":"text","text":"https://github.com/Thoughtful-Automation/frontend/security/dependabot/54","mar...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7192
+
+10. CX-7191: chore(deps): next vulnerability in frontend
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-30T12:10:29.248+0000
+   Updated: 2025-09-03T19:35:20.868+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"link:"},{"type":"text","text":"https://github.com/Thoughtful-Automation/frontend/security/dependabot/53","mar...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7191
+
+11. CX-7190: chore(deps): next vulnerability in frontend
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-30T12:10:29.060+0000
+   Updated: 2025-09-03T19:35:21.059+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"link:"},{"type":"text","text":"https://github.com/Thoughtful-Automation/frontend/security/dependabot/52","mar...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7190
+
+12. CX-7189: chore(deps): next vulnerability in frontend
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-30T12:07:25.681+0000
+   Updated: 2025-09-03T19:35:21.162+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"link:"},{"type":"text","text":"https://github.com/Thoughtful-Automation/frontend/security/dependabot/50","mar...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7189
+
+13. CX-7188: chore(deps): next vulnerability in frontend
+   Status: Done
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-30T12:07:25.587+0000
+   Updated: 2025-09-03T19:35:20.919+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"link:"},{"type":"text","text":"https://github.com/Thoughtful-Automation/frontend/security/dependabot/51","mar...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7188
+
+14. CX-6951: Create PrivateLink consumer for shared MSK
+   Status: Done
+   Assignee: Harry Pan
+   Priority: Medium
+   Created: 2025-08-21T17:24:38.113+0000
+   Updated: 2025-09-05T18:33:14.885+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6951
+
+15. CX-6862: Investigate Okta Management options for GitHub/Temporal
+   Status: Done
+   Assignee: Asa Downs
+   Priority: Medium
+   Created: 2025-08-18T21:14:53.946+0000
+   Updated: 2025-09-03T19:05:53.878+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6862
+
+16. CX-6733: Add IAM auth to Knative Kafka broker
+   Status: Done
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2025-08-13T19:28:21.887+0000
+   Updated: 2025-09-04T19:53:03.823+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6733
+
+17. CX-6695: Update Knative eventing demo
+   Status: Done
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2025-08-11T21:00:11.690+0000
+   Updated: 2025-09-05T21:48:52.263+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6695
+
+18. CX-6639: Document Parsing Discovery
+   Status: Done
+   Assignee: Phil Bjorge
+   Priority: Medium
+   Created: 2025-08-05T16:44:18.052+0000
+   Updated: 2025-09-05T15:55:54.200+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6639
+
+19. CX-6619: Deploy KNative Kafka Broker
+   Status: Done
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2025-08-04T16:24:03.845+0000
+   Updated: 2025-09-04T22:09:50.670+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6619
+
+20. CX-6011: Setup cross-account sharing of MSK for platform engineering accounts
+   Status: Done
+   Assignee: Harry Pan
+   Priority: Medium
+   Created: 2025-07-11T16:39:46.532+0000
+   Updated: 2025-09-05T18:33:21.116+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"inlineCard","attrs":{"url":"https://aws.amazon.com/blogs/big-data/secure-connectivity-patterns-for-amazon-msk-serverless-cr...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6011
+
+21. CX-5033: Document Parser - Principal Finance - EFT, Denial, Check
+   Status: Done
+   Assignee: Antonio Christofoletti
+   Priority: Medium
+   Created: 2025-05-10T16:52:05.963+0000
+   Updated: 2025-09-06T20:56:23.203+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":1},"content":[{"type":"text","text":"Given","marks":[{"type":"strong"}]}]},{"type":"paragraph","content":[{"type":"text","text":...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5033
+
+22. CX-4933: RFC: Agent Storage Solution
+   Status: Done
+   Assignee: Peter Agnew
+   Priority: Medium
+   Created: 2025-04-25T13:47:58.675+0000
+   Updated: 2025-09-04T14:04:14.767+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"blockquote","content":[{"type":"paragraph","content":[{"type":"text","text":"Timeframe is a little loose since it's Signature Dental, but we're trying to ...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4933
+
+NEW TICKETS (50 total)
+----------------------------------------
+1. CX-7532: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-3frg-24qp-xxv2
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:59.702+0000
+   Updated: 2025-09-06T02:06:00.514+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7532
+
+2. CX-7531: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-4m4r-j72q-7w52
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:58.068+0000
+   Updated: 2025-09-06T02:05:58.895+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7531
+
+3. CX-7530: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-qx2v-8332-m4fv
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:56.154+0000
+   Updated: 2025-09-06T02:05:57.291+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7530
+
+4. CX-7529: (low) - thoughthub-services/converse_ai_agent_aria - Out-of-Bounds
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:53.826+0000
+   Updated: 2025-09-06T02:05:55.349+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7529
+
+5. CX-7528: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-v594-44hm-2j7p
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:51.906+0000
+   Updated: 2025-09-06T02:05:53.000+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7528
+
+6. CX-7527: (low) - thoughthub-services/converse_ai_agent_aria - CVE-2025-8194
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:50.078+0000
+   Updated: 2025-09-06T02:05:51.014+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7527
+
+7. CX-7526: (low) - thoughthub-services/converse_ai_agent_aria - CVE-2025-6069
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:48.419+0000
+   Updated: 2025-09-06T02:05:49.260+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7526
+
+8. CX-7525: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-j5cc-6rx8-ff96
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:46.286+0000
+   Updated: 2025-09-06T02:05:47.163+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7525
+
+9. CX-7524: (low) - thoughthub-services/converse_ai_agent_aria - CVE-2025-8058
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:44.394+0000
+   Updated: 2025-09-06T02:05:45.179+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7524
+
+10. CX-7523: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-8xjp-c72j-67q8
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:42.420+0000
+   Updated: 2025-09-06T02:05:43.556+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7523
+
+11. CX-7522: (low) - thoughthub-services/converse_ai_agent_aria - CVE-2024-58251
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:40.629+0000
+   Updated: 2025-09-06T02:05:41.412+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7522
+
+12. CX-7521: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-xwfj-jgwm-7wp5
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:38.839+0000
+   Updated: 2025-09-06T02:05:39.724+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7521
+
+13. CX-7520: (low) - thoughthub-services/converse_ai_agent_aria - CVE-2025-46394
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:37.063+0000
+   Updated: 2025-09-06T02:05:37.986+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7520
+
+14. CX-7519: (low) - thoughthub-services/converse_ai_agent_aria - Improper Neutralization
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:35.462+0000
+   Updated: 2025-09-06T02:05:36.330+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7519
+
+15. CX-7518: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-rrv5-483w-xmr9
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:33.778+0000
+   Updated: 2025-09-06T02:05:34.616+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7518
+
+16. CX-7517: (low) - thoughthub-services/converse_ai_agent_aria - GHSA-wp4q-9jq4-gv74
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:31.735+0000
+   Updated: 2025-09-06T02:05:32.864+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7517
+
+17. CX-7516: (medium) - thoughthub-services/converse_ai_agent_aria - Memory Leak
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:29.712+0000
+   Updated: 2025-09-06T02:05:30.458+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7516
+
+18. CX-7515: (medium) - thoughthub-services/converse_ai_agent_aria - Out-of-Bounds
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:27.993+0000
+   Updated: 2025-09-06T02:05:28.911+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7515
+
+19. CX-7514: (low) - thoughthub-services/edi_service - GHSA-3frg-24qp-xxv2
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:25.683+0000
+   Updated: 2025-09-06T02:05:26.475+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7514
+
+20. CX-7513: (low) - thoughthub-services/edi_service - GHSA-4m4r-j72q-7w52
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:23.929+0000
+   Updated: 2025-09-06T02:05:24.657+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7513
+
+21. CX-7512: (low) - thoughthub-services/edi_service - GHSA-j5cc-6rx8-ff96
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:22.239+0000
+   Updated: 2025-09-06T02:05:23.028+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7512
+
+22. CX-7511: (low) - thoughthub-services/edi_service - CVE-2025-8058
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:20.730+0000
+   Updated: 2025-09-06T02:05:21.473+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7511
+
+23. CX-7510: (low) - thoughthub-services/edi_service - GHSA-8xjp-c72j-67q8
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:19.005+0000
+   Updated: 2025-09-06T02:05:19.791+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7510
+
+24. CX-7509: (low) - thoughthub-services/edi_service - GHSA-qx2v-8332-m4fv
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:16.930+0000
+   Updated: 2025-09-06T02:05:17.867+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7509
+
+25. CX-7508: (low) - thoughthub-services/edi_service - Out-of-Bounds
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:15.208+0000
+   Updated: 2025-09-06T02:05:15.987+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7508
+
+26. CX-7507: (low) - thoughthub-services/edi_service - GHSA-v594-44hm-2j7p
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:13.640+0000
+   Updated: 2025-09-06T02:05:14.411+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7507
+
+27. CX-7506: (low) - thoughthub-services/edi_service - CVE-2025-8194
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:12.007+0000
+   Updated: 2025-09-06T02:05:12.832+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7506
+
+28. CX-7505: (low) - thoughthub-services/edi_service - CVE-2025-6069
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:09.383+0000
+   Updated: 2025-09-06T02:05:10.720+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7505
+
+29. CX-7504: (low) - thoughthub-services/edi_service - GHSA-wp4q-9jq4-gv74
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:07.803+0000
+   Updated: 2025-09-06T02:05:08.589+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7504
+
+30. CX-7503: (low) - thoughthub-services/edi_service - GHSA-xwfj-jgwm-7wp5
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:06.149+0000
+   Updated: 2025-09-06T02:05:06.997+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7503
+
+31. CX-7502: (low) - thoughthub-services/edi_service - CVE-2025-46394
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:04.185+0000
+   Updated: 2025-09-06T02:05:05.321+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7502
+
+32. CX-7501: (low) - thoughthub-services/edi_service - Improper Neutralization
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:02.600+0000
+   Updated: 2025-09-06T02:05:03.349+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7501
+
+33. CX-7500: (low) - thoughthub-services/edi_service - CVE-2024-58251
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:05:00.923+0000
+   Updated: 2025-09-06T02:05:01.717+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7500
+
+34. CX-7499: (low) - thoughthub-services/edi_service - GHSA-rrv5-483w-xmr9
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:58.951+0000
+   Updated: 2025-09-06T02:04:59.885+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7499
+
+35. CX-7498: (medium) - thoughthub-services/edi_service - Out-of-Bounds
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:57.208+0000
+   Updated: 2025-09-06T02:04:57.986+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7498
+
+36. CX-7497: (medium) - thoughthub-services/edi_service - Memory Leak
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:55.477+0000
+   Updated: 2025-09-06T02:04:56.234+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7497
+
+37. CX-7496: (low) - thoughthub-services/converse_ai_api - GHSA-v594-44hm-2j7p
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:52.730+0000
+   Updated: 2025-09-06T02:04:53.486+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7496
+
+38. CX-7495: (low) - thoughthub-services/converse_ai_api - CVE-2025-8194
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:50.671+0000
+   Updated: 2025-09-06T02:04:51.944+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7495
+
+39. CX-7494: (low) - thoughthub-services/converse_ai_api - CVE-2025-6069
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:48.656+0000
+   Updated: 2025-09-06T02:04:49.547+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7494
+
+40. CX-7493: (low) - thoughthub-services/converse_ai_api - GHSA-j5cc-6rx8-ff96
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:46.328+0000
+   Updated: 2025-09-06T02:04:47.494+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7493
+
+41. CX-7492: (low) - thoughthub-services/converse_ai_api - CVE-2025-8058
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:44.547+0000
+   Updated: 2025-09-06T02:04:45.487+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7492
+
+42. CX-7491: (low) - thoughthub-services/converse_ai_api - GHSA-8xjp-c72j-67q8
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:42.747+0000
+   Updated: 2025-09-06T02:04:43.594+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7491
+
+43. CX-7490: (low) - thoughthub-services/converse_ai_api - GHSA-3frg-24qp-xxv2
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:40.540+0000
+   Updated: 2025-09-06T02:04:41.876+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7490
+
+44. CX-7489: (low) - thoughthub-services/converse_ai_api - GHSA-4m4r-j72q-7w52
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:38.058+0000
+   Updated: 2025-09-06T02:04:39.290+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7489
+
+45. CX-7488: (low) - thoughthub-services/converse_ai_api - GHSA-qx2v-8332-m4fv
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:35.989+0000
+   Updated: 2025-09-06T02:04:37.202+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7488
+
+46. CX-7487: (low) - thoughthub-services/converse_ai_api - Out-of-Bounds
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:34.165+0000
+   Updated: 2025-09-06T02:04:35.103+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7487
+
+47. CX-7486: (low) - thoughthub-services/converse_ai_api - CVE-2025-46394
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:31.836+0000
+   Updated: 2025-09-06T02:04:32.996+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7486
+
+48. CX-7485: (low) - thoughthub-services/converse_ai_api - CVE-2024-58251
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:29.991+0000
+   Updated: 2025-09-06T02:04:30.997+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7485
+
+49. CX-7484: (low) - thoughthub-services/converse_ai_api - GHSA-wp4q-9jq4-gv74
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:27.128+0000
+   Updated: 2025-09-06T02:04:28.834+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7484
+
+50. CX-7483: (low) - thoughthub-services/converse_ai_api - GHSA-rrv5-483w-xmr9
+   Status: To Do
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-09-06T02:04:25.018+0000
+   Updated: 2025-09-06T02:04:25.867+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"emoji","attrs":{"shortName":":warning:","id":"atlassian-warning","text":":warning:"}},{"type":"text","tex...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-7483
+
+STALE TICKETS (32 total)
+----------------------------------------
+1. CX-6969: Containerize claim scraper for AWS Batch
+   Status: In Progress
+   Assignee: Harry Pan
+   Priority: Medium
+   Created: 2025-08-22T18:44:14.068+0000
+   Updated: 2025-08-22T18:44:27.413+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6969
+
+2. CX-6734: Migrate POST /eva/records endpoint
+   Status: In Progress
+   Assignee: Dmytro Pukhovets
+   Priority: Medium
+   Created: 2025-08-13T21:14:25.519+0000
+   Updated: 2025-08-13T21:15:43.179+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6734
+
+3. CX-6731: chore(deps): Bump the npm_and_yarn group across 1 directory with 2 updates
+   Status: In Progress
+   Assignee: Andrew Armaneous
+   Priority: Medium
+   Created: 2025-08-13T17:56:31.269+0000
+   Updated: 2025-08-14T17:00:34.804+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"See: "},{"type":"text","text":"https://github.com/Thoughtful-Automation/relay/pull/57","marks":[{"type":"link...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6731
+
+4. CX-6697: Fixing database_migrator.py issues
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-08-11T21:57:30.018+0000
+   Updated: 2025-08-13T00:36:28.888+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Database migrations often encounter a "},{"type":"text","text":"password that was provided for the role *** i...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6697
+
+5. CX-6673: Fix "application_database" module secret-rotation issue that causes `psycopg.errors.InvalidPassword` errors
+   Status: In Progress
+   Assignee: Geoffrey Plitt
+   Priority: Medium
+   Created: 2025-08-07T22:26:44.070+0000
+   Updated: 2025-08-13T00:36:17.985+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"I’m always getting "},{"type":"text","text":"psycopg.errors.InvalidPassword: The password that was provided f...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6673
+
+6. CX-6671: Temporal Error Handling Strategy Course
+   Status: In Progress
+   Assignee: Asa Downs
+   Priority: Medium
+   Created: 2025-08-07T22:08:17.648+0000
+   Updated: 2025-08-15T16:13:10.446+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6671
+
+7. CX-6649: Optimize payer data extraction
+   Status: In Progress
+   Assignee: Dmytro Pukhovets
+   Priority: Medium
+   Created: 2025-08-06T23:21:00.437+0000
+   Updated: 2025-08-14T17:00:35.279+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6649
+
+8. CX-6578: Endpoint: STEDI Raw x12 270 EDI
+   Status: In Progress
+   Assignee: Alexander Almond
+   Priority: Highest
+   Created: 2025-07-30T20:54:23.216+0000
+   Updated: 2025-08-14T17:00:35.709+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"An endpoint that can handle raw x12 270 EDI"}]}...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6578
+
+9. CX-6563: Move APT backend to thoughthub-services
+   Status: In Progress
+   Assignee: Dmytro Pukhovets
+   Priority: Medium
+   Created: 2025-07-29T12:18:11.521+0000
+   Updated: 2025-08-14T17:00:35.040+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6563
+
+10. CX-6340: Find work-around for broken devcontainer 
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-07-15T22:23:47.283+0000
+   Updated: 2025-07-15T22:24:32.271+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"The thoughthub-services devcontainer won’t build in Cursor, possibly because they switched from microsoft/vsc...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-6340
+
+11. CX-5940: Research AWS Account Management strategies
+   Status: In Progress
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2025-06-27T21:02:03.001+0000
+   Updated: 2025-08-14T17:00:34.811+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5940
+
+12. CX-5932: Migrate labeling data from PRD account to new applied ai environment
+   Status: In Progress
+   Assignee: Joe Meiring
+   Priority: Medium
+   Created: 2025-06-27T15:03:25.412+0000
+   Updated: 2025-08-14T20:21:39.034+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5932
+
+13. CX-5920: Kafka+Knative - Thoughthub-services repo Changes to prepare for using events in services
+   Status: In Progress
+   Assignee: Geoffrey Plitt
+   Priority: Medium
+   Created: 2025-06-26T20:59:09.913+0000
+   Updated: 2025-07-04T01:26:56.568+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"heading","attrs":{"level":2},"content":[{"type":"text","text":"Objective"}]},{"type":"paragraph","content":[{"type":"text","text":"Set up foundational eve...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5920
+
+14. CX-5811: Access Human-In-The-Loop Integration
+   Status: In Progress
+   Assignee: Geoffrey Plitt
+   Priority: Medium
+   Created: 2025-06-16T20:28:52.767+0000
+   Updated: 2025-07-18T17:59:55.995+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5811
+
+15. CX-5806: RFC on Observability Platform Options
+   Status: In Progress
+   Assignee: Sean Albito
+   Priority: Medium
+   Created: 2025-06-13T17:15:13.455+0000
+   Updated: 2025-06-27T16:22:21.565+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5806
+
+16. CX-5430: 2025 Pen Test Remediation
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2025-06-11T19:58:05.833+0000
+   Updated: 2025-06-11T19:58:06.328+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5430
+
+17. CX-5224: Stedi Endpoint
+   Status: In Progress
+   Assignee: Nick Caravias
+   Priority: High
+   Created: 2025-06-04T19:55:33.499+0000
+   Updated: 2025-08-14T17:00:35.286+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Portal Aggregator needs to serve as a passthrough to the Stedi "},{"type":"text","text":"eligibility verifica...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5224
+
+18. CX-5170: Lambda for embedding model calling
+   Status: In Progress
+   Assignee: Joe Meiring
+   Priority: Medium
+   Created: 2025-05-28T15:46:18.969+0000
+   Updated: 2025-05-28T15:46:26.089+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5170
+
+19. CX-5044: Create account for ML infra
+   Status: In Progress
+   Assignee: Joe Meiring
+   Priority: Medium
+   Created: 2025-05-13T16:24:23.637+0000
+   Updated: 2025-05-19T15:06:45.133+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-5044
+
+20. CX-4713: Outbound Voice Calling
+   Status: In Progress
+   Assignee: Jakob McClanahan
+   Priority: Medium
+   Created: 2025-03-13T16:24:02.744+0000
+   Updated: 2025-06-24T17:12:03.598+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4713
+
+21. CX-4660: Test end-to-end prior auth requests
+   Status: In Progress
+   Assignee: Andrew Armaneous
+   Priority: Medium
+   Created: 2025-03-04T23:04:36.311+0000
+   Updated: 2025-08-14T17:00:36.563+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4660
+
+22. CX-4278: Platform Customer Engagements (FY24Q4)
+   Status: In Progress
+   Assignee: Blake DeBenon
+   Priority: Medium
+   Created: 2024-12-06T00:07:20.153+0000
+   Updated: 2024-12-09T15:18:55.809+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4278
+
+23. CX-4205: Advanced Data Analytics Enhancements (FY24Q4)
+   Status: In Progress
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2024-11-18T17:16:29.823+0000
+   Updated: 2024-12-09T15:19:08.309+0000
+   Team: No team assigned
+   Description: No description
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4205
+
+24. CX-4187: Proliance Project Support (FY24Q4)
+   Status: In Progress
+   Assignee: Blake DeBenon
+   Priority: Medium
+   Created: 2024-11-14T15:34:29.628+0000
+   Updated: 2025-01-24T16:20:42.179+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"The Platform team will provide support to for the Proliance Project in multiple way"}]},{"type":"bulletList",...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4187
+
+25. CX-4184: Agent Services Platform
+   Status: In Progress
+   Assignee: Quenby Mitchell
+   Priority: Medium
+   Created: 2024-11-13T16:17:31.326+0000
+   Updated: 2024-12-13T22:23:51.656+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"AWS architecture to ship services for the TA Agent Platform: "},{"type":"text","text":"https://www.notion.so/...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4184
+
+26. CX-4093: Backup Credential Vault
+   Status: In Progress
+   Assignee: Dmytro Pukhovets
+   Priority: Medium
+   Created: 2024-10-16T14:35:57.337+0000
+   Updated: 2024-12-13T22:23:46.011+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Context:"}]},{"type":"paragraph","content":[{"type":"inlineCard","attrs":{"url":"https://thoughtfulai.slack.c...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-4093
+
+27. CX-3976: Spike/Impl: Autocomplete Dropdown Support
+   Status: In Progress
+   Assignee: Phil Bjorge
+   Priority: Medium
+   Created: 2024-09-19T16:06:22.536+0000
+   Updated: 2024-09-26T18:52:08.542+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Seen in…","marks":[{"type":"strong"}]}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-3976
+
+28. CX-2992: Deploy opus V2 in AWS env, ensure same service level
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2023-10-13T14:15:16.370+0000
+   Updated: 2024-12-13T16:53:57.180+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Steps:"},{"type":"hardBreak"},{"type":"text","text":"Deploy to local"},{"type":"hardBreak"},{"type":"text","t...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-2992
+
+29. CX-2890: SV2 - Supervisor Quickstart V2 bot mimics useful bot actions for bots using steps, records features
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2023-09-01T14:41:55.467+0000
+   Updated: 2024-12-13T16:55:09.648+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Update Supervisor V2 code to display features, use cases requested during the Supervisor documentation tasks ...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-2890
+
+30. CX-2592: Triage scenarios for Auth Failure/Timeout due to Idle Time on Client side
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2023-06-23T15:37:26.477+0000
+   Updated: 2024-12-13T16:54:19.836+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Test :Get details on why Client IdleCounter is resetting time and not showing the “Are you still logged in” m...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-2592
+
+31. CX-2477: Opus: Vite Server Options (server.fs.deny) can be bypassed using double forward-slash (//)
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2023-06-06T20:51:40.483+0000
+   Updated: 2024-12-13T16:56:54.090+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"https://github.com/Thoughtful-Automation/opus/security/dependabot/12","marks":[{"type":"link","attrs":{"href"...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-2477
+
+32. CX-2079: Foundry: Cipher.update_into can corrupt memory if passed an immutable python object as the outbuf
+   Status: In Progress
+   Assignee: Unassigned
+   Priority: Medium
+   Created: 2023-03-31T15:22:58.557+0000
+   Updated: 2024-12-13T16:54:12.762+0000
+   Team: No team assigned
+   Description: {"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"https://github.com/Thoughtful-Automation/otto/security/dependabot/7","marks":[{"type":"link","attrs":{"href":...
+   URL: https://thoughtfulautomation.atlassian.net/browse/CX-2079
+
+BLOCKED TICKETS (0 total)
+----------------------------------------
+No blocked tickets found.
+
+SUMMARY
+----------------------------------------
+Total Completed: 22
+Total New: 50
+Total Stale: 32
+Total Blocked: 0
+Total Updated: 100

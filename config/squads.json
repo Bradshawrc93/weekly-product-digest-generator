@@ -69,6 +69,14 @@
       "jiraUuid": "eab6f557-2ee3-458c-9511-54c135cd4752-81",
       "description": "Deep research and advanced analytics",
       "order": 10
+    },
+    {
+      "name": "Core Engineering/ThoughtHub",
+      "displayName": "Core Engineering/ThoughtHub",
+      "jiraUuid": "CX",
+      "description": "Core engineering and ThoughtHub platform development",
+      "order": 11,
+      "projectKey": "CX"
     }
   ],
   "statusCategories": {

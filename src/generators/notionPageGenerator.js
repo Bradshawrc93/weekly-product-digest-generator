@@ -5,7 +5,7 @@ const { logger } = require('../utils/logger');
 class NotionPageGenerator {
   constructor() {
     this.squads = config.squads;
-    this.maxBlocks = 95; // Leave some buffer below Notion's 100 limit
+    this.maxBlocks = 60; // Very conservative limit to ensure we stay under 100
   }
 
   /**
@@ -15,74 +15,74 @@ class NotionPageGenerator {
     try {
       logger.info('Generating Notion page', { dateRange: dateRange.display });
 
-      const pageData = {
-        title: `Weekly Report: ${dateRange.display}`,
-        children: []
-      };
-
-      let blockCount = 0;
-
+      // Step 1: Plan the entire page with all content
+      const allBlocks = [];
+      
       // AI TL;DR section
       const aiTldrBlocks = this.createAITLDRSection(metrics, organizedData);
-      pageData.children.push(...aiTldrBlocks);
-      blockCount += aiTldrBlocks.length;
+      allBlocks.push(...aiTldrBlocks);
+      allBlocks.push(notion.createDividerBlock());
 
-      // Divider
-      pageData.children.push(notion.createDividerBlock());
-      blockCount += 1;
+      // What Shipped section (with ALL tickets)
+      const whatShippedBlocks = this.createWhatShippedSection(organizedData, allBlocks.length);
+      allBlocks.push(...whatShippedBlocks);
+      allBlocks.push(notion.createDividerBlock());
 
-      // What Shipped section
-      const whatShippedBlocks = this.createWhatShippedSection(organizedData);
-      pageData.children.push(...whatShippedBlocks);
-      blockCount += whatShippedBlocks.length;
-
-      // Divider
-      pageData.children.push(notion.createDividerBlock());
-      blockCount += 1;
-
-      // Change Log section (with block limit)
-      const changeLogBlocks = this.createChangeLogSection(organizedData, blockCount);
-      pageData.children.push(...changeLogBlocks);
-      blockCount += changeLogBlocks.length;
-
-      // Divider
-      pageData.children.push(notion.createDividerBlock());
-      blockCount += 1;
-
-      // Stale tickets section
-      const staleBlocks = this.createStaleTicketsSection(organizedData);
-      pageData.children.push(...staleBlocks);
-      blockCount += staleBlocks.length;
-
-      // Divider
-      pageData.children.push(notion.createDividerBlock());
-      blockCount += 1;
+      // Change Log section
+      const changeLogBlocks = this.createChangeLogSection(organizedData, allBlocks.length);
+      allBlocks.push(...changeLogBlocks);
+      allBlocks.push(notion.createDividerBlock());
 
       // Blocked tickets section
-      const blockedBlocks = this.createBlockedTicketsSection(organizedData);
-      pageData.children.push(...blockedBlocks);
-      blockCount += blockedBlocks.length;
+      const blockedBlocks = this.createBlockedTicketsSection(organizedData, allBlocks.length);
+      allBlocks.push(...blockedBlocks);
 
-      // Divider
-      pageData.children.push(notion.createDividerBlock());
-      blockCount += 1;
-
-      // On Deck section
-      const onDeckBlocks = this.createOnDeckSection(organizedData);
-      pageData.children.push(...onDeckBlocks);
-      blockCount += onDeckBlocks.length;
-
-      logger.info('Page generation complete', { 
-        totalBlocks: blockCount,
-        title: pageData.title 
+      logger.info('Complete page planned', { 
+        totalBlocks: allBlocks.length,
+        title: `Weekly Report: ${dateRange.display}`
       });
+
+      // Step 2: Split into chunks and send
+      const chunks = this.splitBlocksIntoChunks(allBlocks, 90);
+      logger.info('Page split into chunks', { 
+        totalChunks: chunks.length,
+        chunkSizes: chunks.map(chunk => chunk.length)
+      });
+
+      // Step 3: Create page with first chunk
+      const pageData = {
+        title: `Weekly Report: ${dateRange.display}`,
+        children: chunks[0]
+      };
 
       const response = await notion.createPage(pageData);
       
-      logger.info('Weekly report page generated successfully', { 
+      logger.info('Initial page created successfully', { 
         pageId: response.id,
         title: pageData.title,
-        totalBlocks: blockCount
+        initialBlocks: chunks[0].length
+      });
+
+      // Step 4: Append remaining chunks
+      for (let i = 1; i < chunks.length; i++) {
+        logger.info('Appending chunk to page', { 
+          chunkIndex: i + 1,
+          blocksInChunk: chunks[i].length
+        });
+        
+        await notion.appendBlocksToPage(response.id, chunks[i]);
+        
+        logger.info('Chunk appended successfully', { 
+          pageId: response.id,
+          chunkIndex: i + 1
+        });
+      }
+
+      logger.info('Weekly report page generation completed', { 
+        pageId: response.id,
+        title: pageData.title,
+        totalBlocks: allBlocks.length,
+        totalChunks: chunks.length
       });
 
       return response;
@@ -126,11 +126,11 @@ class NotionPageGenerator {
       if (totalDone > 0) {
         summary += `We shipped ${totalDone} key deliverables`;
         if (totalCreated > 0) {
-          summary += ` while launching ${totalCreated} new initiatives`;
+          summary += ` while creating ${totalCreated} new work items`;
         }
         summary += `. `;
       } else if (totalCreated > 0) {
-        summary += `We kicked off ${totalCreated} new initiatives, setting the stage for next week's deliveries. `;
+        summary += `We created ${totalCreated} new work items, setting the stage for next week's deliveries. `;
       } else {
         summary += `Focus was on refinement and planning this week. `;
       }
@@ -147,11 +147,6 @@ class NotionPageGenerator {
         summary += `Clean Operations: All systems are running smoothly with no bottlenecks. `;
       }
 
-      if (totalDone >= totalCreated) {
-        summary += `Bottom Line: We're delivering faster than we're creating new work - excellent execution rhythm.`;
-      } else {
-        summary += `Bottom Line: We're building a strong pipeline for future deliveries.`;
-      }
 
       return summary;
     } catch (error) {
@@ -193,7 +188,7 @@ class NotionPageGenerator {
         if (totalCreated > 0) {
           richTextArray.push({
             type: 'text',
-            text: { content: ` while launching ${totalCreated} new initiatives` }
+            text: { content: ` while creating ${totalCreated} new work items` }
           });
         }
         richTextArray.push({
@@ -203,7 +198,7 @@ class NotionPageGenerator {
       } else if (totalCreated > 0) {
         richTextArray.push({
           type: 'text',
-          text: { content: `We kicked off ${totalCreated} new initiatives, setting the stage for next week's deliveries. ` }
+          text: { content: `We created ${totalCreated} new work items, setting the stage for next week's deliveries. ` }
         });
       } else {
         richTextArray.push({
@@ -259,15 +254,6 @@ class NotionPageGenerator {
         });
       }
 
-      richTextArray.push({
-        type: 'text',
-        text: { content: 'Bottom Line: ' },
-        annotations: { bold: true }
-      });
-      richTextArray.push({
-        type: 'text',
-        text: { content: 'We\'re building a strong pipeline for future deliveries.' }
-      });
 
       return richTextArray;
     } catch (error) {
@@ -311,10 +297,13 @@ class NotionPageGenerator {
   /**
    * Create What Shipped section
    */
-  createWhatShippedSection(organizedData) {
+  createWhatShippedSection(organizedData, currentBlockCount = 0) {
     const blocks = [
       notion.createHeadingBlock('🚢 What Shipped', 1)
     ];
+
+    // Always include descriptions for completed tickets
+    const includeDescriptions = true;
 
     for (const squad of this.squads) {
       const squadData = organizedData[squad.name];
@@ -326,8 +315,10 @@ class NotionPageGenerator {
           notion.createHeadingBlock(squad.displayName, 2)
         );
 
-        // Completed tickets
-        completedTickets.forEach(ticket => {
+        // Show ALL tickets for all squads - no limits
+        const ticketsToShow = completedTickets;
+        
+        ticketsToShow.forEach(ticket => {
           const richText = [
             notion.createRichTextWithLink(ticket.key, ticket.jiraUrl),
             notion.createRichText(' - '),
@@ -336,7 +327,15 @@ class NotionPageGenerator {
           ];
           
           blocks.push(notion.createMixedParagraph(richText));
+          
+          // Add description as a toggle block to save space
+          if (includeDescriptions && ticket.description && ticket.description.trim() !== '') {
+            const descriptionParagraph = notion.createParagraphBlock(ticket.description);
+            blocks.push(notion.createToggleBlock('Ticket Description', [descriptionParagraph]));
+          }
         });
+        
+        // No truncation - show all tickets
 
         blocks.push(notion.createParagraphBlock(''));
       }
@@ -347,6 +346,17 @@ class NotionPageGenerator {
     }
 
     return blocks;
+  }
+
+  /**
+   * Split blocks into chunks of 90 for Notion API limits
+   */
+  splitBlocksIntoChunks(allBlocks, chunkSize = 90) {
+    const chunks = [];
+    for (let i = 0; i < allBlocks.length; i += chunkSize) {
+      chunks.push(allBlocks.slice(i, i + chunkSize));
+    }
+    return chunks;
   }
 
   /**
@@ -369,8 +379,8 @@ class NotionPageGenerator {
     }
 
     // Calculate remaining blocks available for changelog
-    const remainingBlocks = this.maxBlocks - currentBlockCount - 40; // Reserve 40 for other sections
-    const maxChangelogBlocks = Math.max(remainingBlocks, 20); // Minimum 20 blocks for changelog
+    const remainingBlocks = this.maxBlocks - currentBlockCount - 20; // Reserve 20 for other sections
+    const maxChangelogBlocks = Math.max(remainingBlocks, 15); // Minimum 15 blocks for changelog
 
     logger.info('Changelog block allocation', { 
       currentBlocks: currentBlockCount,
@@ -398,7 +408,7 @@ class NotionPageGenerator {
       const toggleChildren = [];
       
       // Show tickets with events in the toggle (limit to prevent Notion API errors)
-      const maxToggleChildren = 90; // Stay well below Notion's 100 limit
+      const maxToggleChildren = Math.min(90, maxChangelogBlocks - blocksUsed - 2); // Respect calculated limit
       let childrenCount = 0;
       
       for (const ticketGroup of groupedEvents) {
@@ -469,7 +479,7 @@ class NotionPageGenerator {
   /**
    * Create Stale Tickets section
    */
-  createStaleTicketsSection(organizedData) {
+  createStaleTicketsSection(organizedData, currentBlockCount = 0) {
     const blocks = [
       notion.createHeadingBlock('⚠️ Stale - Needs Review', 1)
     ];
@@ -484,6 +494,9 @@ class NotionPageGenerator {
       blocks.push(notion.createParagraphBlock('No stale tickets this week.'));
       return blocks;
     }
+
+    // Always include descriptions for stale tickets
+    const includeDescriptions = true;
 
     // Show all squads with stale tickets using toggle blocks
     squadsWithStale.forEach(squad => {
@@ -503,6 +516,15 @@ class NotionPageGenerator {
         ];
         
         toggleChildren.push(notion.createMixedParagraph(richText));
+        
+        // Add description underneath with indentation and italic formatting
+        if (includeDescriptions) {
+          const indentedDescription = [
+            notion.createRichText('\t', {}),
+            notion.createRichText(ticket.description, { italic: true })
+          ];
+          toggleChildren.push(notion.createMixedParagraph(indentedDescription));
+        }
       });
 
       // Create toggle block with squad name and all tickets
@@ -517,7 +539,7 @@ class NotionPageGenerator {
   /**
    * Create Blocked Tickets section
    */
-  createBlockedTicketsSection(organizedData) {
+  createBlockedTicketsSection(organizedData, currentBlockCount = 0) {
     const blocks = [
       notion.createHeadingBlock('🚪 Blocked - Needs Unblocking', 1)
     ];
@@ -532,6 +554,9 @@ class NotionPageGenerator {
       blocks.push(notion.createParagraphBlock('No blocked tickets this week.'));
       return blocks;
     }
+
+    // Always include descriptions for blocked tickets
+    const includeDescriptions = true;
 
     // Show all squads with blocked tickets using toggle blocks
     squadsWithBlocked.forEach(squad => {
@@ -551,6 +576,15 @@ class NotionPageGenerator {
         ];
         
         toggleChildren.push(notion.createMixedParagraph(richText));
+        
+        // Add description underneath with indentation and italic formatting
+        if (includeDescriptions) {
+          const indentedDescription = [
+            notion.createRichText('\t', {}),
+            notion.createRichText(ticket.description, { italic: true })
+          ];
+          toggleChildren.push(notion.createMixedParagraph(indentedDescription));
+        }
       });
 
       // Create toggle block with squad name and all tickets

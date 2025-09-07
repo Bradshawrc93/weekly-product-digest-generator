@@ -409,6 +409,31 @@ class NotionConnector {
   }
 
   /**
+   * Append blocks to an existing page
+   */
+  async appendBlocksToPage(pageId, blocks) {
+    try {
+      const response = await this.client.blocks.children.append({
+        block_id: pageId,
+        children: blocks
+      });
+
+      logger.info('Blocks appended to Notion page successfully', { 
+        pageId, 
+        blocksAdded: blocks.length 
+      });
+      return response;
+    } catch (error) {
+      logger.error('Failed to append blocks to Notion page', { 
+        error: error.message,
+        pageId,
+        blocksCount: blocks.length
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Delete a page
    */
   async deletePage(pageId) {
