@@ -1,6 +1,7 @@
 const notion = require('../connectors/notion');
 const config = require('../utils/config');
 const { logger } = require('../utils/logger');
+const aiService = require('../services/aiService');
 
 class NotionPageGenerator {
   constructor() {
@@ -19,7 +20,7 @@ class NotionPageGenerator {
       const allBlocks = [];
       
       // AI TL;DR section
-      const aiTldrBlocks = this.createAITLDRSection(metrics, organizedData);
+      const aiTldrBlocks = await this.createAITLDRSection(metrics, organizedData);
       allBlocks.push(...aiTldrBlocks);
       allBlocks.push(notion.createDividerBlock());
 
@@ -95,8 +96,8 @@ class NotionPageGenerator {
   /**
    * Create AI TL;DR section
    */
-  createAITLDRSection(metrics, organizedData) {
-    const aiSummaryRichText = this.generateAITLDRSummaryRichText(metrics, organizedData);
+  async createAITLDRSection(metrics, organizedData) {
+    const aiSummaryRichText = await this.generateAITLDRSummaryRichText(metrics, organizedData);
     
     return [
       notion.createHeadingBlock('🤖 AI TL;DR', 1),
@@ -108,7 +109,7 @@ class NotionPageGenerator {
   /**
    * Generate AI TL;DR summary based on data
    */
-  generateAITLDRSummary(metrics, organizedData) {
+  async generateAITLDRSummary(metrics, organizedData) {
     try {
       // Calculate key metrics
       const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
@@ -116,29 +117,14 @@ class NotionPageGenerator {
       const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
       const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
 
-      const squadsWithActivity = Object.entries(metrics).filter(([_, squad]) => 
-        squad.done > 0 || squad.created > 0
-      );
-
-      // Generate story-driven summary
-      let summary = `This Week's Story: `;
+      // Use AI service to generate intelligent summary
+      const aiSummary = await aiService.generateShippedWorkSummary(organizedData, metrics);
       
-      if (totalDone > 0) {
-        summary += `We shipped ${totalDone} key deliverables`;
-        if (totalCreated > 0) {
-          summary += ` while creating ${totalCreated} new work items`;
-        }
-        summary += `. `;
-      } else if (totalCreated > 0) {
-        summary += `We created ${totalCreated} new work items, setting the stage for next week's deliveries. `;
-      } else {
-        summary += `Focus was on refinement and planning this week. `;
-      }
-
-      if (squadsWithActivity.length > 0) {
-        const heroSquad = squadsWithActivity
-          .sort(([_, a], [__, b]) => (b.done + b.created) - (a.done + a.created))[0];
-        summary += `${heroSquad[0]} emerged as this week's MVP with the most impactful contributions. `;
+      // Add additional context about new work and blockers
+      let summary = aiSummary;
+      
+      if (totalCreated > 0) {
+        summary += ` Additionally, we created ${totalCreated} new work items, setting the stage for next week's deliveries. `;
       }
 
       if (totalStale > 0 || totalBlocked > 0) {
@@ -147,88 +133,46 @@ class NotionPageGenerator {
         summary += `Clean Operations: All systems are running smoothly with no bottlenecks. `;
       }
 
-
       return summary;
     } catch (error) {
       logger.error('Failed to generate AI TL;DR summary', { error: error.message });
-      return 'AI summary generation failed. Please check the data and try again.';
+      
+      // Fallback to basic summary
+      const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
+      const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
+      
+      return `This week's story: We shipped ${totalDone} key deliverables${totalCreated > 0 ? ` while creating ${totalCreated} new work items` : ''}. AI summary generation failed, but the detailed work is listed below.`;
     }
   }
 
   /**
    * Generate AI TL;DR summary with rich text formatting
    */
-  generateAITLDRSummaryRichText(metrics, organizedData) {
+  async generateAITLDRSummaryRichText(metrics, organizedData) {
     try {
-      // Calculate key metrics
-      const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
+      // Use AI service to generate intelligent summary
+      const aiSummary = await aiService.generateShippedWorkSummary(organizedData, metrics);
+      
+      // Calculate additional metrics for context
       const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
       const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
       const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
 
-      const squadsWithActivity = Object.entries(metrics).filter(([_, squad]) => 
-        squad.done > 0 || squad.created > 0 || squad.updated > 0
-      );
-
       // Build rich text array
       const richTextArray = [];
 
-      // Start with "This Week's Story: "
+      // Add the AI-generated summary
       richTextArray.push({
         type: 'text',
-        text: { content: 'This Week\'s Story: ' },
-        annotations: { bold: true }
+        text: { content: aiSummary },
+        annotations: {}
       });
       
-      if (totalDone > 0) {
+      // Add additional context about new work and blockers
+      if (totalCreated > 0) {
         richTextArray.push({
           type: 'text',
-          text: { content: `We shipped ${totalDone} key deliverables` }
-        });
-        if (totalCreated > 0) {
-          richTextArray.push({
-            type: 'text',
-            text: { content: ` while creating ${totalCreated} new work items` }
-          });
-        }
-        richTextArray.push({
-          type: 'text',
-          text: { content: '. ' }
-        });
-      } else if (totalCreated > 0) {
-        richTextArray.push({
-          type: 'text',
-          text: { content: `We created ${totalCreated} new work items, setting the stage for next week's deliveries. ` }
-        });
-      } else {
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'Focus was on refinement and planning this week. ' }
-        });
-      }
-
-      if (squadsWithActivity.length > 0) {
-        // Determine most impactful squad: prioritize shipped items, then total activity (done + created + updated)
-        const heroSquad = squadsWithActivity
-          .sort(([_, a], [__, b]) => {
-            // First priority: most shipped items
-            if (b.done !== a.done) {
-              return b.done - a.done;
-            }
-            // Second priority: most total activity (done + created + updated)
-            const aTotal = a.done + a.created + a.updated;
-            const bTotal = b.done + b.created + b.updated;
-            return bTotal - aTotal;
-          })[0];
-        
-        // Get squad display name
-        const squadConfig = this.squads.find(s => s.name === heroSquad[0]);
-        const squadDisplayName = squadConfig ? squadConfig.displayName : heroSquad[0];
-        
-        richTextArray.push({
-          type: 'text',
-          text: { content: `${squadDisplayName} ranked as this week's MVP with the most impactful contributions. ` },
-          annotations: { bold: true }
+          text: { content: ` Additionally, we created ${totalCreated} new work items, setting the stage for next week's deliveries. ` }
         });
       }
 
@@ -240,20 +184,14 @@ class NotionPageGenerator {
         });
         richTextArray.push({
           type: 'text',
-          text: { content: `We need to review ${totalStale} items that have been listed as stale and unblock ${totalBlocked} critical path items. ` }
+          text: { content: `We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. ` }
         });
       } else {
         richTextArray.push({
           type: 'text',
-          text: { content: 'Clean Operations: ' },
-          annotations: { bold: true }
-        });
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'All systems are running smoothly with no bottlenecks. ' }
+          text: { content: 'Clean Operations: All systems are running smoothly with no bottlenecks. ' }
         });
       }
-
 
       return richTextArray;
     } catch (error) {

@@ -39,26 +39,43 @@ class JiraConnector {
   }
 
   /**
-   * Search for issues using JQL
+   * Search for issues using JQL with pagination support
    */
   async searchIssues(jql, fields = ['summary', 'status', 'priority', 'assignee', 'created', 'updated', 'description', 'project'], maxResults = 1000) {
     try {
-      const response = await axios.post(`${this.baseUrl}/rest/api/3/search`, {
-        jql,
-        fields,
-        maxResults,
-        expand: ['changelog']
-      }, {
-        headers: this.headers
-      });
+      const allIssues = [];
+      let startAt = 0;
+      const pageSize = 100; // Jira's default page size
+      
+      while (startAt < maxResults) {
+        const response = await axios.post(`${this.baseUrl}/rest/api/3/search`, {
+          jql,
+          fields,
+          maxResults: Math.min(pageSize, maxResults - startAt),
+          startAt,
+          expand: ['changelog']
+        }, {
+          headers: this.headers
+        });
+
+        const issues = response.data.issues;
+        allIssues.push(...issues);
+        
+        // If we got fewer results than requested, we've reached the end
+        if (issues.length < pageSize) {
+          break;
+        }
+        
+        startAt += pageSize;
+      }
 
       logger.info('Jira search successful', { 
         jql: jql.substring(0, 100) + '...',
-        total: response.data.total,
-        returned: response.data.issues.length 
+        total: allIssues.length,
+        returned: allIssues.length 
       });
 
-      return response.data.issues;
+      return allIssues;
     } catch (error) {
       logger.error('Jira search failed', { 
         error: error.message,

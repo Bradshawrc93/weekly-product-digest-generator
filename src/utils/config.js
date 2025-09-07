@@ -20,6 +20,10 @@ class Config {
       databaseId: process.env.NOTION_DATABASE_ID
     };
 
+    this.openai = {
+      apiKey: process.env.OPENAI_API_KEY
+    };
+
     this.settings = {
       nodeEnv: process.env.NODE_ENV || 'development',
       logLevel: process.env.LOG_LEVEL || 'info',
@@ -57,9 +61,19 @@ class Config {
       'NOTION_DATABASE_ID'
     ];
 
+    const optional = [
+      'OPENAI_API_KEY'
+    ];
+
     const missing = required.filter(key => !process.env[key]);
     if (missing.length > 0) {
       throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+    }
+
+    // Log optional variables that are missing
+    const missingOptional = optional.filter(key => !process.env[key]);
+    if (missingOptional.length > 0) {
+      console.warn(`Optional environment variables not set: ${missingOptional.join(', ')}`);
     }
   }
 
