@@ -145,8 +145,9 @@ class WeeklyReportGenerator {
     const blockedIssues = await jiraConnector.getBlockedTickets(squadUuids);
     logger.info('Fetched blocked tickets', { count: blockedIssues.length });
 
-    // Fetch comments for all issues that had activity
-    const allIssueKeys = allIssues.map(issue => issue.key);
+    // Fetch comments for all issues that had activity (limit to first 100 to prevent timeout)
+    const allIssueKeys = allIssues.map(issue => issue.key).slice(0, 100);
+    logger.info('Fetching comments for issues (limited to first 100)', { totalIssues: allIssues.length, commentIssues: allIssueKeys.length });
     const comments = await jiraConnector.getCommentsForIssues(allIssueKeys, dateRange);
     logger.info('Fetched comments', { 
       issuesWithComments: comments.length,

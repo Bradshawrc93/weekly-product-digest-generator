@@ -123,6 +123,16 @@ class NotionConnector {
   }
 
   /**
+   * Truncate text to fit within Notion's character limits
+   */
+  truncateText(text, maxLength = 2000) {
+    if (!text || text.length <= maxLength) {
+      return text;
+    }
+    return text.substring(0, maxLength - 3) + '...';
+  }
+
+  /**
    * Create a paragraph block
    */
   createParagraphBlock(text) {
@@ -134,7 +144,7 @@ class NotionConnector {
           {
             type: 'text',
             text: {
-              content: text
+              content: this.truncateText(text)
             }
           }
         ]
@@ -154,7 +164,7 @@ class NotionConnector {
           {
             type: 'text',
             text: {
-              content: text
+              content: this.truncateText(text)
             }
           }
         ]
@@ -174,7 +184,7 @@ class NotionConnector {
           {
             type: 'text',
             text: {
-              content: text
+              content: this.truncateText(text)
             }
           }
         ]

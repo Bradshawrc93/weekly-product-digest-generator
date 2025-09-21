@@ -117,23 +117,10 @@ class NotionPageGenerator {
       const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
       const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
 
-      // Use AI service to generate intelligent summary
+      // Use AI service to generate intelligent summary - return it directly without additional context
       const aiSummary = await aiService.generateShippedWorkSummary(organizedData, metrics);
       
-      // Add additional context about new work and blockers
-      let summary = aiSummary;
-      
-      if (totalCreated > 0) {
-        summary += ` Additionally, we created ${totalCreated} new work items, setting the stage for next week's deliveries. `;
-      }
-
-      if (totalStale > 0 || totalBlocked > 0) {
-        summary += `What's Next: We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. `;
-      } else {
-        summary += `Clean Operations: All systems are running smoothly with no bottlenecks. `;
-      }
-
-      return summary;
+      return aiSummary;
     } catch (error) {
       logger.error('Failed to generate AI TL;DR summary', { error: error.message });
       
@@ -158,40 +145,15 @@ class NotionPageGenerator {
       const totalStale = Object.values(metrics).reduce((sum, squad) => sum + squad.stale, 0);
       const totalBlocked = Object.values(metrics).reduce((sum, squad) => sum + squad.blocked, 0);
 
-      // Build rich text array
+      // Build rich text array - just return the AI-generated summary without additional context
       const richTextArray = [];
 
-      // Add the AI-generated summary
+      // Add the AI-generated summary only
       richTextArray.push({
         type: 'text',
         text: { content: aiSummary },
         annotations: {}
       });
-      
-      // Add additional context about new work and blockers
-      if (totalCreated > 0) {
-        richTextArray.push({
-          type: 'text',
-          text: { content: ` Additionally, we created ${totalCreated} new work items, setting the stage for next week's deliveries. ` }
-        });
-      }
-
-      if (totalStale > 0 || totalBlocked > 0) {
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'What\'s Next: ' },
-          annotations: { bold: true }
-        });
-        richTextArray.push({
-          type: 'text',
-          text: { content: `We need to address ${totalStale} items that have been waiting and unblock ${totalBlocked} critical path items. ` }
-        });
-      } else {
-        richTextArray.push({
-          type: 'text',
-          text: { content: 'Clean Operations: All systems are running smoothly with no bottlenecks. ' }
-        });
-      }
 
       return richTextArray;
     } catch (error) {

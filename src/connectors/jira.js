@@ -48,13 +48,15 @@ class JiraConnector {
       const pageSize = 100; // Jira's default page size
       
       while (startAt < maxResults) {
-        const response = await axios.post(`${this.baseUrl}/rest/api/3/search`, {
+        const params = new URLSearchParams({
           jql,
-          fields,
-          maxResults: Math.min(pageSize, maxResults - startAt),
-          startAt,
-          expand: ['changelog']
-        }, {
+          fields: fields.join(','),
+          maxResults: Math.min(pageSize, maxResults - startAt).toString(),
+          startAt: startAt.toString(),
+          expand: 'changelog'
+        });
+        
+        const response = await axios.get(`${this.baseUrl}/rest/api/3/search/jql?${params}`, {
           headers: this.headers
         });
 

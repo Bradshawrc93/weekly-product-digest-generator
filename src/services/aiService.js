@@ -99,8 +99,6 @@ class AIService {
   buildShippedWorkPrompt(shippedWorkData) {
     let prompt = `Analyze the following engineering work completed this week and generate a professional summary.
 
-Current week's story: We shipped ${shippedWorkData.reduce((sum, squad) => sum + squad.ticketCount, 0)} key deliverables.
-
 For each squad that shipped work, provide a brief summary of what was accomplished. Focus on:
 - Key technical achievements
 - Business impact
@@ -111,7 +109,7 @@ Here's the shipped work data:
 `;
 
     shippedWorkData.forEach(squad => {
-      prompt += `\n## ${squad.squadName} (${squad.ticketCount} items shipped):\n`;
+      prompt += `\n## ${squad.squadName}:\n`;
       
       squad.tickets.forEach(ticket => {
         prompt += `- ${ticket.key}: ${ticket.summary}\n`;
@@ -123,13 +121,15 @@ Here's the shipped work data:
     });
 
     prompt += `\nPlease generate a summary that includes:
-1. The overall story: "This week's story: We shipped X key deliverables"
-2. For each squad that shipped work, a brief summary of their key accomplishments
-3. Focus on business impact and technical achievements
-4. Keep it concise but informative
-5. Use professional, executive-friendly language
+1. For each squad that shipped work, a brief summary of their key accomplishments
+2. Focus on business impact and technical achievements
+3. Keep it very concise - aim for 2-3 sentences per squad maximum
+4. Use professional, executive-friendly language
+5. Add a line break before starting to discuss each new squad (except the first one)
+6. Total response should be under 1800 characters to fit Notion limits
+7. Do NOT add any concluding statements or overall summary paragraphs at the end
 
-Format the response as a single paragraph that flows naturally.`;
+Format the response as flowing text with line breaks separating different squad discussions. End immediately after describing the last squad's work.`;
 
     return prompt;
   }
@@ -138,31 +138,26 @@ Format the response as a single paragraph that flows naturally.`;
    * Generate fallback summary when AI fails
    */
   generateFallbackSummary(organizedData, metrics) {
-    const totalDone = Object.values(metrics).reduce((sum, squad) => sum + squad.done, 0);
-    const totalCreated = Object.values(metrics).reduce((sum, squad) => sum + squad.created, 0);
-    
-    let summary = `This week's story: We shipped ${totalDone} key deliverables`;
-    if (totalCreated > 0) {
-      summary += ` while creating ${totalCreated} new work items`;
-    }
-    summary += `. `;
-
     const squadsWithActivity = Object.entries(metrics).filter(([_, squad]) => squad.done > 0);
+    
+    let summary = '';
     
     if (squadsWithActivity.length > 0) {
       const topSquads = squadsWithActivity
         .sort(([_, a], [__, b]) => b.done - a.done)
         .slice(0, 3);
       
-      summary += `Key deliveries: `;
+      summary += `Key deliveries this week: `;
       topSquads.forEach(([squadName, squad], index) => {
-        summary += `${squadName} delivered ${squad.done} items`;
+        summary += `${squadName} delivered key functionality`;
         if (index < topSquads.length - 1) {
           summary += ', ';
         } else {
           summary += '. ';
         }
       });
+    } else {
+      summary = 'No major deliveries were completed this week.';
     }
 
     return summary;
